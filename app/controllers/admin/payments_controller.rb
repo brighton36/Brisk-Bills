@@ -11,7 +11,19 @@ class Admin::PaymentsController < ApplicationController
   active_scaffold :payment do |config|
     config.label = "Payments"
 
-    config.columns = [:paid_on, :client, :payment_method, :payment_method_identifier, :amount, :invoice_assignments, :amount_unallocated, :created_at, :updated_at]
+    config.columns = [
+      :paid_on, 
+      :client, 
+      :payment_method, 
+      :payment_method_identifier, 
+      :amount, 
+      # Unfortunately, if I actually tried to make the name of this column "invoice_assignments"
+      # active_scaffold would try to interpret the post on its own and get in my way:
+      :assignments,
+      :amount_unallocated, 
+      :created_at, 
+      :updated_at
+    ]
 
     config.columns[:client].form_ui = :select
     config.columns[:client].sort_by :sql => 'clients.company_name'
@@ -22,7 +34,7 @@ class Admin::PaymentsController < ApplicationController
     config.columns[:payment_method_identifier].label = 'Method Identifier'
 
     config.columns[:amount_unallocated].label = 'Unallocated'
-    config.columns[:invoice_assignments].label = 'Applies To'
+    config.columns[:assignments].label = 'Applies To'
     
     config.columns[:amount].sort_by :sql => 'amount_in_cents'
     
@@ -36,19 +48,25 @@ class Admin::PaymentsController < ApplicationController
       :payment_method, 
       :payment_method_identifier,
       :amount_unallocated, 
-      :invoice_assignments
+      :assignments
     ]
     
-    observe_active_scaffold_form_fields :fields => %w(client amount), :action => :on_invoice_assignment_observation
+    observe_active_scaffold_form_fields :fields => %w(client amount), :action => :on_assignment_observation
   end
 
-  def before_update_save(payment)      
-    payment.invoice_assignments = payment.client.recommend_invoice_assignments_for payment.amount
+  def before_update_save(payment)
+    # TODO! Use the actual values...
+    logger.error "Well, we're here - what we got?"+payment.invoice_assignments.inspect
+    
+# TODO: Remove. Stinky & Old: payment.invoice_assignments = payment.client.recommend_invoice_assignments_for payment.amount
+    
+    # TODO: New, build whats needed , or pull from whats already there
+    # InvoicePayment.new :invoice => inv, :amount => assignment
   end
 
   alias before_create_save before_update_save
 
-  def on_invoice_assignment_observation
+  def on_assignment_observation
     @observed_column = params[:observed_column]
 
     # First let's load the record in question (or create one) ...

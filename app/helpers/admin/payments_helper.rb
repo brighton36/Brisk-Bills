@@ -64,13 +64,13 @@ module Admin::PaymentsHelper
     )
   end
   
-  def invoice_assignments_column(record)
+  def assignments_column(record)
     record.invoice_assignments.collect{|ia| 
       '%s to Invoice %d' % [ia.amount.format, ia.invoice.id   ]
     }.join ', '
   end
   
-  def invoice_assignments_form_column(record, input_name = nil)
+  def assignments_form_column(record, input_name = nil)
     content_tag(:div, :id => 'record_invoice_assignment_%s' % record.id ) do
       if record.client
         
@@ -87,7 +87,7 @@ module Admin::PaymentsHelper
           
         if show_invoices.length > 0
           
-          assignment_observation = @active_scaffold_observations.find{|o| o[:action] == :on_invoice_assignment_observation}.dup
+          assignment_observation = @active_scaffold_observations.find{|o| o[:action] == :on_assignment_observation}.dup
           
           assignment_observation[:fields] += show_invoices.collect{ |inv|
             'invoice_assignments_%d_amount' % inv.id

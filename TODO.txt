@@ -3,7 +3,8 @@
 Now for the final Controller Adjustments:
 	* Show a pop-up warning if someone tries to commit a payment w/o allocating the full amount...
 	* Get the actual create/update actions working 
-		* Test the case of an error in validation ( is there a limit on the method_identifier?)
+		* I'd say to start by just disabling any active_scaffold handling of :invoice_assignments
+		* Test the case of an error in validation ( is there a limit on the method_identifier? or just unselected no payment perhaps...)
 		* Don't allow someone to assign more than the payment amount via standard record errors
 		* Make sure that we cant submit a negative assignment value via standard record errors
 	* Test to make sure that we're properly deleting Invoice assignments when we remove them in set_invoice_assignments_from_params on edit-save 

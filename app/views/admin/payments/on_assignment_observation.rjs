@@ -17,7 +17,7 @@ else
   # Now let's render these guessed assignments
   page.replace(
     'record_invoice_assignment_%s' % @record.id , 
-    invoice_assignments_form_column(@record) 
+    assignments_form_column(@record) 
   )
 end
 
