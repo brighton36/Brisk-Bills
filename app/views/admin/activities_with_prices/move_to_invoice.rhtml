@@ -1,0 +1,44 @@
+<h1>Select a destination invoice:</h1>
+<% if @errors_during_move.length > 0 -%>
+<div class="error-message">
+   <p>The following error(s) prevented your move from completing:</p>
+   <ul>
+   <% @errors_during_move.each do |error| -%>
+      <li><%=h error%></li>
+   <% end -%>
+   </ul>
+</div>
+<% end -%>
+<p>The following un-published invoices are available targets for this move:</p>
+<% form_remote_tag( 
+   :url => { 
+      :action => "move_to_invoice", 
+      :id => params[:id], 
+      :eid => params[:eid], 
+      :nested => 'true', 
+      :parent_model => 'Invoice', 
+      :parent_column => 'activities' 
+   },
+   :loading => "Modalbox.hide();$('#{loading_indicator_id(:action => :pagination)}').style.visibility = 'visible';",
+   :complete => "$('#{loading_indicator_id(:action => :pagination)}').style.visibility = 'hidden';",
+   :failure => "ActiveScaffold.report_500_response('#{active_scaffold_id}')",
+   :method => :get
+) do %>
+   <% if @dest_invoices and @dest_invoices.length > 0 -%>
+      <%= select_tag(
+         'move_to_invoice_id', 
+         options_for_select(
+           @dest_invoices.collect{|inv| [inv.long_name, inv.id]},
+           params[:move_to_invoice_id].to_i
+         )
+      ) %>
+   <% else -%>
+      <p class="warning-message">We're sorry, but no un-published invoices were available in the database for this move.</p>
+   <% end -%>
+   <p>This activity's client and invoice association will be matched with the selected destination.</p>
+   <p>
+      <%= submit_tag 'Move...', :class => "MB_focusable" %>
+       or 
+      <%= link_to_function 'Cancel & Close', "Modalbox.hide();", :class => "MB_focusable", :title => 'Cancel & Close' %>
+   </p>
+<% end %>

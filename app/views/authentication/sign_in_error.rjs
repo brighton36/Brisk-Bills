@@ -1,0 +1,2 @@
+page << stop_loading_indicator
+page << flash_blind_down( :message => flash_notice( :error, @flash_error) )

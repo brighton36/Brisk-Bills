@@ -1,0 +1,2 @@
+module Admin::Employees
+end

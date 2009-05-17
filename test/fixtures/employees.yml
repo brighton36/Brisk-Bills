@@ -1,0 +1,22 @@
+--- 
+employee_00001: 
+  updated_at: 2008-05-06 20:36:24 -04:00
+  phone_extension: 69
+  id: 1
+  first_name: Chris
+  last_name: DeRose
+  created_at: 2008-05-06 20:36:24 -04:00
+employee_00002: 
+  updated_at: 2008-05-06 20:36:24 -04:00
+  phone_extension: 70
+  id: 2
+  first_name: Arian
+  last_name: Amador
+  created_at: 2008-05-06 20:36:24 -04:00
+employee_00003: 
+  updated_at: 2008-05-06 20:36:24 -04:00
+  phone_extension: 71
+  id: 3
+  first_name: Michael
+  last_name: Bogle
+  created_at: 2008-05-06 20:36:24 -04:00

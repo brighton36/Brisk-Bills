@@ -1,0 +1,105 @@
+/* Front Page Sign-in */
+body#sign-in #main, .reset-forgotten-password #main{
+	width: 650px;
+	margin: 0 auto 0 auto;
+}
+
+body#sign-in #footer, .reset-forgotten-password #footer{
+	width: 650px;
+	text-align: center;
+	margin: 12px auto 0 auto;
+}
+
+.welcome_box #loading_indicator{
+	display: block;
+}
+
+.welcome_box {
+	background:#ECF5FF none repeat scroll 0 0;
+	border:8px solid #a7a7a7;
+	clear:both;
+	padding: 15px 20px 32px 20px;
+}
+
+.welcome_box h1{
+	margin: 4px 4px 0 0;
+	padding:0;
+	display: block;
+	font-size:1.6em;
+  float:left;
+}
+
+.welcome_box fieldset {
+	border:none;
+	border-top: 1px #000 solid;
+	margin: 8px 0 0 0;
+	padding: 4px 0 20px 0;
+}
+
+.welcome_box label, .welcome_box input{	
+	display:block;
+	float:left;
+	margin: 16px 0 0 0;
+	font-size:12pt;
+}
+
+.welcome_box label{
+	clear:left;
+	padding-top: 4px;
+	width: 140px;
+}
+
+.welcome_box input{
+	width: 400px;
+	margin-right: 48px;
+	clear: right;
+}
+
+.welcome_box #commit {
+  display: none;
+}
+
+.welcome_box .submit{
+	width: 140px;
+	height: 40px;
+	margin: 0 18px 0 140px;
+	clear: none;
+}
+
+
+.welcome_box .submit_note{
+	margin: 10px 0 12px 0;
+	padding: 10px 0 0 0;
+	display: block;
+}
+
+.welcome_box #email_my_password{
+	width: 200px;
+}
+
+.welcome_box .flash-result {
+  margin: 4px 0 0 0;
+  padding: 4px;
+}
+
+.welcome_box .flash-result span{
+  display:block;
+  float: left;
+  margin: 1px 0 0 8px;
+  width:554px;
+}
+
+.welcome_box .flash-result img{
+  display:block;
+  float: left;
+}
+
+.welcome_box .notice-error{
+  background-color:#FFFFCC;
+  border:1px dotted #FFCC66;
+}
+
+.welcome_box .notice-info{
+  background-color:#ADFFAD;
+  border:1px dotted #3DFF3D;
+}

@@ -1,0 +1,14 @@
+if @active_credential
+  # Success - Redirect :
+  page.redirect_to( (@redirect_to) ? @redirect_to : @active_credential.default_post_login_url_to )
+else
+  # Errors occurred:
+  page << stop_loading_indicator
+  page << flash_blind_down(
+    :afterFinish => "function(){ 
+      new Effect.Shake('password_input', { duration: 0.20, distance: 5 }); 
+      $('password_input').value = ''; 
+    }".tr("\n",''),
+    :message => flash_notice(:error, (@flash_error) ? @flash_error : "Invalid e-mail address or password. Let&#39;s try it again?")
+  )
+end

@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 TRANSITIONAL//EN">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; CHARSET=UTF-8">
+</head>
+<body>
+<div align="center">
+	<table cellspacing="0" cellpadding="0" width="100%">
+	<tr>
+		<td width="190" valign="top">
+			<div align="center"><%= image_tag @company_logo_file, :size => '185x76', :align=>'bottom', :border => '0', :alt => @company_name %></div>
+			<br>
+			<div align="center"><font size="1">Application Design - Networking - Web Sites</font></div>
+		</td>
+		<td>
+			<br>
+			<br>
+		</td>
+		<td width="250">
+			<table bgcolor="#ffffff" cellspacing="0" cellpadding="0" width="100%">
+			<tr>
+				<td>
+					<br>
+					<br>
+				</td>
+				<td width="250">
+					<font size="2"><%=@company_address1%></font><br>
+					<font size="2"><%=@company_address2%></font><br>
+					<font size="2"><%=@company_city%>, <%=@company_state%> <%=@company_zip%></font><br>
+					<br>
+					<table cellspacing="0" cellpadding="0" width="100%">
+					<tr>
+						<td><u><font size="2">Office:</font></u></td>
+						<td><font size="2"><%=@company_phone%></font></td>
+					</tr>
+					<tr>
+						<td><u><font size="2">Fax:</font></u></td>
+						<td><font size="2"><%=@company_fax%></font></td>
+					</tr>
+					<tr>
+						<td colspan="2"><font size="2">
+							<a href="<%=@company_url%>" target="_blank"><%=@company_url%></a>
+						</font></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<hr size="1">

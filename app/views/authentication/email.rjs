@@ -1,0 +1,9 @@
+page << stop_loading_indicator
+page << flash_blind_down( 
+  :message => (@flash_error) ? 
+    flash_notice(:error, @flash_error) :
+    flash_notice( 
+      :info, 
+      'Password reset instructions have been sent to your email address. Please check your inbox for further directions.'
+    )
+)

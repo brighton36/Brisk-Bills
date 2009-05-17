@@ -1,0 +1,56 @@
+--- 
+client_representative_00001: 
+  accepts_tos_version: 0
+  updated_at: 2008-05-06 20:36:24 -04:00
+  title: Manager
+  notes: Test Notes
+  id: 1
+  cell_phone: 555-555-5555
+  first_name: Ralph
+  password: 
+  last_name: Dahlgren
+  created_at: 2008-05-06 20:36:24 -04:00
+client_representative_00002: 
+  accepts_tos_version: 0
+  updated_at: 2008-05-06 20:36:24 -04:00
+  title: Comptroler
+  notes: Test Notes for Kevin
+  id: 2
+  cell_phone: 555-555-5555
+  first_name: Kevin
+  password: 
+  last_name: May
+  created_at: 2008-05-06 20:36:24 -04:00
+client_representative_00003: 
+  accepts_tos_version: 0
+  updated_at: 2008-05-06 20:36:24 -04:00
+  title: President
+  notes: Test Notes for Mom
+  id: 3
+  cell_phone: 954-261-8957
+  first_name: Ann Marie
+  password: 
+  last_name: DeRose
+  created_at: 2008-05-06 20:36:24 -04:00
+client_representative_00004: 
+  accepts_tos_version: 0
+  updated_at: 2008-05-06 20:36:24 -04:00
+  title: Administrative Clerk
+  notes: 
+  id: 4
+  cell_phone: 305-555-5555
+  first_name: Anna
+  password: 
+  last_name: Duys
+  created_at: 2008-05-06 20:36:24 -04:00
+client_representative_00005: 
+  accepts_tos_version: 0
+  updated_at: 2008-05-06 20:36:24 -04:00
+  title: Administrative Clerk
+  notes: 
+  id: 5
+  cell_phone: 305-555-5555
+  first_name: Isabel
+  password: 
+  last_name: Villalba
+  created_at: 2008-05-06 20:36:24 -04:00

@@ -1,0 +1,18 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title><%=h "%s | %s" % [@page_title, @site_title]%></title>
+	<link rel="shortcut icon" href="<%=image_path "favicon.ico" %>" type="image/x-icon" /> 
+	<%= javascript_include_tag :defaults %>
+	<%= active_scaffold_includes %>
+	<%= stylesheet_link_tag 'public/screen.css' %>
+	<%= javascript_include_tag(*@javascripts) if @javascripts %>
+	<%= stylesheet_link_tag(*@stylesheets) if @stylesheets %>
+</head>
+<body id="<%=@body_id%>" class="<%=@body_class%>">
+<div id="main">
+<%= yield  %>
+</div>
+<div id="footer">BriskBills - for more information, visit us at <a href="http://www.briskbills.com">www.briskbills.com</a></div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+   <title><%=h "%s | %s" % [@page_title, @site_title]%></title>
+	<link rel="shortcut icon" href="<%=image_path "favicon.ico" %>" type="image/x-icon" /> 
+   <%= javascript_include_tag :defaults %>
+   <%= active_scaffold_includes %>
+	 <%= stylesheet_link_tag 'admin/screen.css' %>
+   <%= javascript_include_tag(*@javascripts) if @javascripts %>
+   <%= stylesheet_link_tag(*@stylesheets) if @stylesheets %>
+</head>
+<body id="<%=@body_id%>" class="admin <%=@body_class%>">
+   <div id="main" class="clearfix">
+      <div id="navigation" class="clearfix">
+		<% w = 100 %>
+    <%= image_tag 'brisk-bills-logo.gif', :size => '%dx%d' % [w, 300.to_f/316*w], :alt => "Brisk Bills" %>
+		<%= render :partial => "layouts/navigation_tree", :locals => {:tree => @main_navigation} if @main_navigation -%>
+      </div>
+      <div id="content" class="clearfix">
+         <%if flash[:notice] -%><p class="flash"><%= flash[:notice] %></p> <%end -%>
+         <%= yield  %>
+      </div>
+   </div>
+	<div id="footer">BriskBills - for more information, visit us at <a href="http://www.briskbills.com">www.briskbills.com</a></div>
+</body>
+</html>

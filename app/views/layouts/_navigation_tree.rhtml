@@ -1,0 +1,15 @@
+<ul>
+<% tree.each do |branch| -%>
+	<%
+	markup_classes = (branch.markup_classes) ? branch.markup_classes : []
+	markup_classes << 'current_href' if branch.href and /^#{branch.href}.+$/.match(request.request_uri)
+	-%>
+	<li<%= ' class="%s"' % markup_classes.join(',') if markup_classes.length > 0 %>>
+	<% if branch.href -%>
+		<a href="<%=branch.href%>">
+		<%=h branch.title %></a>
+	<%else%><%=h branch.title %><%end%>
+	<%=render :partial => "layouts/navigation_tree", :locals => {:tree => branch.items} if branch.descendents? -%>
+	</li>
+<% end -%>
+</ul>

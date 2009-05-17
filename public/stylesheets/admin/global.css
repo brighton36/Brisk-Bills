@@ -1,0 +1,138 @@
+body{
+   background: #ebebeb url("../../images/background.gif") repeat-x;
+   color:#666666;
+   font-family:arial,sans-serif;   
+}
+
+h3 {
+   color:#444444;
+   font-family:verdana,sans-serif;
+   font-size:17px;
+   font-size-adjust:none;
+   font-stretch:normal;
+   font-style:normal;
+   font-variant:normal;
+   font-weight:normal;
+   line-height:normal;
+   margin:0pt;
+   padding:2px 0px;
+}
+
+h2 {
+   margin: 0 0 5px 0;
+   padding:0;
+}
+
+.clearfix:after {
+    content: "."; 
+    display: block; 
+    height: 0; 
+    clear: both; 
+    visibility: hidden;
+}
+
+.money_negative{color:red;}
+.money_positive{color:green;}
+
+input.disabled{ background-color: #ddd; }
+
+.active-scaffold-header h2 {padding-top: 0px;}
+
+.active-scaffold-header div.actions {
+	right:0;
+	top:0;
+}
+
+.admin .active-scaffold li.form-element dt {
+   width: 105px;
+}
+
+.admin .checkbox-list {
+   margin-top: 10px;
+   padding-left: 0px;
+   margin-left: 0px;
+   clear: none;
+   float:left;
+   width: 195px;   
+}
+
+.admin .checkbox-list li{
+   float: left;
+   clear: both;
+}
+
+
+.active-scaffold .form li{
+	margin: 4px 0 4px 0;
+}
+
+.active-scaffold .form dt {
+	width:110px;
+	display:block;
+	float:left;
+	clear:left;
+}
+
+.active-scaffold .form dd {
+	margin-left:5px;	
+}
+
+.active-scaffold .form textarea {
+	margin: 8px 0 0 0;
+	height:120px;
+	width:600px;
+	font-size:11pt;
+}
+
+#MB_window {
+   font-family:Arial,Helvetica,sans-serif;
+   font-size:small;
+   font-size-adjust:none;
+   font-style:normal;
+   font-variant:normal;
+   font-weight:normal;
+   line-height:130%;
+}
+
+
+#MB_content a { color:#0066CC; }
+#MB_content a:hover { color:#CC6633; }
+#MB_content a:visited { color:#AA99DD; }
+
+#MB_content div.error-message {
+   border: 1px #f66 solid;
+   background-color: #fbb;
+   width: 400px;
+}
+
+#MB_content div.error-message p {
+   margin-left:0.5em;
+   margin-top:0.5em;
+   margin-bottom:0.25em;
+   display:block;
+}
+
+#MB_content div.error-message ul {
+   margin: 0 0 0.5em 0em;
+}
+
+#MB_content div.error-message li { 
+   margin: 0;
+}
+
+#MB_content p.warning-message {
+   border: 1px solid #ff6;
+   background-color: #ffb;
+   padding: 0.5em;
+   width: 550px;
+}
+
+#MB_content div.warning {
+   background:transparent url(../../images/modal-warn.gif) no-repeat scroll 0 15px;
+   font-weight:bold;
+   padding:0.5em 0.5em 1em 28px;
+}
+
+#MB_content div.warning p { 
+   margin:0.75em 0;
+}

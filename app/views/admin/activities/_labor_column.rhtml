@@ -1,0 +1,17 @@
+<%
+hourly_rate = nil
+begin
+	hourly_rate = record.labor.employee.labor_rate_for(record.client).hourly_rate
+rescue
+
+end
+-%>
+<ul class="activity_show activity_labor_show">
+	<li class="type">Labor</li>
+	<li class="client"><%=h (record.client.nil?) ? '(Unknown)' : record.client.company_name %></li>
+	<% if record.labor and record.labor.comments and record.labor.comments.length > 0 -%>
+	<li class="comments"><%=h record.labor.comments %></li>
+	<% end -%>
+	<li class="employee">- <%=h record.labor.employee.name %> (<%=h (hourly_rate.nil?) ? '??' : "$#{money_for_input(hourly_rate)}" %>/hr)</li>
+	<li class="duration"><%=h record.labor.friendly_duration %></li>
+</ul>

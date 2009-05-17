@@ -1,0 +1,25 @@
+--- 
+activity_labor_0001: 
+  id: 2
+  activity_id: 1
+  employee_id: 2
+  comments: Fixed printer issues for amy.
+  minute_duration: 120
+  created_at: 2008-01-01 00:01:00 -04:00
+  updated_at: 2008-01-01 00:01:00 -04:00
+activity_labor_0002: 
+  id: 4
+  activity_id: 2
+  employee_id: 1
+  comments: Restarted file server.
+  minute_duration: 60
+  created_at: 2008-01-01 00:01:00 -04:00
+  updated_at: 2008-01-01 00:01:00 -04:00
+activity_labor_0003: 
+  id: 8
+  activity_id: 3
+  employee_id: 2
+  comments: Moved printer from Chrissie's Office to Tim's office.
+  minute_duration: 30
+  created_at: 2008-01-01 00:01:00 -04:00
+  updated_at: 2008-01-01 00:01:00 -04:00

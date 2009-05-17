@@ -1,0 +1,24 @@
+defaults: &defaults
+  database: cusis
+  adapter:  mysql
+  socket:  <%=
+   ['/opt/local/var/run/mysql5/mysqld.sock',
+    '/opt/local/var/run/mysqld/mysqld.sock',
+    '/var/run/mysqld/mysqld.sock',
+    '/tmp/mysql.sock'].select { |f| File.exist? f }.first 
+   %>
+  <%= IO.readlines(SECRETS_FILE).map(&:chomp).join "\n  " unless SECRETS_FILE.nil? %>
+
+development:
+  database: cusis_development
+  <<: *defaults
+
+test:
+  database: cusis_test
+  <<: *defaults
+
+production:
+  <<: *defaults
+
+
+ 

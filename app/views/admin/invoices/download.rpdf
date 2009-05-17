@@ -1,0 +1,224 @@
+pdf.info.author   = @company_name
+pdf.info.title    = 'Invoice (%s) - %s %s' % [@invoice_number, @client.name, @issued_on.strftime('%m/%d/%Y')]
+pdf.info.subject  = @company_name
+
+# This is all presentation stuff that will not be in the database (For now, I suppose)
+pdf.margins_in 0.8, 0.5, 0.5, 0.5
+
+text_color = Color::RGB.from_html("#444")
+header_color = Color::RGB.from_html("#FFFFFF")
+header_shade_color = Color::RGB.from_html('#AAA')
+zebra_shade_color = Color::RGB.from_html('#C5DBF7')
+
+table_outer_line_style = PDF::Writer::StrokeStyle.new(0.25, :cap => :butt, :join => :bevel)
+
+# Not crazy about this, but for now it'll do cause it'll work well enough...
+pdf.on_start_new_page 1, SerializableProc.new( %q{ |page|
+  background_image_data = open(RAILS_ROOT+'/public/images/invoice-background.jpg', "rb") { |file| file.read }
+  background_image_info = PDF::Writer::Graphics::ImageInfo.new background_image_data
+
+  page.add_image(
+    background_image_data, 
+    0, 0, 
+    page.page_width, background_image_info.height.to_f, 
+    background_image_info
+  )
+})
+
+pdf.start_page_numbering(
+  pdf.left_margin+(pdf.page_width-pdf.left_margin-pdf.right_margin)/2,
+  pdf.bottom_margin-pdf.in2pts(0.25), 
+  10,
+  :center, 
+  "Page <PAGENUM> of <TOTALPAGENUM>"
+)
+
+pdf.text_render_style 0
+pdf.fill_color text_color
+
+# Upper-Right Header
+logo_fudge_x = -1*pdf.in2pts(0.24)
+logo_fudge_y = pdf.in2pts(0.24)
+
+logo_image_data = open(@company_logo_path, "rb") { |file| file.read }
+logo_image_info = PDF::Writer::Graphics::ImageInfo.new logo_image_data
+
+logo_x = pdf.page_width-pdf.right_margin-logo_image_info.width+logo_fudge_x
+logo_y = pdf.page_height-pdf.top_margin-logo_image_info.height+logo_fudge_y
+
+pdf.add_image(
+  logo_image_data, 
+  logo_x, 
+  logo_y,
+  logo_image_info.width,logo_image_info.height,
+  logo_image_info,
+  {:type => :external, :target => @company_url}
+)
+
+pdf.select_font "Helvetica"
+pdf.font_size = 10
+
+company_lines = [
+  @company_address1,
+  @company_address2,
+  "%s, %s %s" % [@company_city,@company_state,@company_zip],
+  "",
+  "Phone: #{@company_phone}",
+  "Fax: #{@company_fax}"
+]
+
+company_lines_y = logo_y-pdf.font_height/2
+0.upto(company_lines.size) do |i|
+  pdf.add_text logo_x, company_lines_y-pdf.font_height*(i+1), company_lines[i]
+end
+
+# Upper-Left Header/Content
+pdf.select_font "Helvetica-Bold"
+pdf.font_size = 22
+pdf.text "Invoice", :leading => 0
+
+pdf.select_font "Helvetica"
+pdf.font_size = 10
+ 
+header_indent_x_offset = pdf.in2pts(1.15)
+
+pdf.text "\nDate:"
+pdf.add_text header_indent_x_offset, pdf.y, @issued_on.strftime('%m/%d/%Y')
+
+pdf.text "\nInvoice:"
+pdf.add_text header_indent_x_offset, pdf.y, @invoice_number.to_s
+
+pdf.text "\n"
+
+# Customer Table
+PDF::SimpleTable.new do |tab|
+  tab.column_order = ['Customer']
+
+  tab.shade_heading_color = header_shade_color
+  tab.text_color          = text_color
+  tab.heading_color       = header_color
+  tab.outer_line_style    = table_outer_line_style
+  tab.show_lines          = :outer
+  tab.show_headings       = true
+  tab.shade_rows          = :none
+  tab.orientation         = :right
+  tab.position            = :left
+  tab.shade_headings      = true
+  tab.heading_font_size   = 10
+  tab.width               = 250
+  tab.row_gap             = 0
+
+  customer_lines = @client.mailing_address
+  customer_lines += Array.new(5-customer_lines.size," ") # There's a five-line minimum in the design
+
+  tab.data.replace customer_lines.collect{|line| {'Customer' => line }}
+  tab.render_on pdf
+end
+
+pdf.text "\n"
+
+# Charges Table:
+PDF::SimpleTable.new do |tab|
+  tab.column_order = ['item', 'date','description','qty','rate','amount']
+
+  tab.column_order.each do |col| 
+    tab.columns[col] = PDF::SimpleTable::Column.new col.capitalize
+    tab.columns[col].heading = PDF::SimpleTable::Column::Heading.new { |head| head.justification = :center }
+  end
+
+  tab.columns['item'].justification = :center
+
+  tab.columns['date'].width = pdf.in2pts(0.7)
+  tab.columns['date'].justification = :center
+
+  tab.columns['amount'].width = pdf.in2pts(0.7)
+  tab.columns['amount'].justification = :right
+
+  tab.columns['rate'].width = pdf.in2pts(0.7)
+  tab.columns['rate'].justification = :right
+
+  tab.columns['qty'].width = pdf.in2pts(0.6)
+  tab.columns['qty'].justification = :right
+
+  tab.shade_heading_color = header_shade_color
+  tab.shade_color         = Color::RGB.from_html("#fff")
+  tab.shade_color2        = zebra_shade_color
+  tab.heading_color       = header_color
+  tab.text_color          = text_color
+  tab.outer_line_style    = table_outer_line_style
+  tab.inner_line_style    = table_outer_line_style
+  tab.show_lines        = :outer
+  tab.show_headings     = true
+  tab.shade_rows        = :striped
+  tab.orientation       = :center
+  tab.position          = :center
+  tab.shade_headings    = true
+  tab.heading_font_size = 10
+  tab.font_size         = 9
+  tab.width             = pdf.page_width - pdf.left_margin - pdf.right_margin
+
+    
+  tab.data = @invoice_rows.collect { |line| 
+    { 
+    'item'        => line[3], 
+    'date'        => line[4], 
+    'description' => line[5], 
+    'qty'         => line[0],
+    'rate'        => ('%.2f' % line[1].to_f),
+    'amount'    => ('%.2f' % line[2].to_f)
+    }
+  }
+
+  tab.render_on pdf
+end if @invoice_rows.length > 0
+
+# Now we'll add the totals:
+
+pdf.font_size = 10
+pdf.text "\n"
+
+totals = [ ['Sub-Total', @invoice.sub_total], ['Tax', @invoice.taxes_total], ['Total', @invoice.grand_total] ].collect do |total|
+	# NOTE: This DRY-ly formats the above into nicer-looking/final output strings:
+	[ 
+		total[0], 
+		(' $%.2f' % total[1].abs).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/, '\1,') 
+	]
+end
+
+pdf.select_font "Helvetica-Bold"
+max_values_width = pdf.text_line_width(totals.find{|total| total[0] == 'Total'}[1], 12)
+
+totals.each do |total|
+	total_label, total_value = total
+
+	if total_label == 'Total'
+		pdf.select_font "Helvetica-Bold"
+		pdf.font_size = 12
+	else
+		pdf.select_font "Helvetica"
+		pdf.font_size = 11
+	end
+
+	total_label += ' : '
+
+	total_margin_fudge = pdf.in2pts(0.1)
+
+	# Calc the offsets:
+	right_content_edge_x = pdf.page_width - pdf.right_margin - total_margin_fudge
+	
+	total_value_x = right_content_edge_x - pdf.text_line_width(total_value, pdf.font_size)
+	total_label_x = right_content_edge_x - max_values_width - pdf.text_line_width(total_label, pdf.font_size)
+
+	# Write some values:
+	pdf.text total_label, :absolute_left => total_label_x
+
+	pdf.add_text total_value_x, pdf.y, total_value
+end
+
+# Thank-you Text:
+pdf.font_size = 10
+pdf.text "\n\n"
+
+pdf.select_font "Helvetica-Bold"
+
+pdf.text @footer_text, :justification => :center

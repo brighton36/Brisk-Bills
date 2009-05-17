@@ -1,0 +1,28 @@
+--- 
+activity_0001: 
+  id: 1
+  client_id: 1
+  is_published: 1
+  activity_type: labor
+  occurred_on: 2008-05-06 20:36:24 -04:00
+  cost: 110.00
+  created_at: 2008-01-01 00:01:00 -04:00
+  updated_at: 2008-01-01 00:01:00 -04:00
+activity_0002: 
+  id: 2
+  client_id: 1
+  is_published: 0
+  activity_type: labor
+  occurred_on: 2008-05-06 20:37:24 -04:00
+  cost: 85.00
+  created_at: 2008-01-01 00:01:00 -04:00
+  updated_at: 2008-01-01 00:01:00 -04:00
+activity_0003: 
+  id: 3
+  client_id: 2
+  is_published: 1
+  activity_type: labor
+  occurred_on: 2008-05-06 20:37:24 -04:00
+  cost: 32.75
+  created_at: 2008-01-01 00:01:00 -04:00
+  updated_at: 2008-01-01 00:01:00 -04:00

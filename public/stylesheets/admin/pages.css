@@ -1,0 +1,137 @@
+.activity-column ul.activity_show {
+	margin: 2px;
+	padding :0;
+	display: block;
+	position: relative; 
+}
+
+.activity-column ul.activity_show li {
+	margin:0;
+	padding :0;
+	list-style-image:none;
+	list-style-position:outside;
+	list-style-type:none;
+	float: left;
+}
+
+.activity-column ul.activity_show li.type {
+	background-color: #aaa;
+	color: #fff;
+	font-size:11pt;
+	width: 88px;
+	padding: 2px 2px 2px 4px;
+	margin:0 10px 0 0;
+}
+
+.activity-column ul.activity_proposal_show li.type {
+	background-color: #ff0084;
+}
+
+.activity-column ul.activity_material_show li.type {
+	background-color: #cc8400;
+}
+
+.activity-column ul.activity_labor_show li.type {
+	background-color: #0066cc;
+}
+
+.activity-column ul.activity_adjustment_show li.type {
+	background-color: #C40000;
+}
+
+.activity-column ul.activity_show li.client {
+	font-size:10pt;
+	line-height:11pt;
+	padding-top:3px;
+	clear: right;
+}
+
+.activity-column ul.activity_show li.comments {
+   width: 590px;  
+}
+
+.activity-column ul.activity_show li.comments, 
+.activity-column ul.activity_adjustment_show li.label,
+.activity-column ul.activity_material_show li.label,
+.activity-column ul.activity_proposal_show li.label {
+	margin: 6px 4px 0px 4px;
+	clear: both;
+	width: 420px;
+	display:block;
+	word-wrap: break-word;
+	overflow: hidden;
+}
+
+.activity-column ul.activity_show li.duration {
+	color: #0066cc;
+	position: absolute;
+	right: 2px;
+	top: 4px;
+}
+
+.activity-column ul.activity_show li.employee {
+	clear:both;
+	float:right;
+	margin-top:3px;
+}
+
+.activity-column ul.activity_show li.proposed_on {
+	clear:both;
+	float:right;
+	margin-top:3px;
+}
+
+.active-scaffold .form span.slimtimer_task {
+	display:block;
+	line-height:16px;
+	margin-top:6px;
+	font-style: italic;
+	color:#555555;
+}
+
+.activity-column ul.activity_show li.label {
+	color: #aaa;
+	position: absolute;
+	right: 2px;
+	top: 4px;
+}
+
+.activity-column ul.activity_proposal_show li.label {
+	color: #ff0084;
+   position: relative;
+   margin-bottom: 6px;
+}
+
+.activity-column ul.activity_material_show li.label {
+	color: #cc8400;
+	position: relative;
+   margin-bottom: 6px;
+}
+
+.activity-column ul.activity_adjustment_show li.label {
+	color: #C40000;
+	position: relative;
+   margin-bottom: 6px;
+}
+
+.admin_settings .active-scaffold li.form-element dt {
+   padding: 2px 0;
+}
+
+.admin_settings .active-scaffold .form .form-element dd {
+   color:#555555;
+   font-family:verdana,sans-serif;
+   font-size:11px;
+   font-size-adjust:none;
+   font-stretch:normal;
+   font-style:normal;
+   font-variant:normal;
+   font-weight:normal;
+   line-height:normal;
+   padding: 4px 0;
+}
+
+
+.label-input {
+	width: 590px;
+}

@@ -1,0 +1,11 @@
+<ul class="activity_show  activity_proposal_show">
+	<li class="type">Proposal</li>
+	<li class="client"><%=h (record.client.nil?) ? '(Unknown)' : record.client.company_name %></li>
+	<% if record.proposal -%>
+	<li class="label"><%=h record.proposal.label %></li>
+	<% if record.proposal.comments and record.proposal.comments.length > 0 -%>
+	<li class="comments"><%=h record.proposal.comments %></li>
+	<% end -%>
+   <li class="proposed_on">Proposed: <%=record.proposal.proposed_on.strftime("%m/%d/%Y %I:%M %p")%></li>
+	<% end -%>
+</ul>

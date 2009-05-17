@@ -1,0 +1,36 @@
+body{
+   background: #ebebeb url("../../images/background.gif") repeat-x;
+   color:#666666;
+   font-family:arial,sans-serif;
+	font-size: 10pt; 
+}
+
+h3 {
+   color:#444444;
+   font-family:verdana,sans-serif;
+   font-size:17px;
+   font-size-adjust:none;
+   font-stretch:normal;
+   font-style:normal;
+   font-variant:normal;
+   font-weight:normal;
+   line-height:normal;
+   margin:0pt;
+   padding:2px 0px;
+}
+
+h2 {
+   margin: 0 0 5px 0;
+   padding:0;
+}
+
+.clearfix:after {
+    content: "."; 
+    display: block; 
+    height: 0; 
+    clear: both; 
+    visibility: hidden;
+}
+
+.money_negative{color:red;}
+.money_positive{color:green;}
