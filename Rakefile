@@ -1,10 +1,11 @@
-# Add your own tasks in files placed in lib/tasks ending in .rake,
-# for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
-
-require(File.join(File.dirname(__FILE__), 'config', 'boot'))
+require File.join(File.dirname(__FILE__), 'config', 'boot')
 
 require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
 
 require 'tasks/rails'
+
+unless Rake::Task.task_defined? "brisk_bills:release"
+  Dir["#{BRISKBILLS_ROOT}/lib/tasks/**/*.rake"].sort.each { |ext| load ext }
+end
