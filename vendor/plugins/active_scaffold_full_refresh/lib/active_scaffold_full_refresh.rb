@@ -7,7 +7,7 @@ module ActiveScaffoldFullRefresh
       send "do_#{on_action}"
 
       if successful?
-        do_list
+        do_list unless @records
       
         render(:update) do |page| 
           page.replace_html active_scaffold_content_id, :partial => 'list', :layout => false
@@ -21,7 +21,7 @@ module ActiveScaffoldFullRefresh
           end
         end
       else
-        render :action => "#{on_action}.rjs", :layout => false
+        render :action => "#{on_action}.html.erb", :layout => false
       end
 
     else

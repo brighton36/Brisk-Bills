@@ -2,6 +2,12 @@ module Admin::InvoicesHelper
   
   include Admin::IsActiveColumnHelper
   
+  def active_scaffold_input_options(column, scope)
+    options = super(column, scope)
+    options.merge! :include_seconds => true if column.name == :issued_on        
+    options
+  end
+  
   def is_published_form_column(column, input_name)
     select_tag input_name, options_for_select([['Yes', 1],['No',0]], (column.is_published) ? 1 : 0 ) 
   end

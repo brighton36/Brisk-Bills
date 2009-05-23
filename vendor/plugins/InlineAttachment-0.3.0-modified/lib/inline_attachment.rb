@@ -66,6 +66,20 @@ end
 module ActionView
   module Helpers #:nodoc:
     module AssetTagHelper
+      
+      # Brisk-Bills Adjustment
+      # This is a weird hack that fixes issues in produiction mode with inlineattachment - seems to work, so whatever?
+      alias image_path_without_inline_attachment image_path
+      def image_path(source)
+        @part_container ||= @controller
+        if @part_container.is_a?(ActionMailer::Base) or @part_container.is_a?(ActionMailer::Part)
+          '/images/%s' % source
+        else
+          image_path_without_inline_attachment(source)
+        end
+      end
+      # /Brisk-Bills
+      
       def image_tag(source, options = {})
         options.symbolize_keys!
         

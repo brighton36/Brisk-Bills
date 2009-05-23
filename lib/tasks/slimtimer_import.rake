@@ -99,8 +99,8 @@ namespace :brisk_bills do
               raise StandardError, "Error #{(update_task.new_record?)?'Creat':'Updat'}ing task: #{update_task.errors.full_messages.inspect}" unless update_task.errors.empty?
             end
           
-          rescue
-            puts "Error in 'list_tasks': #{$!}"
+#          rescue
+#            puts "Error in 'list_tasks': #{$!}"
           end
         end
         
@@ -186,8 +186,8 @@ namespace :brisk_bills do
         end
     
       
-      rescue
-        puts "Error in 'Employee.find': #{$!}"
+#      rescue
+#        puts "Error in 'Employee.find': #{$!}"
       end
     end
 
