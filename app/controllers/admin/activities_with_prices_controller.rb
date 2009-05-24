@@ -18,7 +18,7 @@ class Admin::ActivitiesWithPricesController < Admin::ActivitiesController
   
   # We need to be sure the view is looking in the right place, this little hack should do it:
   def self.active_scaffold_paths
-    super_view_path = RAILS_ROOT+'/app/views/admin/activities'
+    super_view_path = BRISKBILLS_ROOT+'/app/views/admin/activities'
     @active_scaffold_overrides << super_view_path unless @active_scaffold_overrides.include? super_view_path
     super
   end

@@ -1,6 +1,6 @@
 require 'ostruct'
 
-require "#{RAILS_ROOT}/lib/dti-navigation-menu/lib/dti-navigation-menu"
+require "#{BRISKBILLS_ROOT}/lib/dti-navigation-menu/lib/dti-navigation-menu"
 
 class ResourceNotFound < StandardError    
 end

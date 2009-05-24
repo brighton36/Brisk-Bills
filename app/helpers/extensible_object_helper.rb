@@ -10,7 +10,7 @@ module ExtensibleObjectHelper
   module ClassMethods
 
     def handle_extensions      
-      /^(#{RAILS_ROOT}.+)\.rb\:[\d]+/.match caller[0]
+      /^(#{BRISKBILLS_ROOT}.+)\.rb\:[\d]+/.match caller[0]
       
       extension_directory = $1
       

@@ -1,73 +1,244 @@
-require 'rake/clean'
-require 'rake/gempackagetask'
-require 'rake/rdoctask'
+#require 'rake/clean'
+#require 'rake/gempackagetask'
+#require 'rake/rdoctask'
+##require 'rake/testtask'
+#
+#require 'fileutils'
+#require 'tempfile'
+#
+#require "#{RAILS_ROOT}/lib/brisk-bills.rb"
+#
+#include FileUtils
+#
+#namespace :package do
+#  desc "Packaging Tasks" 
+#  
+#  RbConfig = Config unless defined? RbConfig
+#  
+#  NAME = "brisk-bills"
+#  VERS = ENV['VERSION'] || BriskBills::Version.to_s
+#  PKG = "#{NAME}-#{VERS}"
+#  
+#  RDOC_OPTS = ['--quiet', '--title', 'The BriskBills Programmers Reference', '--main', 'README', '--inline-source']
+#  RDOC_EXTRAS = ['README', 'INSTALL', "CHANGELOG", "COPYING","COPYING.LESSER", 'bin/brisk-bills']
+#  RDOC_EXCLUDES = []
+#  
+#  PKG_FILES = FileList['**/*']
+#  PKG_FILES.exclude '**/._*'
+#  PKG_FILES.exclude '**/*.rej'
+#  PKG_FILES.exclude '.git*'
+#  PKG_FILES.exclude /^cache/
+#  PKG_FILES.exclude 'config/database.yml'
+#  PKG_FILES.exclude 'config/locomotive.yml'
+#  PKG_FILES.exclude 'config/lighttpd.conf'
+#  PKG_FILES.exclude 'config/mongrel_mimes.yml'
+#  PKG_FILES.exclude 'db/*.db'
+#  PKG_FILES.exclude /^doc/
+#  PKG_FILES.exclude 'log/*.log'
+#  PKG_FILES.exclude 'log/*.pid'
+#  PKG_FILES.exclude /^pkg/
+#  PKG_FILES.include 'public/.htaccess'
+#  PKG_FILES.exclude /\btmp\b/
+#
+#  SPEC =
+#    Gem::Specification.new do |s|
+#      s.name = NAME
+#      s.version = VERS
+#      s.platform = Gem::Platform::RUBY
+#      s.summary = "A full-featured, rails-based system for basic accounting, with a particular focus on invoicing and automatic bill generation."
+#      s.description = s.summary
+#      s.author = "Chris DeRose, DeRose Technologies, Inc."
+#      s.email = 'cderose@derosetechnologies.com'
+#      s.homepage = 'http://www.derosetechnologies.com/community/brisk-bills'
+#      s.rubyforge_project = 'brisk-bills'
+#      
+#      s.bindir = 'bin'
+#      s.executables = 'brisk-bills'
+#      
+#      s.has_rdoc = true
+#      s.rdoc_options = RDOC_OPTS
+#      rdoc_excludes = RDOC_EXCLUDES
+#      rdoc_excludes.each do |e|
+#        s.rdoc_options << '--exclude' << e
+#      end
+#      s.extra_rdoc_files = RDOC_EXTRAS
+#      
+#      s.files = PKG_FILES
+#      s.require_paths = ["lib"] 
+#      s.test_files = FileList['test/*']
+#      
+#      s.add_dependency 'extensions',  '>= 0.6.0'
+#      s.add_dependency 'pdf-writer',  '>= 1.1.8'
+#      s.add_dependency 'slimtimer4r', '>= 0.2.4'
+#      s.add_dependency 'rails',       '>= 2.3.2'
+#    end
+#  
+#  Rake::RDocTask.new do |rdoc|
+#      rdoc.rdoc_dir = 'doc/rdoc'
+#      rdoc.options += RDOC_OPTS
+#      rdoc.main = "README"
+#      rdoc.rdoc_files.add PKG_FILES+RDOC_EXTRAS
+#      puts rdoc.rdoc_files.inspect
+#  end
+#  
+#  Rake::GemPackageTask.new(SPEC) do |p|
+#      p.need_tar = true
+#      p.need_zip = true
+#      p.gem_spec = SPEC
+#  end
+#   
+#  task :test do
+#    # For some reason this namespace wants to unit test everytime we run a task in it ... I just hacked this in there for now
+#  end
+#   
+#  task :install do
+#    sh %{rake package}
+#    sh %{sudo gem install pkg/#{NAME}-#{VERS}}
+#  end
+#  
+#  task :uninstall => [:clean] do
+#    sh %{sudo gem uninstall #{NAME}}
+#  end
+#  
+#  desc "Publish the release files to RubyForge."
+#  task :release => [:gem, :package] do
+##    files = ["gem", "tgz", "zip"].map { |ext| "pkg/#{PKG_FILE_NAME}.#{ext}" }
+##    release_id = nil
+##    system %{rubyforge login}
+##    files.each_with_index do |file, idx|
+##      if idx == 0
+##        cmd = %Q[rubyforge add_release #{RELEASE_NOTES}#{RELEASE_CHANGES} --preformatted #{RUBY_FORGE_GROUPID} #{RUBY_FORGE_PACKAGEID} "#{RELEASE_NAME}" #{file}]
+##        puts cmd
+##        system cmd
+##      else
+##        release_id ||= begin
+##          puts "rubyforge config #{RUBY_FORGE_PROJECT}"
+##          system "rubyforge config #{RUBY_FORGE_PROJECT}"
+##          `cat ~/.rubyforge/auto-config.yml | grep "#{RELEASE_NAME}"`.strip.split(/:/).last.strip
+##        end
+##        cmd = %Q[rubyforge add_file #{RUBY_FORGE_GROUPID} #{RUBY_FORGE_PACKAGEID} #{release_id} #{file}]
+##        puts cmd
+##        system cmd
+##      end
+##    end
+#  end
+#  
+#end
+
+require 'rubygems'
 require 'rake/testtask'
+require 'rake/rdoctask'
+require 'rake/gempackagetask'
+require 'brisk-bills'
 
-require 'fileutils'
-require 'tempfile'
+PKG_NAME = 'brisk-bills'
+PKG_VERSION = BriskBills::Version.to_s
+PKG_FILE_NAME = "#{PKG_NAME}-#{PKG_VERSION}"
+RUBY_FORGE_PROJECT = PKG_NAME
+RUBY_FORGE_USER = ENV['RUBY_FORGE_USER'] || 'brighton36'
 
-require "#{RAILS_ROOT}/lib/brisk-bills.rb"
+RELEASE_NAME  = ENV['RELEASE_NAME'] || PKG_VERSION
+RELEASE_NOTES = ENV['RELEASE_NOTES'] ? " -n #{ENV['RELEASE_NOTES']}" : ''
+RELEASE_CHANGES = ENV['RELEASE_CHANGES'] ? " -a #{ENV['RELEASE_CHANGES']}" : ''
+RUBY_FORGE_GROUPID = '1337'
+RUBY_FORGE_PACKAGEID = '1638'
 
-include FileUtils
+RDOC_TITLE = "BriskBills - Invoicing Made Simple"
+RDOC_EXTRAS = ['README', 'INSTALL', "CHANGELOG", "COPYING","COPYING.LESSER", 'bin/brisk-bills']
 
+namespace 'package' do
+  spec = Gem::Specification.new do |s|
+    s.name = PKG_NAME
+    s.version = PKG_VERSION
+    s.author = "Chris DeRose, DeRose Technologies, Inc."
+    s.email = 'cderose@derosetechnologies.com'
+    s.description = s.summary = "A full-featured, rails-based system for basic accounting, with a particular focus on invoicing and automatic bill generation."
+    s.homepage = 'http://www.derosetechnologies.com/community/brisk-bills'
+        
+    s.rubyforge_project = RUBY_FORGE_PROJECT
+    s.platform = Gem::Platform::RUBY
+    s.bindir = 'bin'
+    s.executables = (Dir['bin/*'] + Dir['scripts/*']).map { |file| File.basename(file) }
+    
+    s.add_dependency 'rake', '>= 0.8.3'
+    s.add_dependency 'extensions',  '>= 0.6.0'
+    s.add_dependency 'pdf-writer',  '>= 1.1.8'
+    s.add_dependency 'slimtimer4r', '>= 0.2.4'
+    s.add_dependency 'rails',       '>= 2.3.2'
 
-namespace :package do
-  desc "Packaging Tasks" 
-  
-  RbConfig = Config unless defined? RbConfig
-  
-  NAME = "brisk-bills"
-  VERS = ENV['VERSION'] || BriskBills::Version.to_s
-  PKG = "#{NAME}-#{VERS}"
-  
-  RDOC_OPTS = ['--quiet', '--title', 'The BriskBills Programmers Reference', '--main', 'README', '--inline-source']
-  RDOC_FILES = ['README', 'INSTALL', "CHANGELOG", "COPYING","COPYING.LESSER", 'bin/brisk-bills']
-  PKG_FILES = (%w(Rakefile) + RDOC_FILES + Dir.glob("{app,bin,config,db,doc,lib,log,public,Rakefile,script,test,tmp,vendor}/**/*")).uniq
-
-  SPEC =
-    Gem::Specification.new do |s|
-      s.name = NAME
-      s.version = VERS
-      s.platform = Gem::Platform::RUBY
-      s.has_rdoc = true
-      s.bindir = 'bin'
-      s.executables = 'brisk-bills'
-      s.rdoc_options += RDOC_OPTS
-      s.extra_rdoc_files = RDOC_FILES
-      s.summary = "A full-featured, rails-based system for basic accounting, with a particular focus on invoicing and automatic bill generation."
-      s.description = s.summary
-      s.author = "Chris DeRose, DeRose Technologies, Inc."
-      s.email = 'cderose@derosetechnologies.com'
-      s.homepage = 'http://www.derosetechnologies.com/community/brisk-bills'
-      s.rubyforge_project = 'brisk-bills'
-      s.files = PKG_FILES
-      s.require_paths = ["lib"] 
-      s.test_files = FileList['test/*']
-      
-      s.add_dependency 'extensions'
-      s.add_dependency 'pdf-writer'
-      s.add_dependency 'slimtimer4r'
+    s.has_rdoc = true
+    s.rdoc_options << '--title' << RDOC_TITLE << '--line-numbers' << '--main' << 'README'
+    rdoc_excludes = Dir["**"].reject { |f| !File.directory? f }
+    rdoc_excludes.each do |e|
+      s.rdoc_options << '--exclude' << e
     end
-  
-  Rake::RDocTask.new do |rdoc|
-      rdoc.rdoc_dir = 'doc/rdoc'
-      rdoc.options += RDOC_OPTS
-      rdoc.main = "README"
-      rdoc.rdoc_files.add RDOC_FILES+['lib/**/*.rb']
+    s.extra_rdoc_files = RDOC_EXTRAS
+    
+    files = FileList['**/*']
+    files.exclude '**/._*'
+    files.exclude '**/*.rej'
+    files.exclude '.git*'
+    files.exclude /^cache/
+    files.exclude 'config/database.yml'
+    files.exclude 'config/locomotive.yml'
+    files.exclude 'config/lighttpd.conf'
+    files.exclude 'config/mongrel_mimes.yml'
+    files.exclude 'db/*.db'
+    files.exclude /^doc/
+    files.exclude 'log/*.log'
+    files.exclude 'log/*.pid'
+    files.exclude /^pkg/
+    files.exclude /\btmp\b/
+    files.exclude 'radiant.gemspec'
+    files.include 'public/.htaccess'
+    files.include 'log/.keep' # A cheap/easy way of making sure the (otherwise emtpy) log dir gets packaged
+    s.files = files.to_a
   end
-  
-  Rake::GemPackageTask.new(SPEC) do |p|
-      p.need_tar = true
-      p.need_zip = true
-      p.gem_spec = SPEC
+
+  Rake::GemPackageTask.new(spec) do |pkg|
+    pkg.need_zip = true
+    pkg.need_tar = true
   end
-  
-  task :install do
-    sh %{rake package}
-    sh %{sudo gem install pkg/#{NAME}-#{VERS}}
+
+  task :gemspec do
+    File.open('radiant.gemspec', 'w') {|f| f.write spec.to_ruby }
   end
-  
-  task :uninstall => [:clean] do
-    sh %{sudo gem uninstall #{NAME}}
+
+  namespace :gem do
+    desc "Uninstall Gem"
+    task :uninstall do
+      sh "gem uninstall #{PKG_NAME}" rescue nil
+    end
+
+    desc "Build and install Gem from source"
+    task :install => [:package, :uninstall] do
+      chdir("#{RADIANT_ROOT}/pkg") do
+        latest = Dir["#{PKG_NAME}-*.gem"].last
+        sh "gem install #{latest}"
+      end
+    end
+  end
+
+  desc "Publish the release files to RubyForge."
+  task :release => [:gem, :package] do
+    files = ["gem", "tgz", "zip"].map { |ext| "pkg/#{PKG_FILE_NAME}.#{ext}" }
+    release_id = nil
+    system %{rubyforge login}
+    files.each_with_index do |file, idx|
+      if idx == 0
+        cmd = %Q[rubyforge add_release #{RELEASE_NOTES}#{RELEASE_CHANGES} --preformatted #{RUBY_FORGE_GROUPID} #{RUBY_FORGE_PACKAGEID} "#{RELEASE_NAME}" #{file}]
+        puts cmd
+        system cmd
+      else
+        release_id ||= begin
+          puts "rubyforge config #{RUBY_FORGE_PROJECT}"
+          system "rubyforge config #{RUBY_FORGE_PROJECT}"
+          `cat ~/.rubyforge/auto-config.yml | grep "#{RELEASE_NAME}"`.strip.split(/:/).last.strip
+        end
+        cmd = %Q[rubyforge add_file #{RUBY_FORGE_GROUPID} #{RUBY_FORGE_PACKAGEID} #{release_id} #{file}]
+        puts cmd
+        system cmd
+      end
+    end
   end
 end

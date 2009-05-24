@@ -63,7 +63,7 @@ module BriskBills
       super
     end
 
-    def initialize_framework_views
+    def load_view_paths
       view_paths = returning [] do |arr|
         # Add the singular view path if it's not in the list
         arr << configuration.view_path if !configuration.view_paths.include?(configuration.view_path)

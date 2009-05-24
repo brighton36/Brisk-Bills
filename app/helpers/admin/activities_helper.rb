@@ -99,7 +99,7 @@ module Admin::ActivitiesHelper
   private
   
   def activity_partial_path
-    "#{RAILS_ROOT}/app/views/admin/activities"
+    "#{BRISKBILLS_ROOT}/app/views/admin/activities"
   end
   
   handle_extensions

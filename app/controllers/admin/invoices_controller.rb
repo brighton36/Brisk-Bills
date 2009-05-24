@@ -142,7 +142,7 @@ class Admin::InvoicesController < ApplicationController
       :company_logo_file
     )
     
-    @company_logo_path = '%s/public/images/%s' % [RAILS_ROOT, company_logo_file]
+    @company_logo_path = '%s/public/images/%s' % [BRISKBILLS_ROOT, company_logo_file]
     
     @footer_text = "Thank-you for choosing %s! All payments are due within thirty days of receipt. We take checks, cash, and major credit cards. We appreciate your business, and encourage you to call us at %s if there are any discrepencies or concerns." % [@company_name, @company_phone]
 

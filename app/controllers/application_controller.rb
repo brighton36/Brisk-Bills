@@ -1,6 +1,8 @@
 # Filters added to this controller apply to all controllers in the application.
 # Likewise, all the methods added will be available for all controllers.
 
+require "#{BRISKBILLS_ROOT}/lib/utilities.rb"
+
 class ApplicationController < ActionController::Base
   before_filter :validate_credentials
 
@@ -9,7 +11,7 @@ class ApplicationController < ActionController::Base
 
     unless Credential.guest_permitted? params[:controller], params[:action]
       if @active_credential
-        render :file => "#{RAILS_ROOT}/public/500.html" unless @active_credential.is_request_permitted?( params[:controller], params[:action] )
+        render :file => "#{RAILS_ROOT}/public/500.html", :status => 500 unless @active_credential.is_request_permitted?( params[:controller], params[:action] )
       else
         session[:uncredentialed_request_uri] = request.request_uri
 

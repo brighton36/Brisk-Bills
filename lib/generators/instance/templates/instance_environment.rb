@@ -17,6 +17,8 @@ BriskBills::Initializer.run do |config|
   # To use Rails without a database, you must remove the Active Record framework
   # config.frameworks -= [ :action_mailer ]
   
+  config.load_paths << "#{BRISKBILLS_ROOT}/app/model_views"
+
   # Only load the plugins named here, in the order given. By default, all plugins 
   # in vendor/plugins are loaded in alphabetical order.
   # :all can be used as a placeholder for all plugins not explicitly named
@@ -43,42 +45,25 @@ BriskBills::Initializer.run do |config|
   # Use the database for sessions instead of the cookie-based default,
   # which shouldn't be used to store highly confidential information
   # (create the session table with 'rake db:sessions:create')
-  config.action_controller.session_store = :cookie_store
+  config.action_controller.session_store = :active_record_store
 
   # Use SQL instead of Active Record's schema dumper when creating the test database.
   # This is necessary if your schema can't be completely dumped by the schema dumper,
   # like if you have constraints or database-specific column types
   # config.active_record.schema_format = :sql
   
-  # Enable page/fragment caching by setting a file-based store
-  # (remember to create the caching directory and make it readable to the application)
-  # config.action_controller.fragment_cache_store = :file_store, "#{RAILS_ROOT}/fragment_cache"
-  config.action_controller.page_cache_directory = "#{RAILS_ROOT}/cache"
-  
-  # Activate observers that should always be running
-  config.active_record.observers = :user_action_observer
-
   # Make Active Record use UTC-base instead of local time
   config.active_record.default_timezone = :utc
   
-  # Set the default field error proc
-  config.action_view.field_error_proc = Proc.new do |html, instance|
-    %{<div class="error-with-field">#{html} <small class="error">&bull; #{[instance.error_message].flatten.first}</small></div>}
-  end
+  # We really don't do any I18n right now, this is a hack to fix some of the date formatting issues that popped up in rails 2.3
+  config.i18n[:load_path] << "#{BRISKBILLS_ROOT}/config/locale/en.rb"
   
   config.after_initialize do
     # Add new inflection rules using the following format:
     ActiveSupport::Inflector.inflections do |inflect|
       inflect.uncountable 'config'
     end
-
-    # Auto-require text filters
-    Dir["#{BRISKBILLS_ROOT}/app/models/*_filter.rb"].each do |filter|
-      require_dependency File.basename(filter).sub(/\.rb$/, '')
-    end
-
-    # Response Caching Defaults
-    ResponseCache.defaults[:directory] = ActionController::Base.page_cache_directory
-    ResponseCache.defaults[:logger]    = ActionController::Base.logger
   end
 end
+
+ActionMailer::Base.delivery_method = :sendmail
