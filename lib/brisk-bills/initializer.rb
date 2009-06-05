@@ -10,11 +10,24 @@ module BriskBills
     def initialize
       self.view_paths = []
       super
+
+      # Active Record defaults
+      self.active_record.default_timezone = :utc
+      self.active_record.timestamped_migrations = false
     end
 
     private
       def framework_root_path
         BRISKBILLS_ROOT + '/vendor/rails'
+      end
+      
+      def default_i18n
+        i18n = super
+
+        # We really don't do any I18n right now, this is a hack to fix some of the date formatting issues that popped up in rails 2.3
+        i18n[:load_path] << "#{BRISKBILLS_ROOT}/config/locale/en.rb"
+
+        i18n
       end
 
       # Provide the load paths for the BriskBills installation

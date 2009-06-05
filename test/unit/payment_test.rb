@@ -205,7 +205,7 @@ class PaymentTest < ActiveSupport::TestCase
   
   def sanitize_time(time)
     # This removes the usec's 
-    Time.local time.sec, time.min, time.hour, time.day, time.month, time.year, time.wday, time.yday, time.isdst, time.gmt_offset unless time.nil?
+    Time.utc time.sec, time.min, time.hour, time.day, time.month, time.year, time.wday, time.yday, time.isdst, time.gmt_offset unless time.nil?
   end
 
 end
