@@ -50,6 +50,10 @@ module BriskBills
     def loaded_via_gem?
       pick_boot.is_a? GemBoot
     end
+    
+    def loaded_via_app?
+      pick_boot.is_a? AppBoot
+    end
 
     def preinitializer_path
       "#{RAILS_ROOT}/config/preinitializer.rb"

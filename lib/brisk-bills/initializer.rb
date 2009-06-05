@@ -42,10 +42,7 @@ module BriskBills
       end
 
       def default_plugin_paths
-        [
-          "#{RAILS_ROOT}/vendor/plugins",
-          "#{BRISKBILLS_ROOT}/vendor/plugins"
-        ]
+        ["#{RAILS_ROOT}/vendor/plugins", "#{BRISKBILLS_ROOT}/vendor/plugins"]
       end
 
       def default_view_path
@@ -67,16 +64,17 @@ module BriskBills
       view_paths = returning [] do |arr|
         # Add the singular view path if it's not in the list
         arr << configuration.view_path if !configuration.view_paths.include?(configuration.view_path)
-        # Add the default view paths
+        # Add the default view paths        
         arr.concat configuration.view_paths
       end
+
       if configuration.frameworks.include?(:action_controller) || defined?(ActionController::Base)
         view_paths.each do |vp|
           unless ActionController::Base.view_paths.include?(vp)
             ActionController::Base.prepend_view_path vp
           end
         end
-      end
+      end      
     end
 
     def admin
