@@ -143,8 +143,9 @@ RELEASE_CHANGES = ENV['RELEASE_CHANGES'] ? " -a #{ENV['RELEASE_CHANGES']}" : ''
 RUBY_FORGE_GROUPID = '1337'
 RUBY_FORGE_PACKAGEID = '1638'
 
-RDOC_TITLE = "BriskBills - Invoicing Made Simple"
-RDOC_EXTRAS = ['README', 'INSTALL', "CHANGELOG", "COPYING","COPYING.LESSER", 'bin/brisk-bills']
+RDOC_TITLE = "BriskBills - Invoicing with a bit of kick!"
+RDOC_EXTRAS = ['README', 'INSTALL', "CHANGELOG", "COPYING","COPYING.LESSER", 'bin/brisk-bills', 'app']
+RDOC_EXCLUDES = ['lib/generators']
 
 namespace 'package' do
   spec = Gem::Specification.new do |s|
@@ -160,18 +161,17 @@ namespace 'package' do
     s.bindir = 'bin'
     s.executables = (Dir['bin/*'] + Dir['scripts/*']).map { |file| File.basename(file) }
     
-    s.add_dependency 'rake', '>= 0.8.3'
+    s.add_dependency 'rake',        '>= 0.8.3'
     s.add_dependency 'extensions',  '>= 0.6.0'
     s.add_dependency 'pdf-writer',  '>= 1.1.8'
     s.add_dependency 'slimtimer4r', '>= 0.2.4'
     s.add_dependency 'rails',       '>= 2.3.2'
 
     s.has_rdoc = true
-    s.rdoc_options << '--title' << RDOC_TITLE << '--line-numbers' << '--main' << 'README'
-    rdoc_excludes = Dir["**"].reject { |f| !File.directory? f }
-    rdoc_excludes.each do |e|
-      s.rdoc_options << '--exclude' << e
-    end
+    s.rdoc_options = [
+      '--title', RDOC_TITLE, '--line-numbers', '--main', 'README'
+    ]+RDOC_EXCLUDES.collect{|e| ['--exclude', e] }.flatten
+
     s.extra_rdoc_files = RDOC_EXTRAS
     
     files = FileList['**/*']

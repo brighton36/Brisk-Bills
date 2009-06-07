@@ -18,29 +18,33 @@ app_path = ARGV.first
 require 'rails_generator'
 require 'rails_generator/scripts/generate'
 
-class Rails::Generator::Base
-
-  def self.use_application_sources!
-    reset_sources
-    sources << Rails::Generator::PathSource.new(:builtin, "#{File.dirname(__FILE__)}/../lib/generators")
-  end
-
-  def add_general_options!(opt)
-    opt.separator ''
-    opt.separator 'Brisk Bills Info:'
-    opt.on('-v', '--version', 'Show the Brisk Bills version number and quit.')
-    opt.on('-h', '--help', 'Show this help message and quit.') { |v| options[:help] = v }
-
-    opt.separator ''
-    opt.separator 'General Options:'
-
-    opt.on('-p', '--pretend', 'Run but do not make any changes.') { |v| options[:pretend] = v }
-    opt.on('-f', '--force', 'Overwrite files that already exist.') { options[:collision] = :force }
-    opt.on('-s', '--skip', 'Skip files that already exist.') { options[:collision] = :skip }
-    opt.on('-q', '--quiet', 'Suppress normal output.') { |v| options[:quiet] = v }
-    opt.on('-t', '--backtrace', 'Debugging: show backtrace on errors.') { |v| options[:backtrace] = v }
-  end
-
+class Rails #:nodoc:
+	class Generator #:nodoc:
+		class Base #:nodoc:
+		
+		  def self.use_application_sources!
+		    reset_sources
+		    sources << Rails::Generator::PathSource.new(:builtin, "#{File.dirname(__FILE__)}/../lib/generators")
+		  end
+		
+		  def add_general_options!(opt)
+		    opt.separator ''
+		    opt.separator 'Brisk Bills Info:'
+		    opt.on('-v', '--version', 'Show the Brisk Bills version number and quit.')
+		    opt.on('-h', '--help', 'Show this help message and quit.') { |v| options[:help] = v }
+		
+		    opt.separator ''
+		    opt.separator 'General Options:'
+		
+		    opt.on('-p', '--pretend', 'Run but do not make any changes.') { |v| options[:pretend] = v }
+		    opt.on('-f', '--force', 'Overwrite files that already exist.') { options[:collision] = :force }
+		    opt.on('-s', '--skip', 'Skip files that already exist.') { options[:collision] = :skip }
+		    opt.on('-q', '--quiet', 'Suppress normal output.') { |v| options[:quiet] = v }
+		    opt.on('-t', '--backtrace', 'Debugging: show backtrace on errors.') { |v| options[:backtrace] = v }
+		  end
+		
+		end
+	end
 end
 
 Rails::Generator::Base.use_application_sources!

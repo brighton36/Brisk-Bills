@@ -72,7 +72,7 @@ module BriskBills
       end
   end
 
-  class Initializer < Rails::Initializer
+  class Initializer < Rails::Initializer #:nodoc:
     def self.run(command = :process, configuration = Configuration.new)
       Rails.configuration = configuration
       super
