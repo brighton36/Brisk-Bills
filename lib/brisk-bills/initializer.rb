@@ -6,6 +6,7 @@ module BriskBills
 
   class Configuration < Rails::Configuration
     attr_accessor :view_paths
+    attr_accessor :authentication_salt
 
     def initialize
       self.view_paths = []
@@ -55,7 +56,11 @@ module BriskBills
       end
 
       def default_plugin_paths
-        ["#{RAILS_ROOT}/vendor/plugins", "#{BRISKBILLS_ROOT}/vendor/plugins"]
+        ret = ["#{RAILS_ROOT}/vendor/plugins"]
+        
+        ret << "#{BRISKBILLS_ROOT}/vendor/plugins" if RAILS_ROOT != BRISKBILLS_ROOT
+        
+        ret
       end
 
       def default_view_path
@@ -90,9 +95,6 @@ module BriskBills
       end      
     end
 
-    def admin
-      configuration.admin
-    end
   end
 
 end

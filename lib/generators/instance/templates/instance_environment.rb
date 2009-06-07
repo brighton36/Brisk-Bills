@@ -31,13 +31,18 @@ BriskBills::Initializer.run do |config|
   # (by default production uses :info, the others :debug)
   # config.log_level = :debug
   
+  <% 
+  # We'll be using this for the random strings down below
+  character_pool = (0...255).collect(&:chr).reject{|c| !/[a-z0-9\!\@\#\$\%\^\&\*\(\)\_\+]/i.match c }
+  %>
+
   # Your secret key for verifying cookie session data integrity.
   # If you change this key, all old sessions will become invalid!
   # Make sure the secret is at least 30 characters and all random, 
   # no regular words or you'll be exposed to dictionary attacks.
   config.action_controller.session = {
     :session_key => '_brisk-bills_session',
-    :secret      => <% require 'digest/sha1' %>'<%= Digest::SHA1.hexdigest("--#{app_name}--#{Time.now.to_s}--#{rand(10000000)}--") %>'
+    :secret      => '<%= ([nil]*54).collect{character_pool[rand(character_pool.length)]}.join%>'
   }
   
   # Use the database for sessions instead of the cookie-based default,
@@ -49,7 +54,9 @@ BriskBills::Initializer.run do |config|
   # This is necessary if your schema can't be completely dumped by the schema dumper,
   # like if you have constraints or database-specific column types
   # config.active_record.schema_format = :sql
-
+  
+  # This is used by the authentication controller, and should be a unique to every database:
+  config.authentication_salt = '<%= ([nil]*52).collect{character_pool[rand(character_pool.length)]}.join%>'
 end
 
 ActionMailer::Base.delivery_method = :sendmail

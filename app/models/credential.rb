@@ -21,9 +21,10 @@ class Credential < ActiveRecord::Base
 
   def self.salt_and_hash(password)
     begin
-      @salt = YAML::load(IO.read(SECRETS_FILE))["password_salt"]
+      @salt = Rails.configuration.authentication_salt
     rescue
-      @salt = "No Salt is a bad idea!"
+      @salt = "Salt is missing - No Salt is a bad idea!"
+      logger.error @salt # cheeky?
     end unless @salt
 
     Digest::SHA256.hexdigest( "%s%s" % [password, @salt] )

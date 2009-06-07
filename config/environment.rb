@@ -1,13 +1,10 @@
 # Be sure to restart your server when you modify this file
 
+# Specifies gem version of Rails to use when vendor/rails is not present
+RAILS_GEM_VERSION = '2.3.2' unless defined? RAILS_GEM_VERSION
+
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
-
-# We'll use this during bootup
-SECRETS_FILE = "#{RAILS_ROOT}/config/secrets.yml"
-
-# And I need this included before the initializer ends too
-require 'yaml'
 
 BriskBills::Initializer.run do |config|
   # Settings in config/environments/* take precedence over those specified here.
@@ -24,30 +21,19 @@ BriskBills::Initializer.run do |config|
   # :all can be used as a placeholder for all plugins not explicitly named
   # config.plugins = [ :exception_notification, :ssl_requirement, :all ]
 
+
   # Use the database for sessions instead of the file system
   # (create the session table with 'rake db:sessions:create')
   config.action_controller.session_store = :active_record_store
 
   config.action_controller.session = { 
     :session_key => "_briskbills_session",
-    :secret => YAML::load(IO.read(SECRETS_FILE))["session_secret"]
-  }  unless SECRETS_FILE.nil?
+    :secret => 'eHqaX)DcVnzAHe2@U7*ZNcgjhFSwMz+s(OQnkd$3!BStoC4NCSIGvX'
+  }
 
-  # Activate observers that should always be running
-  # config.active_record.observers = :cacher, :garbage_collector, :forum_observer
+  # This is used by the authentication controller, and should be a unique to every database:
+  config.authentication_salt = '_SI*0jb%d)YcZSi#fM7hcdW3t3ZUM@Lo$1To6IyUjM0ieBFDnENH'
 
-  # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
-  # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}')]
-  # config.i18n.default_locale = :de
-
-  # Add new inflection rules using the following format
-  # (all these examples are active by default):
-  # Inflector.inflections do |inflect|
-  #   inflect.plural /^(ox)$/i, '\1en'
-  #   inflect.singular /^(ox)en/i, '\1'
-  #   inflect.irregular 'person', 'people'
-  #   inflect.uncountable %w( fish sheep )
-  # end
 end
 
 ActionMailer::Base.delivery_method = :sendmail

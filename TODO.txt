@@ -1,16 +1,5 @@
-TODO: Clean up our actual non-generated environment.rb ... - remove the secrets.yml, and secret in general really ... Add something for the password_salt..
-	* Auto-generate password salt? Put in the config...
-
-* Use this on mario
-* make it easy to start new projects with a rake task
+* make it easy to start new projects with a rake task brisk-bills:first_time_setup which should create and migrate the db, and create the first administrative user
 * Work on rdoc
-	
-TODO: write a 'setup' binary that creates the secrets file and sets-up the first employee
-		* Use instiki as model for setuP? make radiant is better ...
-
-NOTE: Do I actully need this anywhere? I think not...
-	# Add new inflection rules using the following format:
-   ActiveSupport::Inflector.inflections{|inflect| inflect.uncountable 'config' }
 
 * Now put it on rubyforge 
 ---------------
