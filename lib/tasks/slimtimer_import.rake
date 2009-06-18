@@ -1,15 +1,17 @@
-require 'date'
-require 'pathname'
-require 'slimtimer4r'
-
-class SlimTimer::Record 
-  def sanitize_time(time); Time.utc(*time.to_a); end
-end
-
 namespace :brisk_bills do
   desc "Import SlimTimer Entries as Brisk Bills tasks" 
   
   task :slimtimer_import => :environment do   
+    
+    require 'date'
+    require 'pathname'
+    require 'slimtimer4r'
+    require "#{BRISKBILLS_ROOT}/lib/utilities"
+    
+    class ::SlimTimer::Record 
+      def sanitize_time(time); Time.utc(*time.to_a); end
+    end
+
     sync_from_days_ago, sync_start_days_ago, ignore_tasks = Setting.grab( 
       :slimtimer_sync_from_days_ago, 
       :slimtimer_sync_start_days_ago, 
