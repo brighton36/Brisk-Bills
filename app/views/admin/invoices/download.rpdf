@@ -181,7 +181,7 @@ totals = [ ['Sub-Total', @invoice.sub_total], ['Tax', @invoice.taxes_total], ['T
 	# NOTE: This DRY-ly formats the above into nicer-looking/final output strings:
 	[ 
 		total[0], 
-		(' $%.2f' % total[1].abs).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/, '\1,') 
+		(' %s$%.2f' % [(total[1].to_f < 0.0 ? '-' : ''), total[1].abs]).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/, '\1,') 
 	]
 end
 
