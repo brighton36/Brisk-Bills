@@ -1,5 +1,4 @@
 defaults: &defaults
-  database: cusis
   adapter:  mysql
   socket:  <%=
    ['/opt/local/var/run/mysql5/mysqld.sock',
@@ -10,15 +9,13 @@ defaults: &defaults
   <%= IO.readlines("#{RAILS_ROOT}/config/secrets.yml").map(&:chomp).join "\n  " if File.exists? "#{RAILS_ROOT}/config/secrets.yml" %>
 
 development:
-  database: cusis_development
+  database: brisbills_development
   <<: *defaults
 
 test:
-  database: cusis_test
+  database: briskbills_test
   <<: *defaults
 
 production:
+  database: brisbills_production
   <<: *defaults
-
-
- 
