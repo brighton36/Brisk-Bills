@@ -1,7 +1,6 @@
-* last months invoices task needs to be added
-* that negative fix for kevin
-
 * make it easy to start new projects with a rake task brisk-bills:first_time_setup which should create and migrate the db, and create the first administrative user
+	cderose@cderose-laptop:/tmp/bb-test$ rake db:create
+	
 * Work on rdoc
 
 * Now put it on rubyforge 
