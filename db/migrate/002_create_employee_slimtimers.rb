@@ -1,5 +1,3 @@
-require "#{RAILS_ROOT}/app/models/employee.rb"
-
 class CreateEmployeeSlimtimers < ActiveRecord::Migration
   def self.up
     create_table :employee_slimtimers, :options => 'TYPE=InnoDB' do |t|

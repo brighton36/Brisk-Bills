@@ -1,3 +1,7 @@
+* then get all those models out of the migrate
+* Then get all those defaults into a fixture/task..?
+
+* Try out agree('question here?[yn]') in first_time_setup
 * make it easy to start new projects with a rake task brisk-bills:first_time_setup which should create and migrate the db, and create the first administrative user
 	cderose@cderose-laptop:/tmp/bb-test$ rake db:create
 	
