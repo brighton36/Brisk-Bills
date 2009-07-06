@@ -18,8 +18,8 @@ app_path = ARGV.first
 require 'rails_generator'
 require 'rails_generator/scripts/generate'
 
-class Rails #:nodoc:
-	class Generator #:nodoc:
+module Rails #:nodoc:
+	module Generator #:nodoc:
 		class Base #:nodoc:
 		
 		  def self.use_application_sources!
