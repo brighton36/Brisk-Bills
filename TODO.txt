@@ -1,14 +1,13 @@
-* then get all those models out of the migrate
-* Then get all those defaults into a fixture/task..?
-
-* Try out agree('question here?[yn]') in first_time_setup
-* make it easy to start new projects with a rake task brisk-bills:first_time_setup which should create and migrate the db, and create the first administrative user
-	cderose@cderose-laptop:/tmp/bb-test$ rake db:create
+* Go through and remove the RAILS_ROOT 
 	
 * Work on rdoc
 
+* THe sql files are getting included in the gem! no esta bein! derosetechnologies_com_cusis.1.06.09.sql:
+
 * Now put it on rubyforge 
 ---------------
+* Taxes aren't auto-filling on invoices/activities ... and the apply tax checkbox is in a goofy place
+* Add tax column on clients->invoices for mom to review
 * Use the integer representation of money and not these crappy bigdecimals
 * Translate the time into the local zone for the user, probably each user/client should have a zone associtation in their account.
 	*  Its already stored in UTC everywhere...

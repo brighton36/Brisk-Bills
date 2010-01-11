@@ -1,3 +1,5 @@
+require "#{BRISKBILLS_ROOT}/db/migrate/021_create_views_and_indexes"
+
 class UpdatesForSalesTax < ActiveRecord::Migration
 
   CREATE_VIEWS = [
@@ -73,7 +75,7 @@ class UpdatesForSalesTax < ActiveRecord::Migration
     say_with_time "Updating Views" do
       updated_view_names = CREATE_VIEWS.collect{|v| v[0]}
       
-      replace_views CreateViewsAndIndexes::CREATE_VIEWS.select{|v| true if updated_view_names.include? v[0] }.reverse
+      replace_views ::CreateViewsAndIndexes::CREATE_VIEWS.select{|v| true if updated_view_names.include? v[0] }.reverse
     end    
 
     remove_column :activities, :tax

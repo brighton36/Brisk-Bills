@@ -31,6 +31,9 @@ BriskBills::Initializer.run do |config|
   # (by default production uses :info, the others :debug)
   # config.log_level = :debug
   
+  # Load the translations from the gem repo
+  config.i18n.load_path << Dir[File.join(BRISKBILLS_ROOT, 'config', 'locale', '*.{rb,yml}')]
+  
   <% 
   # We'll be using this for the random strings down below
   character_pool = (0...255).collect(&:chr).reject{|c| !/[a-z0-9\!\@\#\$\%\^\&\*\(\)\_\+]/i.match c }

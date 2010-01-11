@@ -51,6 +51,7 @@ namespace 'package' do
     files = FileList['**/*']
     files.exclude '**/._*'
     files.exclude '**/*.rej'
+    files.exclude '*.sql'
     files.exclude '.git*'
     files.exclude /^cache/
     files.exclude 'config/database.yml'
