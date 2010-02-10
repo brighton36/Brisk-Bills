@@ -1,0 +1,5 @@
+
+To install BriskBills, simply run :
+	gem install brisk-bills
+	
+And refer to the README for organizational setup instructions  
