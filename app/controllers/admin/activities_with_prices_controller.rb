@@ -5,8 +5,8 @@ class Admin::ActivitiesWithPricesController < Admin::ActivitiesController
   activities_scaffold_config do |config|
     config.label = "Invoice Activity"
     
-    config.columns << :cost
-    config.list.columns = [:activity, :cost, :occurred_on]
+    config.columns << [:cost, :tax]
+    config.list.columns = [:activity, :cost, :tax, :occurred_on]
         
     config.action_links.add :move_to_invoice, :type => :record, :label => 'Move...', :crud_type => :update, :action => 'move_to_invoice'
     

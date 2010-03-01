@@ -9,6 +9,8 @@ class Admin::ActivitiesController
       config.columns[model_field].for_activities << 'material'
       
       config.update.columns << model_field
+      
+      config.update.columns.move_column_under :apply_tax, :cost
     end
     
     config.columns[:apply_tax].label = "Apply Tax?"

@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20090410212612) do
+ActiveRecord::Schema.define(:version => 27) do
 
   create_table "activities", :force => true do |t|
     t.integer  "client_id"
@@ -75,15 +75,15 @@ ActiveRecord::Schema.define(:version => 20090410212612) do
   create_table "client_finance_transactions", :force => true do |t|
     t.integer  "client_id"
     t.datetime "date"
-    t.binary   "description", :limit => 2147483647
-    t.decimal  "amount",                            :precision => 34, :scale => 2
+    t.binary   "description", :limit => 16777215
+    t.decimal  "amount",                          :precision => 34, :scale => 2
   end
 
   create_table "client_finance_transactions_union", :force => true do |t|
     t.integer  "client_id"
     t.datetime "date"
-    t.binary   "description", :limit => 2147483647
-    t.decimal  "amount",                            :precision => 34, :scale => 2
+    t.binary   "description", :limit => 16777215
+    t.decimal  "amount",                          :precision => 34, :scale => 2
   end
 
   create_table "client_representatives", :force => true do |t|
@@ -250,10 +250,6 @@ ActiveRecord::Schema.define(:version => 20090410212612) do
 
   add_index "payments", ["client_id"], :name => "index_payments_on_client_id"
   add_index "payments", ["payment_method_id"], :name => "index_payments_on_payment_method_id"
-
-  create_table "schema_info", :id => false, :force => true do |t|
-    t.integer "version"
-  end
 
   create_table "sessions", :force => true do |t|
     t.string   "session_id", :null => false

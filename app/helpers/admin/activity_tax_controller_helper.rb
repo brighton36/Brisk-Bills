@@ -8,9 +8,10 @@ module Admin::ActivityTaxControllerHelper
         tax_percent = tax_percent.to_f
         tax_flat = tax_flat.to_f
 
-        id_suffix = params[:eid] || params[:record_id]
-        tax_field_id  = "record_tax_%s"  % id_suffix
-        cost_field_id = "record_cost_%s" % id_suffix
+        id_suffix = (params[:eid] ? '_' : '')+params[:record_id]
+        
+        tax_field_id  = options_for_column(:tax)[:id] + id_suffix
+        cost_field_id = options_for_column(:cost)[:id] + id_suffix
         tax_field_hidden_id  = "%s_hidden"  % tax_field_id
 
         page[cost_field_id].value = money_for_input(params[:cost].to_f)
