@@ -29,7 +29,7 @@ class Invoice < ActiveRecord::Base
   validates_presence_of :client_id, :issued_on
 
   # This just ends up being useful in a couple places
-  ACTIVITY_TOTAL_SQL = '(IF(activities.cost IS NULL, 0, activities.cost)+IF(activities.tax IS NULL, 0, activities.tax))'
+  ACTIVITY_TOTAL_SQL = '(IF(activities.cost_in_cents IS NULL, 0, activities.cost_in_cents)+IF(activities.tax_in_cents IS NULL, 0, activities.tax_in_cents))'
 
   def initialize(*args)
     super(*args)
@@ -122,11 +122,11 @@ class Invoice < ActiveRecord::Base
   end
 
   def taxes_total
-    process_total :taxes_total, :tax
+    process_total :taxes_total, :tax_in_cents
   end
 
   def sub_total
-    process_total :sub_total, :cost
+    process_total :sub_total, :cost_in_cents
   end
   
   def amount
@@ -162,16 +162,16 @@ class Invoice < ActiveRecord::Base
         unallocated_payments = Payment.find_with_totals( 
           :all, 
           :conditions => [
-            'client_id = ? AND (payments.amount - IF(payments_total.amount_allocated IS NULL, 0, payments_total.amount_allocated) ) > ?', 
+            'client_id = ? AND (payments.amount_in_cents - IF(payments_total.amount_allocated_in_cents IS NULL, 0, payments_total.amount_allocated_in_cents) ) > ?', 
             client_id, 
             0
           ] 
         )
     
-        current_client_balance = BigDecimal.new 0.0.to_s
-        unallocated_payments.each { |pmnt| current_client_balance -= BigDecimal.new(pmnt.amount_unallocated.to_s) }
+        current_client_balance = 0.0.to_money
+        unallocated_payments.each { |pmnt| current_client_balance -= pmnt.amount_unallocated }
         
-        invoice_balance = BigDecimal.new amount.to_s
+        invoice_balance = amount
     
         unallocated_payments.each do |unallocated_pmnt|
           break if invoice_balance == 0 or current_client_balance >= 0
@@ -209,37 +209,39 @@ class Invoice < ActiveRecord::Base
   end
   
   def amount_paid
-    ret = (attribute_present? :amount_paid) ? 
-      read_attribute(:amount_paid) : 
-      InvoicePayment.sum( :amount, :conditions => ['invoice_id = ?', id] ) || 0
-      
-    BigDecimal.new ret.to_s
+    Money.new(
+      (
+        (attribute_present? :amount_paid_in_cents) ? 
+          read_attribute(:amount_paid_in_cents) : 
+          InvoicePayment.sum( :amount_in_cents, :conditions => ['invoice_id = ?', id] ) || 0
+      ).to_i
+    )
   end
   
   def amount_outstanding
-    ret = (attribute_present? :amount_outstanding) ? read_attribute(:amount_outstanding) : (amount - amount_paid)
-    
-    BigDecimal.new ret.to_s
+    (attribute_present? :amount_outstanding_in_cents) ? 
+      Money.new(read_attribute(:amount_outstanding_in_cents).to_i) : 
+      (amount - amount_paid)
   end
 
   def self.find_with_totals( how_many = :all, options = {} )
     joins = []
     joins << 'LEFT JOIN ('+
-      "SELECT invoices.id AS invoice_id, SUM(#{ACTIVITY_TOTAL_SQL}) AS total"+
+      "SELECT invoices.id AS invoice_id, SUM(#{ACTIVITY_TOTAL_SQL}) AS total_in_cents"+
       ' FROM invoices'+
       ' LEFT JOIN activities ON activities.invoice_id = invoices.id'+
       ' GROUP BY invoices.id'+
     ') AS activities_total ON activities_total.invoice_id = invoices.id'
     
     joins << 'LEFT JOIN ('+
-      'SELECT invoices.id AS invoice_id, SUM(invoice_payments.amount) AS total'+
+      'SELECT invoices.id AS invoice_id, SUM(invoice_payments.amount_in_cents) AS total_in_cents'+
       ' FROM invoices'+
       ' LEFT JOIN invoice_payments ON invoice_payments.invoice_id = invoices.id'+
       ' GROUP BY invoices.id'+
     ') AS invoices_total ON invoices_total.invoice_id = invoices.id'
 
-    cast_amount = 'IF(activities_total.total IS NULL, 0,activities_total.total)'
-    cast_amount_paid = 'IF(invoices_total.total IS NULL, 0,invoices_total.total)'
+    cast_amount = 'IF(activities_total.total_in_cents IS NULL, 0,activities_total.total_in_cents)'
+    cast_amount_paid = 'IF(invoices_total.total_in_cents IS NULL, 0,invoices_total.total_in_cents)'
 
     Invoice.find( 
       how_many,
@@ -249,9 +251,9 @@ class Invoice < ActiveRecord::Base
           'invoices.client_id',
           'invoices.comments',
           'invoices.issued_on',
-          "#{cast_amount} AS amount",
-          "#{cast_amount_paid} AS amount_paid",
-          "#{cast_amount} - #{cast_amount_paid} AS amount_outstanding"
+          "#{cast_amount} AS amount_in_cents",
+          "#{cast_amount_paid} AS amount_paid_in_cents",
+          "#{cast_amount} - #{cast_amount_paid} AS amount_outstanding_in_cents"
         ].join(', '),
         :order => 'issued_on ASC',
         :joins => joins.join(' ')
@@ -271,12 +273,12 @@ class Invoice < ActiveRecord::Base
   private 
   
   def process_total(name, field_sql)   
-    BigDecimal.new( 
+    Money.new( 
       ( 
         (attribute_present? name) ? 
           read_attribute(name) : 
-          (Activity.sum(field_sql, :conditions => ['invoice_id = ?', id]) || 0 )
-      ).to_s
+          (Activity.sum(field_sql, :conditions => ['invoice_id = ?', id]) || 0 ).to_i
+      )
     )
   end
 

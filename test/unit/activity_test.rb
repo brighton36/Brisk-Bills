@@ -22,14 +22,7 @@ class ActivityTest < ActiveSupport::TestCase
       ).save!
     end
     
-    assert_raise( ActiveRecord::RecordInvalid ) do
-      Activity.create(
-      :is_published => false,
-      :occurred_on => Time.new,
-      :activity_type => 'n/a',
-      :cost => 'Bogus!'
-      ).save!
-    end
+    # NOTE: I used to test the costs in here, but, since we've switched to acts_as money, this is no longer needed...
     
     assert_nothing_raised do
       Activity.create(
@@ -80,12 +73,11 @@ class ActivityTest < ActiveSupport::TestCase
   end
   
   def test_validations
-    a1 = Activity.new :activity_type => nil, :cost => 'abc'
+    a1 = Activity.new :activity_type => nil
     
     assert_nothing_raised { a1.valid? }
     
-    assert_equal 2, a1.errors.length
+    assert_equal 1, a1.errors.length
     assert_equal true, a1.errors.invalid?(:activity_type)
-    assert_equal true, a1.errors.invalid?(:cost)
   end
 end

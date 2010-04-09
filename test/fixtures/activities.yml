@@ -5,7 +5,7 @@ activity_0001:
   is_published: 1
   activity_type: labor
   occurred_on: 2008-05-06 20:36:24 -04:00
-  cost: 110.00
+  cost_in_cents: 11000
   created_at: 2008-01-01 00:01:00 -04:00
   updated_at: 2008-01-01 00:01:00 -04:00
 activity_0002: 
@@ -14,7 +14,7 @@ activity_0002:
   is_published: 0
   activity_type: labor
   occurred_on: 2008-05-06 20:37:24 -04:00
-  cost: 85.00
+  cost_in_cents: 8500
   created_at: 2008-01-01 00:01:00 -04:00
   updated_at: 2008-01-01 00:01:00 -04:00
 activity_0003: 
@@ -23,6 +23,6 @@ activity_0003:
   is_published: 1
   activity_type: labor
   occurred_on: 2008-05-06 20:37:24 -04:00
-  cost: 32.75
+  cost_in_cents: 3275
   created_at: 2008-01-01 00:01:00 -04:00
   updated_at: 2008-01-01 00:01:00 -04:00

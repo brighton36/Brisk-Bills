@@ -27,7 +27,8 @@ class Client < ActiveRecord::Base
   end
   
   def balance
-    (
+    Money.new( 
+      (
       (attribute_present? :balance) ? 
         read_attribute(:balance) :
         Client.find(
@@ -36,27 +37,28 @@ class Client < ActiveRecord::Base
           'id',
           'company_name',
           '(
-           IF(charges.charges_sum IS NULL, 0,charges.charges_sum) - 
-           IF(deposits.payment_sum IS NULL, 0, deposits.payment_sum)
-          ) AS sum_difference'
+           IF(charges.charges_sum_in_cents IS NULL, 0,charges.charges_sum_in_cents) - 
+           IF(deposits.payment_sum_in_cents IS NULL, 0, deposits.payment_sum_in_cents)
+          ) AS sum_difference_in_cents'
         ].join(', '),
         :joins => [
           "LEFT JOIN(
-            SELECT invoices.client_id, SUM(#{Invoice::ACTIVITY_TOTAL_SQL}) AS charges_sum 
+            SELECT invoices.client_id, SUM(#{Invoice::ACTIVITY_TOTAL_SQL}) AS charges_sum_in_cents 
               FROM invoices 
               LEFT JOIN activities ON activities.invoice_id = invoices.id 
               GROUP BY invoices.client_id
           ) AS charges ON charges.client_id = clients.id",
           
           'LEFT JOIN (
-            SELECT payments.client_id, SUM(payments.amount) AS payment_sum 
+            SELECT payments.client_id, SUM(payments.amount_in_cents) AS payment_sum_in_cents
               FROM payments 
               GROUP BY payments.client_id
           ) AS deposits ON deposits.client_id = clients.id '
         ].join(' '),
         :conditions => [ 'clients.id = ?', id]
-        ).sum_difference
-    ).to_f unless id.nil?
+        ).sum_difference_in_cents
+      ).to_i
+    ) unless id.nil?
   end
   
   def ensure_not_referenced_on_destroy

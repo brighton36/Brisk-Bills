@@ -32,7 +32,7 @@ module Factory
   def self.generate_payment(amount, attributes = {})
     Payment.create!(
       {
-      :amount => BigDecimal.new(amount.to_s),
+      :amount => amount,
       :client => Factory.client, 
       :payment_method_id => 1
       }.merge(attributes)
@@ -69,7 +69,7 @@ class PaymentTest < ActiveSupport::TestCase
     [1200.00, 400, 99.99, 1500.99, 430.01].each do |amt| 
       inv =  Factory.generate_invoice(amt)
       
-      assert_equal BigDecimal.new(amt.to_s), inv.amount # THis was a weird bug we were having so I put this here...
+      assert_equal amt, inv.amount # THis was a weird bug we were having so I put this here...
       
       invoices << inv
     end
@@ -82,11 +82,11 @@ class PaymentTest < ActiveSupport::TestCase
       payments << Factory.generate_payment(amt)
     end
     
-    assert_equal BigDecimal.new(0.to_s), client.balance
+    assert_equal 0.to_money, client.balance
     
     payments.delete_at(1).destroy
     
-    assert_equal 400.00.to_s, client.balance.to_s
+    assert_equal 400.00.to_money, client.balance
     
     invoices.each_index { |i| assert_equal( ((i == 1) ? false : true), invoices[i].is_paid? ) }
     
@@ -95,17 +95,17 @@ class PaymentTest < ActiveSupport::TestCase
     payments << Factory.generate_payment(10.00)
     payments << Factory.generate_payment(201.00)
     
-    assert_equal BigDecimal.new(0.0.to_s), client.balance
+    assert_equal 0.0.to_money, client.balance
     
     assert_equal true, invoices[1].is_paid?
     
     payments << Factory.generate_payment(300.20)
     
-    assert_equal -300.20.to_s, client.balance.to_s
+    assert_equal -300.20.to_money, client.balance
 
     invoices << Factory.generate_invoice(300.20)
     
-    assert_equal BigDecimal.new(0.to_s), client.balance
+    assert_equal 0.to_money, client.balance
   end
   
   def test_invoice_allocates_payment_credits
@@ -174,11 +174,11 @@ class PaymentTest < ActiveSupport::TestCase
       invoices << invoice
     end
     
-    assert_equal BigDecimal.new(0.to_s), Factory.client.balance
+    assert_equal 0.to_money, Factory.client.balance
     
     [9,7,5,3,1].each { |i| payments.delete_at(i).destroy }
     
-    assert_equal BigDecimal.new(1364.to_s), Factory.client.balance
+    assert_equal 1364.to_money, Factory.client.balance
 
     [1,3,5,7,9].each do |i|
       running_time += 2.weeks
@@ -188,17 +188,17 @@ class PaymentTest < ActiveSupport::TestCase
       assert_equal running_time, invoices[i].paid_on
     end
     
-    assert_equal BigDecimal.new(0.to_s), Factory.client.balance
+    assert_equal 0.to_money, Factory.client.balance
 
     5.times { payments.delete_at(0).destroy }
     
-    assert_equal BigDecimal.new(682.to_s), Factory.client.balance
+    assert_equal 682.to_money, Factory.client.balance
     
     Factory.generate_payment 682, :paid_on => (running_time += 2.weeks) 
     
     [0,2,4,6,8].each { |i| assert_equal running_time, invoices[i].paid_on }
     
-    assert_equal BigDecimal.new(0.to_s), Factory.client.balance
+    assert_equal 0.to_money, Factory.client.balance
   end
 
   private

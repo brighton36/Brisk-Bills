@@ -185,7 +185,7 @@ class InvoiceTest < ActiveSupport::TestCase
     Payment.create!(
       :client => client,
       :payment_method_id => 1,
-      :amount => BigDecimal.new(2000.00.to_s),
+      :amount => 2000.00,
       :paid_on => (DateTime.now << 1)
     ) 
 
@@ -270,9 +270,9 @@ class InvoiceTest < ActiveSupport::TestCase
     invoice.activities.each { |a| assert_equal true, valid_activities.include?(a.id) }
     
     # Make sure the cost adds up:
-    assert_equal 2421.0.to_s, invoice.amount.to_s
+    assert_equal 2421.0, invoice.amount
     
-    assert_equal 2421.0.to_s, (invoice.sub_total+invoice.taxes_total).to_s
+    assert_equal 2421.0, (invoice.sub_total+invoice.taxes_total)
     
     # Now Make sure we unassign on a delete:
     assert_nothing_raised { invoice.destroy }
@@ -446,9 +446,9 @@ class InvoiceTest < ActiveSupport::TestCase
       )
     end
 
-    assert_equal 1805.96.to_s, invoice.amount.to_s
+    assert_equal 1805.96, invoice.amount
 
-    assert_equal 1805.96.to_s, (invoice.sub_total+invoice.taxes_total).to_s
+    assert_equal 1805.96, (invoice.sub_total+invoice.taxes_total)
 
     assert_equal(
       invoice.activity_ids, 
@@ -464,9 +464,9 @@ class InvoiceTest < ActiveSupport::TestCase
       invoice.activities(true)
     end
 
-    assert_equal 3.98.to_s, invoice.amount.to_s
+    assert_equal 3.98, invoice.amount
     
-    assert_equal 3.98.to_s, (invoice.sub_total+invoice.taxes_total).to_s
+    assert_equal 3.98, (invoice.sub_total+invoice.taxes_total)
     
     assert_equal(
       activities.select{|a| /^Activity::Labor$/.match a.class.to_s}.collect{|a| a.activity.id},
@@ -482,9 +482,9 @@ class InvoiceTest < ActiveSupport::TestCase
       invoice.activities(true)
     end
 
-    assert_equal 4245.98.to_s, invoice.amount.to_s
+    assert_equal 4245.98, invoice.amount
     
-    assert_equal 4245.98.to_s, (invoice.sub_total+invoice.taxes_total).to_s
+    assert_equal 4245.98, (invoice.sub_total+invoice.taxes_total)
     
     assert_equal(
       activities.select{|a| /^Activity::(Material|Labor|Proposal)$/.match a.class.to_s}.collect{|a| a.activity.id},
@@ -505,9 +505,9 @@ class InvoiceTest < ActiveSupport::TestCase
     inv = nil
     assert_nothing_raised { inv = Invoice.create! :client => Factory.create_client }
     
-    assert_equal 0.0.to_s, inv.amount.to_s
+    assert_equal 0.0, inv.amount
     
-    assert_equal 0.0.to_s, (inv.sub_total+inv.taxes_total).to_s
+    assert_equal 0.0, (inv.sub_total+inv.taxes_total)
     
   end
   
@@ -543,9 +543,9 @@ class InvoiceTest < ActiveSupport::TestCase
       assert_equal client_src.id, activity_type.activity.client_id
     end
 
-    assert_equal 2448.99.to_s, invoice_src.amount.to_s
+    assert_equal 2448.99, invoice_src.amount
     
-    assert_equal 2448.99.to_s, (invoice_src.sub_total+invoice_src.taxes_total).to_s
+    assert_equal 2448.99, (invoice_src.sub_total+invoice_src.taxes_total)
 
     assert_nothing_raised do 
       subactivities.each do |activity_type|
@@ -553,9 +553,9 @@ class InvoiceTest < ActiveSupport::TestCase
       end
     end
 
-    assert_equal 2448.99.to_s, invoice_dest.amount.to_s
+    assert_equal 2448.99, invoice_dest.amount
     
-    assert_equal 2448.99.to_s, (invoice_dest.sub_total+invoice_dest.taxes_total).to_s
+    assert_equal 2448.99, (invoice_dest.sub_total+invoice_dest.taxes_total)
 
     subactivities.each do |at|
       assert_equal invoice_dest.id, at.activity.invoice_id
@@ -569,9 +569,9 @@ class InvoiceTest < ActiveSupport::TestCase
     assert_equal invoice_src.id, labor.activity.invoice_id
     assert_equal client_src.id, labor.activity.client_id
 
-    assert_equal 2447.0.to_s, invoice_dest.amount.to_s
+    assert_equal 2447.0, invoice_dest.amount
     
-    assert_equal 2447.0.to_s, (invoice_dest.sub_total+invoice_dest.taxes_total).to_s
+    assert_equal 2447.0, (invoice_dest.sub_total+invoice_dest.taxes_total)
 
     invoice_src.is_published = true
     invoice_src.save!

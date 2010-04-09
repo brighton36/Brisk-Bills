@@ -9,18 +9,18 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 27) do
+ActiveRecord::Schema.define(:version => 28) do
 
   create_table "activities", :force => true do |t|
     t.integer  "client_id"
     t.integer  "invoice_id"
-    t.boolean  "is_published",                                 :default => false, :null => false
+    t.boolean  "is_published",  :default => false, :null => false
     t.string   "activity_type"
     t.datetime "occurred_on"
-    t.decimal  "cost",          :precision => 10, :scale => 2
+    t.integer  "cost_in_cents"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.decimal  "tax",           :precision => 10, :scale => 2
+    t.integer  "tax_in_cents"
   end
 
   add_index "activities", ["client_id"], :name => "index_activities_on_client_id"
@@ -75,15 +75,15 @@ ActiveRecord::Schema.define(:version => 27) do
   create_table "client_finance_transactions", :force => true do |t|
     t.integer  "client_id"
     t.datetime "date"
-    t.binary   "description", :limit => 16777215
-    t.decimal  "amount",                          :precision => 34, :scale => 2
+    t.binary   "description",     :limit => 16777215
+    t.integer  "amount_in_cents", :limit => 34,       :precision => 34, :scale => 0
   end
 
   create_table "client_finance_transactions_union", :force => true do |t|
     t.integer  "client_id"
     t.datetime "date"
-    t.binary   "description", :limit => 16777215
-    t.decimal  "amount",                          :precision => 34, :scale => 2
+    t.binary   "description",     :limit => 16777215
+    t.integer  "amount_in_cents", :limit => 34,       :precision => 34, :scale => 0
   end
 
   create_table "client_representatives", :force => true do |t|
@@ -131,21 +131,21 @@ ActiveRecord::Schema.define(:version => 27) do
     t.string   "fax_number"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.boolean  "is_active",                                                    :default => true, :null => false
-    t.decimal  "uninvoiced_activities_balance", :precision => 33, :scale => 2
-    t.decimal  "charges_sum",                   :precision => 33, :scale => 2
-    t.decimal  "payment_sum",                   :precision => 32, :scale => 2
-    t.decimal  "balance",                       :precision => 34, :scale => 2
+    t.boolean  "is_active",                                                                           :default => true, :null => false
+    t.integer  "uninvoiced_activities_balance_in_cents", :limit => 33, :precision => 33, :scale => 0
+    t.integer  "charges_sum_in_cents",                   :limit => 33, :precision => 33, :scale => 0
+    t.integer  "payment_sum_in_cents",                   :limit => 32, :precision => 32, :scale => 0
+    t.integer  "balance_in_cents",                       :limit => 34, :precision => 34, :scale => 0
   end
 
   create_table "clients_with_charges_sum", :id => false, :force => true do |t|
     t.integer "client_id"
-    t.decimal "charges_sum", :precision => 33, :scale => 2
+    t.integer "charges_sum_in_cents", :limit => 33, :precision => 33, :scale => 0
   end
 
   create_table "clients_with_payment_sum", :id => false, :force => true do |t|
     t.integer "client_id"
-    t.decimal "payment_sum", :precision => 32, :scale => 2
+    t.integer "payment_sum_in_cents", :limit => 32, :precision => 32, :scale => 0
   end
 
   create_table "credentials", :force => true do |t|
@@ -164,7 +164,7 @@ ActiveRecord::Schema.define(:version => 27) do
   create_table "employee_client_labor_rates", :force => true do |t|
     t.integer  "employee_id"
     t.integer  "client_id"
-    t.decimal  "hourly_rate", :precision => 10, :scale => 2
+    t.integer  "hourly_rate_in_cents"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -190,9 +190,9 @@ ActiveRecord::Schema.define(:version => 27) do
   end
 
   create_table "invoice_payments", :force => true do |t|
-    t.integer "payment_id",                                :null => false
-    t.integer "invoice_id",                                :null => false
-    t.decimal "amount",     :precision => 10, :scale => 2, :null => false
+    t.integer "payment_id",      :null => false
+    t.integer "invoice_id",      :null => false
+    t.integer "amount_in_cents", :null => false
   end
 
   add_index "invoice_payments", ["payment_id", "invoice_id"], :name => "index_invoice_payments_on_payment_id_and_invoice_id"
@@ -216,20 +216,20 @@ ActiveRecord::Schema.define(:version => 27) do
   add_index "invoices_activity_types", ["invoice_id", "activity_type_id"], :name => "index_invoices_activity_types_on_invoice_id_and_activity_type_id"
 
   create_table "invoices_with_payments", :id => false, :force => true do |t|
-    t.integer "invoice_id",                                 :default => 0, :null => false
-    t.decimal "amount_paid", :precision => 32, :scale => 2
+    t.integer "invoice_id",                                                        :default => 0, :null => false
+    t.integer "amount_paid_in_cents", :limit => 32, :precision => 32, :scale => 0
   end
 
   create_table "invoices_with_totals", :force => true do |t|
     t.integer  "client_id"
     t.text     "comments"
     t.datetime "issued_on"
-    t.boolean  "is_published",                                :default => false, :null => false
+    t.boolean  "is_published",                                                      :default => false, :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.decimal  "amount",       :precision => 33, :scale => 2
-    t.decimal  "amount_paid",  :precision => 32, :scale => 2
-    t.integer  "is_paid",                                     :default => 0,     :null => false
+    t.integer  "amount_in_cents",      :limit => 33, :precision => 33, :scale => 0
+    t.integer  "amount_paid_in_cents", :limit => 32, :precision => 32, :scale => 0
+    t.integer  "is_paid",                                                           :default => 0,     :null => false
   end
 
   create_table "payment_methods", :force => true do |t|
@@ -242,7 +242,7 @@ ActiveRecord::Schema.define(:version => 27) do
     t.integer  "client_id"
     t.integer  "payment_method_id"
     t.text     "payment_method_identifier"
-    t.decimal  "amount",                    :precision => 10, :scale => 2
+    t.integer  "amount_in_cents"
     t.datetime "paid_on"
     t.datetime "created_at"
     t.datetime "updated_at"

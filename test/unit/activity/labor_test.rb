@@ -39,7 +39,7 @@ class Activity::LaborTest < ActiveSupport::TestCase
     assert_equal 'labor', l.activity.activity_type
 
     assert_equal 1, l.activity.client_id
-    assert_equal BigDecimal.new("55.34"), l.activity.cost
+    assert_equal "55.34", l.activity.cost.to_s
     assert_equal time_now, l.activity.occurred_on
     assert_equal false, l.activity.is_published   # Make sure this defaults to false
   end
@@ -215,13 +215,12 @@ class Activity::LaborTest < ActiveSupport::TestCase
 
     l2 = Activity::Labor.new :employee_id => Employee.find(1), :minute_duration => 1
     l2.activity.activity_type = nil
-    l2.activity.cost = 'abc'
+#   I used to have this in here - and an asseer below, but, since we've switched to acts_as money, its no longer needed...
+#    l2.activity.cost = 'abc'
     
     assert_nothing_raised { l2.valid? }
-
-    assert_equal true, l2.errors.invalid?(:cost)
     assert_equal true, l2.errors.invalid?(:activity_type)
-    assert_equal 2, l2.errors.length
+    assert_equal 1, l2.errors.length
 
     # Create activity, call validate, then test that the labor validations fail
     a1 = Activity.new :activity_type => 'labor', :cost => 5

@@ -1,11 +1,17 @@
 class Activity < ActiveRecord::Base
   include ExtensibleObjectHelper
+  include MoneyModelHelper
+
+  money :cost, :currency => false
+  money :tax,  :currency => false
   
   belongs_to :client
   belongs_to :invoice
   
   validates_presence_of :activity_type
-    
+  
+  # Since we've switched to acts_as_money, these two validations are no longer needed, since acts_as money guarantee's
+  # the nmericality... But - they don't hurt, so I'll keep them here.
   validates_numericality_of :cost, :allow_nil => true
   validates_numericality_of :tax,  :allow_nil => true
   
