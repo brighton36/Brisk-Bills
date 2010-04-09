@@ -38,6 +38,7 @@ namespace 'package' do
     s.add_dependency 'extensions',  '>= 0.6.0'
     s.add_dependency 'pdf-writer',  '>= 1.1.8'
     s.add_dependency 'slimtimer4r', '>= 0.2.4'
+    s.add_dependency 'money',       '>= 2.2.0'
     s.add_dependency 'mysql',       '>= 2.7'
     s.add_dependency 'rails',       '>= 2.3.2'
 

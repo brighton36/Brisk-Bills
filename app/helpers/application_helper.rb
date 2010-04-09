@@ -4,12 +4,12 @@ module ApplicationHelper
   def h_money(amount, inverse_polarity = false)    
     '<span class="%s">$%s</span>' % [ 
       ( (inverse_polarity ? (amount > 0 ) : (amount < 0 )) ? 'money_negative':'money_positive' ), 
-      ('%.2f' % amount.abs).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/, '\1,')
+      amount.to_s.gsub(/(\d)(?=\d{3}+(\.\d*)?$)/, '\1,')
     ] unless amount.nil?
   end
   
   def money_for_input(cost)
-    (cost) ? ("%.2f" % cost) : ''
+    cost
   end
   
   def define_application_layout_variables

@@ -1,68 +1,12 @@
 require File.dirname(__FILE__) + '/../test_helper'
-
-module Factory
-
-  def self.generate_invoice(total, attributes = {})
-    client = Factory.client
-    
-    attributes[:issued_on] ||= Time.now
-    
-    activity_increments = (total.floor).to_f/10
-    
-    1.upto(10) do |i|
-      activity_amount = activity_increments
-      activity_amount += total - total.floor if i == 1 
-      
-      # Tax-related test adjustments:
-      activity_tax = (activity_amount * 0.25).floor
-      activity_cost = activity_amount-activity_tax
-
-      a = Activity::Adjustment.new :label => 'test invoice'
-      a.activity.cost = activity_cost
-      a.activity.tax = activity_tax
-      a.activity.client = client
-      a.activity.occurred_on = (attributes[:issued_on] - 1.months)
-      a.activity.is_published = true
-      a.save!
-    end
-
-    Invoice.create!( { :client => client, :activity_types =>  ActivityType.find(:all) }.merge(attributes) )
-  end
-  
-  def self.generate_payment(amount, attributes = {})
-    Payment.create!(
-      {
-      :amount => amount,
-      :client => Factory.client, 
-      :payment_method_id => 1
-      }.merge(attributes)
-    )
-  end
-  
-  def self.client(attributes = {})
-    company_name = (attributes.has_key?(:company_name)) ? attributes[:company_name] : 'ACME Fireworks'
-    
-    client = Client.find :first, :conditions => ['company_name = ?', company_name]
-    
-    (client) ? client : Client.create!(
-      {
-      :company_name => company_name,
-      :address1     => '470 S. Andrews Ave.',
-      :address2     => 'Suite 206', 
-      :phone_number => '954-942-7703',
-      :fax_number   => '954-942-7933' 
-      }.merge(attributes)
-    )
-  end
-  
-end
+require File.dirname(__FILE__) + '/../test_unit_factory_helper.rb'
 
 class PaymentTest < ActiveSupport::TestCase
 
   fixtures :activity_types
 
   def test_payment_allocations
-    client = Factory.client
+    client = Factory.create_client
 
     invoices = []
     
@@ -109,7 +53,7 @@ class PaymentTest < ActiveSupport::TestCase
   end
   
   def test_invoice_allocates_payment_credits
-    client = Factory.client
+    client = Factory.create_client
 
     Factory.generate_payment 230.00
     Factory.generate_payment 70.00
@@ -174,11 +118,11 @@ class PaymentTest < ActiveSupport::TestCase
       invoices << invoice
     end
     
-    assert_equal 0.to_money, Factory.client.balance
+    assert_equal 0.to_money, Factory.create_client.balance
     
     [9,7,5,3,1].each { |i| payments.delete_at(i).destroy }
     
-    assert_equal 1364.to_money, Factory.client.balance
+    assert_equal 1364.to_money, Factory.create_client.balance
 
     [1,3,5,7,9].each do |i|
       running_time += 2.weeks
@@ -188,17 +132,17 @@ class PaymentTest < ActiveSupport::TestCase
       assert_equal running_time, invoices[i].paid_on
     end
     
-    assert_equal 0.to_money, Factory.client.balance
+    assert_equal 0.to_money, Factory.create_client.balance
 
     5.times { payments.delete_at(0).destroy }
     
-    assert_equal 682.to_money, Factory.client.balance
+    assert_equal 682.to_money, Factory.create_client.balance
     
     Factory.generate_payment 682, :paid_on => (running_time += 2.weeks) 
     
     [0,2,4,6,8].each { |i| assert_equal running_time, invoices[i].paid_on }
     
-    assert_equal 0.to_money, Factory.client.balance
+    assert_equal 0.to_money, Factory.create_client.balance
   end
 
   private

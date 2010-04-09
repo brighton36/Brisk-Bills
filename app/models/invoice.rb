@@ -44,7 +44,7 @@ class Invoice < ActiveRecord::Base
   def reattach_activities
     included_activity_types = activity_types.collect{ |a| a.label.downcase }
     unincluded_activity_types = ActivityType.find(:all).collect{ |a| a.label.downcase } - included_activity_types
-    
+
     # First we NULL'ify (remove) existing attachments that no longer should be:
     nullify_conditions = []
     nullify_parameters = [] 
@@ -77,7 +77,7 @@ class Invoice < ActiveRecord::Base
         [ '('+(['activity_type = ?'] * included_activity_types.size).join(' OR ')+')', included_activity_types ] :
         [ 'activity_type IS NULL' ] )
     ]
-   
+    
     Activity.update_all(
       ['invoice_id = ?', id ],
       # This is what ActiveRecord actually expects...

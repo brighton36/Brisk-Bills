@@ -131,6 +131,6 @@ class MoneyToCents < ActiveRecord::Migration
     # Revert to the old views, for the ones that changed...
     self.prior_view_definitions.reject{ |vd| 
       CREATE_VIEWS.find{|cvd| cvd[0] == vd[0]}.nil?
-    }.each{|view_def| execute 'ALTER VIEW %s AS %s' %  [view_def[0], view_def[1]]  }
+    }.each{|view_def| execute 'CREATE OR REPLACE VIEW %s AS %s' %  [view_def[0], view_def[1]]  }
   end
 end
