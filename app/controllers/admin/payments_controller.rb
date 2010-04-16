@@ -16,6 +16,8 @@ class Admin::PaymentsController < ApplicationController
     config.columns[:payment_method_identifier].description = 'Last four card digits, check number...'
     config.columns[:payment_method_identifier].label = 'Method Identifier'
     
+    config.columns[:amount].sort_by :sql => 'amount_in_cents'
+    
     config.list.columns =[:client, :payment_method, :amount, :paid_on]
     config.list.sorting = [{:paid_on => :desc}]
 

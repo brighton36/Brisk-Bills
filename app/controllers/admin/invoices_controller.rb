@@ -35,6 +35,8 @@ class Admin::InvoicesController < ApplicationController
     config.columns[:amount].label = 'Total'
     config.columns[:issued_on].label = 'Issued'
     
+    config.columns[:amount].sort_by :sql => 'amount_in_cents'
+    
     config.columns[:client].sort_by :sql => "clients.company_name"
     config.columns[:client].form_ui = :select
     

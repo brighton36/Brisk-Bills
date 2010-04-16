@@ -1,3 +1,8 @@
+* fix /client_accounting sorting on view cols
+* TRansaction sorting Amount
+* Payments Amount
+* Invoices Totoal
+
 *I want to delete that old ashbritt invoice ... I should be able to !
 	* I guess I unpublish and delete it?
 	* We should put proper transactions in place here too while we're in here...

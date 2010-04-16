@@ -18,6 +18,9 @@ class Admin::ClientAccountingController < ApplicationController
     config.list.columns = [:company_name, :uninvoiced_activities_balance, :balance]
     
     config.columns[:uninvoiced_activities_balance].label = 'Unposted Activity'
+    config.columns[:uninvoiced_activities_balance].sort_by :sql => 'uninvoiced_activities_balance_in_cents'
+
+    config.columns[:balance].sort_by :sql => 'balance_in_cents'
     
     config.list.sorting = [{:company_name => :asc}]
 

@@ -13,6 +13,9 @@ class Admin::ClientFinancialTransactionsController < ApplicationController
 
     config.columns = [:client, :description, :amount, :date]
 
+    
+    config.columns[:amount].sort_by :sql => 'amount_in_cents'
+
     config.list.sorting = [{:date => :desc}]
 
   end

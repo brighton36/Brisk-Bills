@@ -8,6 +8,6 @@ class ClientAccounting < Client
   end
   
   def balance
-    Money.new read_attribute(:balance).to_i
+    Money.new read_attribute(:balance_in_cents).to_i
   end
 end
