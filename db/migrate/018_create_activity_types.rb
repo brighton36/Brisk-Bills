@@ -17,7 +17,7 @@ class CreateActivityTypes < ActiveRecord::Migration
     
     say_with_time "Populating initial activities ..." do
       # Now create the initial entries:
-      activity_models_path = RAILS_ROOT+'/app/models/activity'    
+      activity_models_path = BRISKBILLS_ROOT+'/app/models/activity'    
 
       Find.find(activity_models_path) do |a| 
         activity_types << ActivityType.create( :label => $1.capitalize ) if /^#{activity_models_path}\/([^\/]+)\.rb$/.match a

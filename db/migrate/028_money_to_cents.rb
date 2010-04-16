@@ -1,5 +1,5 @@
 ['021_create_views_and_indexes.rb', '022_create_client_financial_transactions.rb', '024_updates_for_sales_tax.rb'].each do |m|
-  require [RAILS_ROOT,'db','migrate', m].join "/"
+  require [BRISKBILLS_ROOT,'db','migrate', m].join "/"
 end
 
 class MoneyToCents < ActiveRecord::Migration
