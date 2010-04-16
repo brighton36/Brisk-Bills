@@ -33,4 +33,16 @@ class InvoicesWithTotal < Invoice
     inv
   end
   
+  def amount_paid
+    Money.new read_attribute(:amount_paid_in_cents).to_i
+  end
+  
+  def amount_outstanding
+    Money.new read_attribute(:amount_outstanding_in_cents).to_i
+  end
+
+  def amount
+    Money.new read_attribute(:amount_in_cents).to_i
+  end
+
 end

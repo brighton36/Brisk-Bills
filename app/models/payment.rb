@@ -66,12 +66,10 @@ class Payment < ActiveRecord::Base
   end
   
   def amount_allocated
-    Money.new( 
-      ( 
-        (attribute_present? :amount_allocated_in_cents) ? 
-          read_attribute(:amount_allocated_in_cents) : 
-          InvoicePayment.sum(:amount_in_cents, :conditions => ['payment_id = ?', id])
-      ) || 0
+    Money.new(  
+      (attribute_present? :amount_allocated_in_cents) ? 
+        read_attribute(:amount_allocated_in_cents).to_i : 
+        ( InvoicePayment.sum(:amount_in_cents, :conditions => ['payment_id = ?', id]) || 0 )
     )
   end
   

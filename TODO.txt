@@ -1,12 +1,3 @@
-* Use the integer representation of money and not these crappy bigdecimals
-	* I'd like some tests cases written for the view objects, make sure they work just like the non-views... ...
-		* I think we need to hunt torugh the rake file for transaction stuff and figure out what to enable/disable ...
-		* lets move those damn attribute_present?'s out of the models and into the views as an override...
-		* ClientAccounting
-		* ClientFinancialTransactions
-		* InvoicesWithTotal
-	* There's an issue when migratin down to v27. ... I think .... take a look? (something up at least when we do test)
-		
 *I want to delete that old ashbritt invoice ... I should be able to !
 	* I guess I unpublish and delete it?
 	* We should put proper transactions in place here too while we're in here...
@@ -30,6 +21,9 @@ Plugin interface using engines?
 LONGER-TERM: (Needs re-prioritization...)
 
 Feature:
+
+* I'd like some tests cases written for the view objects, make sure they work just like the non-views... ...
+	* Boy this is getting hard, I think it has something to do wioth the transactions... Oddly, the tests work on their own, outside of the rake test	
 
 * Better searches by using the search sql fields...
 

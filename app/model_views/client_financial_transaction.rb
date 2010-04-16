@@ -5,6 +5,10 @@ class ClientFinancialTransaction < ActiveRecord::Base
 
   belongs_to :client
 
+  def amount
+    Money.new read_attribute(:amount_in_cents).to_i
+  end
+
   def readonly?
     true
   end

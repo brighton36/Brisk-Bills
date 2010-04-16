@@ -209,19 +209,11 @@ class Invoice < ActiveRecord::Base
   end
   
   def amount_paid
-    Money.new(
-      (
-        (attribute_present? :amount_paid_in_cents) ? 
-          read_attribute(:amount_paid_in_cents) : 
-          InvoicePayment.sum( :amount_in_cents, :conditions => ['invoice_id = ?', id] ) || 0
-      ).to_i
-    )
+    Money.new InvoicePayment.sum( :amount_in_cents, :conditions => ['invoice_id = ?', id] ).to_i
   end
   
   def amount_outstanding
-    (attribute_present? :amount_outstanding_in_cents) ? 
-      Money.new(read_attribute(:amount_outstanding_in_cents).to_i) : 
-      (amount - amount_paid)
+    amount - amount_paid
   end
 
   def self.find_with_totals( how_many = :all, options = {} )
@@ -273,13 +265,8 @@ class Invoice < ActiveRecord::Base
   private 
   
   def process_total(name, field_sql)   
-    Money.new( 
-      ( 
-        (attribute_present? name) ? 
-          read_attribute(name) : 
-          (Activity.sum(field_sql, :conditions => ['invoice_id = ?', id]) || 0 ).to_i
-      )
-    )
+    Money.new Activity.sum(field_sql, :conditions => ['invoice_id = ?', id]).to_i
+    
   end
 
   handle_extensions
