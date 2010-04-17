@@ -205,7 +205,7 @@ class Invoice < ActiveRecord::Base
   end
   
   def is_paid?
-    (amount_outstanding.zero?) ? true : false
+    amount_outstanding.zero?
   end
   
   def amount_paid

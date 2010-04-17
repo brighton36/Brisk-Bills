@@ -9,7 +9,7 @@ module ApplicationHelper
   end
   
   def money_for_input(cost)
-    cost
+    '%.2f' % cost
   end
   
   def define_application_layout_variables
