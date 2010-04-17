@@ -93,7 +93,7 @@ class Admin::ActivitiesController
   def labor_do_edit
     begin
       labor_rate = @record.labor.employee.labor_rate_for(@record.client)
-      @record.cost = @record.labor.minute_duration.to_f/60*labor_rate.hourly_rate
+      @record.cost = @record.labor.minute_duration.to_f/60*labor_rate.hourly_rate.to_f
     rescue
     end if @record.cost.nil?
     

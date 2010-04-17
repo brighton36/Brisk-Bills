@@ -251,6 +251,10 @@ ActiveRecord::Schema.define(:version => 28) do
   add_index "payments", ["client_id"], :name => "index_payments_on_client_id"
   add_index "payments", ["payment_method_id"], :name => "index_payments_on_payment_method_id"
 
+  create_table "schema_info", :id => false, :force => true do |t|
+    t.integer "version"
+  end
+
   create_table "sessions", :force => true do |t|
     t.string   "session_id", :null => false
     t.text     "data"
