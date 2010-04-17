@@ -1,5 +1,5 @@
 class Admin::ActivitiesController
-
+  
   activities_scaffold_config do |config|
     %w( client_id employee_id duration cost comments ).each do |field|
       model_field = field.to_sym
@@ -80,10 +80,10 @@ class Admin::ActivitiesController
           end
         end
 
-        new_cost ||= @activity.labor.minute_duration.to_f/60*labor_rate.hourly_rate unless labor_rate.nil? or labor_rate.hourly_rate.nil? or @activity.labor.minute_duration.nil?
+        new_cost ||= @activity.labor.minute_duration.to_f/60*labor_rate.hourly_rate.to_f unless labor_rate.nil? or labor_rate.hourly_rate.nil? or @activity.labor.minute_duration.nil?
 
         page[record_cost_js_id].value = money_for_input new_cost
-    
+
       rescue
         page.alert 'Error updating form Record(%s) "%s"' % [params[:record_id], $!]
       end
@@ -93,7 +93,7 @@ class Admin::ActivitiesController
   def labor_do_edit
     begin
       labor_rate = @record.labor.employee.labor_rate_for(@record.client)
-      @record.cost = @record.labor.minute_duration.to_f/60*labor_rate.hourly_rate.to_f
+      @record.cost = @record.labor.minute_duration.to_f/60*labor_rate.hourly_rate
     rescue
     end if @record.cost.nil?
     

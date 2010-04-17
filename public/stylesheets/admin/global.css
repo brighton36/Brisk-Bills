@@ -142,3 +142,11 @@ input.disabled{ background-color: #ddd; }
 #MB_content div.warning p { 
    margin:0.75em 0;
 }
+
+.active-scaffold_detail_value {
+color:#555555;
+font-family:verdana,sans-serif;
+font-size:11px;
+padding:8px 0;
+display: block;
+}
