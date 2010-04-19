@@ -28,7 +28,7 @@ namespace :brisk_bills do
         
         puts "  Created: id (%d) amount: $%s" % [
           inv.id,
-          ('%.2f' % inv.amount.abs).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/, '\1,')
+          ('%.2f' % inv.amount).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/, '\1,')
         ]
       end
     end

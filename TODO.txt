@@ -1,5 +1,3 @@
-* THe is_paid isn't working ...
-
 *I want to delete that old ashbritt invoice ... I should be able to !
   * Here's what I'm thinking:
   	* We remove create_invoice_payments from create/destory
@@ -77,8 +75,8 @@ Nice Features:
 -------------------
 dd if=/dev/urandom bs=200 count=1 | tr -cd 'A-Za-z0-9!@#$%^&*()_+'; echo
 
-CREATE DATABASE `cusis_development`;
-GRANT ALL PRIVILEGES ON cusis_development.* TO cusis@localhost IDENTIFIED BY 'cut1ckle';
+CREATE DATABASE `briskbills_development`;
+GRANT ALL PRIVILEGES ON briskbills_development.* TO briskbills@localhost IDENTIFIED BY 'cut1ckle';
 
 CREATE DATABASE `cusis_test`;
 GRANT ALL PRIVILEGES ON cusis_test.* TO cusis@localhost IDENTIFIED BY 'cut1ckle';
@@ -87,4 +85,5 @@ required gems:
  * extensions
  * pdf-writer
  * slimtimer4r
+ * money
 

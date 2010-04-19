@@ -10,6 +10,9 @@ class Admin::ActivitiesWithPricesController < Admin::ActivitiesController
         
     config.action_links.add :move_to_invoice, :type => :record, :label => 'Move...', :crud_type => :update, :action => 'move_to_invoice'
     
+    config.columns[:cost].sort_by :sql => 'cost_in_cents'
+    config.columns[:tax].sort_by :sql => 'tax_in_cents'
+    
     # This adjusts the order of the link so that move appears to the left, fugly:
     config.action_links.instance_eval do
       @set = @set.sort_by{ |l| ( l.action == "move_to_invoice" ) ? -1 : 1 }
