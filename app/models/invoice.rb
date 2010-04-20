@@ -146,7 +146,7 @@ class Invoice < ActiveRecord::Base
       id,
       issued_on.strftime("%m/%d/%Y %I:%M %p"),
       client.company_name,
-      ('$%.2f' % amount.abs).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/, '\1,')
+      ('$%.2f' % amount.to_s).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/, '\1,')
     ]
   end
 

@@ -1,4 +1,8 @@
-*I want to delete that old ashbritt invoice ... I should be able to !
+* Add Existing Client Representatives should show them in alaphabetical order
+
+* We should add an unpublished Open Invoices controller ...
+
+* I want to delete that old ashbritt invoice ... I should be able to !
   * Here's what I'm thinking:
   	* We remove create_invoice_payments from create/destory
   	* We add an unallocated_amount to the payments controller / view
