@@ -2,6 +2,8 @@
 
 * We should add an unpublished Open Invoices controller ...
 
+* We should put tax before cost in the activities with prices controller...
+
 * I want to delete that old ashbritt invoice ... I should be able to !
   * Here's what I'm thinking:
   	* We remove create_invoice_payments from create/destory
