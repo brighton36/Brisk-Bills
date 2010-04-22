@@ -129,8 +129,10 @@ class Invoice < ActiveRecord::Base
     process_total :sub_total, :cost_in_cents
   end
   
-  def amount
-    process_total :amount, ACTIVITY_TOTAL_SQL
+  def amount( force_reload = false )
+    (attribute_present? :amount_in_cents  and !force_reload) ?
+      Money.new(read_attribute(:amount_in_cents).to_i) :
+      process_total( :amount, ACTIVITY_TOTAL_SQL )
   end
   
   def grand_total
@@ -204,12 +206,18 @@ class Invoice < ActiveRecord::Base
       nil
   end
   
-  def is_paid?
-    amount_outstanding.zero?
+  def is_paid?( force_reload = false )
+    (attribute_present? :is_paid  and !force_reload) ? 
+      (read_attribute(:is_paid).to_i == 1) :
+      amount_outstanding.zero?
   end
   
-  def amount_paid
-    Money.new InvoicePayment.sum( :amount_in_cents, :conditions => ['invoice_id = ?', id] ).to_i
+  def amount_paid( force_reload = false )
+    Money.new( 
+      (attribute_present? :amount_paid_in_cents and !force_reload) ? 
+      read_attribute(:amount_paid_in_cents).to_i :
+      InvoicePayment.sum( :amount_in_cents, :conditions => ['invoice_id = ?', id] ).to_i
+    )
   end
   
   def amount_outstanding
@@ -266,7 +274,6 @@ class Invoice < ActiveRecord::Base
   
   def process_total(name, field_sql)   
     Money.new Activity.sum(field_sql, :conditions => ['invoice_id = ?', id]).to_i
-    
   end
 
   handle_extensions

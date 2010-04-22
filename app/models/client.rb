@@ -20,38 +20,42 @@ class Client < ActiveRecord::Base
     self.company_name
   end
   
-  def uninvoiced_activities_balance
-    Activity.sum( Invoice::ACTIVITY_TOTAL_SQL, :conditions => ['client_id = ? AND is_published = ? AND invoice_id IS NULL',id, true] ) or 0.0
+  def uninvoiced_activities_balance( force_reload = false )
+    (attribute_present? :uninvoiced_activities_balance_in_cents and !force_reload) ?
+      Money.new(read_attribute(:uninvoiced_activities_balance_in_cents).to_i) :
+      (Activity.sum( Invoice::ACTIVITY_TOTAL_SQL, :conditions => ['client_id = ? AND is_published = ? AND invoice_id IS NULL',id, true] ) or 0.0)
   end
   
-  def balance
-    Money.new( 
-      Client.find(
-      :first, 
-      :select => [
-        'id',
-        'company_name',
-        '(
-         IF(charges.charges_sum_in_cents IS NULL, 0,charges.charges_sum_in_cents) - 
-         IF(deposits.payment_sum_in_cents IS NULL, 0, deposits.payment_sum_in_cents)
-        ) AS sum_difference_in_cents'
-      ].join(', '),
-      :joins => [
-        "LEFT JOIN(
-          SELECT invoices.client_id, SUM(#{Invoice::ACTIVITY_TOTAL_SQL}) AS charges_sum_in_cents 
-            FROM invoices 
-            LEFT JOIN activities ON activities.invoice_id = invoices.id 
-            GROUP BY invoices.client_id
-        ) AS charges ON charges.client_id = clients.id",
-        
-        'LEFT JOIN (
-          SELECT payments.client_id, SUM(payments.amount_in_cents) AS payment_sum_in_cents
-            FROM payments 
-            GROUP BY payments.client_id
-        ) AS deposits ON deposits.client_id = clients.id '
-      ].join(' '),
-      :conditions => [ 'clients.id = ?', id]
-      ).sum_difference_in_cents.to_i
+  def balance( force_reload = false )
+    Money.new(
+      (attribute_present? :balance_in_cents and !force_reload) ?
+        read_attribute(:balance_in_cents).to_i :
+        Client.find(
+        :first, 
+        :select => [
+          'id',
+          'company_name',
+          '(
+           IF(charges.charges_sum_in_cents IS NULL, 0,charges.charges_sum_in_cents) - 
+           IF(deposits.payment_sum_in_cents IS NULL, 0, deposits.payment_sum_in_cents)
+          ) AS sum_difference_in_cents'
+        ].join(', '),
+        :joins => [
+          "LEFT JOIN(
+            SELECT invoices.client_id, SUM(#{Invoice::ACTIVITY_TOTAL_SQL}) AS charges_sum_in_cents 
+              FROM invoices 
+              LEFT JOIN activities ON activities.invoice_id = invoices.id 
+              GROUP BY invoices.client_id
+          ) AS charges ON charges.client_id = clients.id",
+          
+          'LEFT JOIN (
+            SELECT payments.client_id, SUM(payments.amount_in_cents) AS payment_sum_in_cents
+              FROM payments 
+              GROUP BY payments.client_id
+          ) AS deposits ON deposits.client_id = clients.id '
+        ].join(' '),
+        :conditions => [ 'clients.id = ?', id]
+        ).sum_difference_in_cents.to_i
     ) unless id.nil?
   end
   
