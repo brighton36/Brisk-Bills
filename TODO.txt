@@ -1,7 +1,7 @@
 *I want to delete that old ashbritt invoice ... I should be able to !
-	* Then get the client unit test going
 	* THen figure out if perhaps we can disable the auto-assign on create  	
-  	* We remove create_invoice_payments from create/destory
+  	* Remove create_invoice_payments from create/destory
+  	
   	* We need to go through and see where client balances are being handled, and make sure its using invoiced_amount - payment_amount
   	* let's start by adding a detail that shows what payments are currently allocated..
   	* Don't forget to Add the right show fields too (in the payments controller)

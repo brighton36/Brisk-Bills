@@ -43,6 +43,10 @@ module Admin::ActivitiesHelper
   def cost_column(record)
     h_money record.cost
   end
+
+  def tax_column(record)
+    h_money record.tax
+  end
     
   # Form Helper Routing:
   def active_scaffold_input_for(column, scope = nil)
