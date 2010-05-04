@@ -97,7 +97,6 @@ class Client < ActiveRecord::Base
   # If verbose_inclusion - all outstanding invoices will be returned, and an assignment of 0 will returned as appropriate
   def recommend_invoice_assignments_for(amount, verbose_inclusion = false)
     amount = amount.to_money
-
     ret = {}
 
     invs = unpaid_invoices(
@@ -109,7 +108,7 @@ class Client < ActiveRecord::Base
     unassigned_outstanding = invs.inject(Money.new(0)){|total, inv| total + inv.amount_outstanding}
     
     invs.each do |inv|
-      ret[inv.id] = (amount <= Money.new(0) or unassigned_outstanding <= Money.new(0)) ?
+      ret[inv.id] = (amount <= 0 or unassigned_outstanding <= 0) ?
         Money.new(0) :
         (amount >= inv.amount_outstanding) ? 
           inv.amount_outstanding : 
@@ -123,7 +122,7 @@ class Client < ActiveRecord::Base
     ret[nil] = amount
     
     # We return with or without 0's depending on what they want:
-    verbose_inclusion ? ret : ret.reject{|id,amnt| amnt == Money.new(0) }
+    verbose_inclusion ? ret : ret.reject{|id,amnt| amnt.zero? }
   end
 
   ## TODO?
