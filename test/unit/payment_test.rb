@@ -9,7 +9,7 @@ class PaymentTest < ActiveSupport::TestCase
     client = Factory.create_client
 
     invoices = []
-    
+
     [1200.00, 400, 99.99, 1500.99, 430.01].each do |amt| 
       inv =  Factory.generate_invoice(amt)
       
@@ -31,8 +31,8 @@ class PaymentTest < ActiveSupport::TestCase
     payments.delete_at(1).destroy
     
     assert_equal 400.00.to_money, client.balance
-    
-    invoices.each_index { |i| assert_equal( ((i == 1) ? false : true), invoices[i].is_paid? ) }
+
+    invoices.each_index { |i| assert_equal( ((i == 1) ? false : true), invoices[i].is_paid?(true) ) }
     
     payments << Factory.generate_payment(174.00)
     payments << Factory.generate_payment(15.00)
@@ -87,20 +87,20 @@ class PaymentTest < ActiveSupport::TestCase
     payment_one_on =  sanitize_time(Time.now - 3.months)
     payment_two_on =  sanitize_time(Time.now - 2.months)
     payment_three_on =  sanitize_time(Time.now - 2.months)
-    
-    Factory.generate_payment 200.00, :paid_on => payment_one_on
 
-    invoice = Factory.generate_invoice 600.00, :issued_on => payment_two_on,  :is_published => true
+    payment_one = Factory.generate_payment 201.00, :paid_on => payment_one_on
+
+    invoice = Factory.generate_invoice 601.00, :issued_on => payment_two_on,  :is_published => true
     
     payment_two = Factory.generate_payment 200.00, :paid_on => payment_two_on
-    Factory.generate_payment 200.00, :paid_on => payment_three_on
+    payment_three = Factory.generate_payment 200.00, :paid_on => payment_three_on
 
-    assert_equal true, invoice.is_paid?
+    assert_equal true, invoice.is_paid?(true)
     assert_equal payment_two_on, invoice.paid_on
     
     payment_two.destroy
     
-    assert_equal false, invoice.is_paid?
+    assert_equal false, invoice.is_paid?(true)
     assert_equal nil, invoice.paid_on
   end
   
@@ -128,7 +128,7 @@ class PaymentTest < ActiveSupport::TestCase
       running_time += 2.weeks
       payments << Factory.generate_payment( invoices[i].amount, :paid_on => running_time )
 
-      assert_equal true, invoices[i].is_paid?
+      assert_equal true, invoices[i].is_paid?(true)
       assert_equal running_time, invoices[i].paid_on
     end
     

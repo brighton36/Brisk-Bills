@@ -1,19 +1,51 @@
 *I want to delete that old ashbritt invoice ... I should be able to !
-	* THen figure out if perhaps we can disable the auto-assign on create  	
-  	* Remove create_invoice_payments from create/destory
-  	
-  	* We need to go through and see where client balances are being handled, and make sure its using invoiced_amount - payment_amount
-  	* let's start by adding a detail that shows what payments are currently allocated..
-  	* Don't forget to Add the right show fields too (in the payments controller)
-  	* THen we can add an edit...
-  	* And then we need to add a complemntary field in the invoices view? Nah - but show which payments are currently assigned as a read-only...
-  	* Then we can allow multiple invoices to be unpublished...
 
-	* I guess I unpublish and delete it?
-	* We should put proper transactions in place here too while we're in here...
-	* No - let's get the damn payments applying with the interface quickbooks uses
-	* We should probably allow payment updates, just do a destroy_invoice_payments and create_invoice_payments when that happens. if its the newest payment for a client.
-		* Make sure the payments_test adds a test for this...
+Here's the current plan:
+	Model:
+	* Fleshed out the invoice's after_update  :mark_invoice_payments in a similar capacity to payment's
+		* Get the client's recommend_payment_assignments_for working?
+	
+	* Perhaps we should change the payment has_many :invoices, :through => 'invoice_payments' to has_many :assigned_invoices, :through => 'invoice_payments'
+		* THis way we could assign payments at the time of creation.
+		
+	* Once create works, then disable the auto-assign on create. for payment
+	* Re-do the tests so that we use auto-assignment via a recommend_invoices_for_amount ... (Or leave it at the association approach)
+		* And make them pass..
+	*Disable the auto-assign on create. for invoice
+		mAke tests pass
+	* Payments shuold be update-able as  well...
+	* Then add tests to ensure:
+		* find_unpaid_invoices works right
+		* The assignments make sense (equal value outstanding returned before any-outstanding)
+		* overriding is possible/easy
+		* People can't specifify more payment_allocations than the total payment's amount
+		* We allow payments to be created without allocation - this is ok..
+		* We need a method for Invoices::find_unallocated, & Payments::find_unallocated
+  	* REmove mark_invoice_payments ?
+  	* Then we can allow multiple invoices to be unpublished...
+  	
+  	* Write a test  (make sure that ) invoices aren't mared as 'paid' until the invoice_payments have been applied.  Even if the balance is 0
+  		* Also - in the case that an invoice price is adjusted after it was marked paid (becomes higher or lower) we don't need to have controller or payment logic to deal with this
+
+  	Controllers:
+  	* let's start by adding a detail that shows what payments are currently allocated..
+  	* Show a warning if someone tries to commit a payment w/o allocating the full amount...
+  	* Don't forget to Add the right show-action fields too (in the payments controller)
+  	* There's should be a way in the invoices to show which payments were applied to the invoice... (perhaps on the edit detail - just a listing?)
+  		* Maybe this should be editable.... perhaps only if is_published?
+  	* THen we can add an edit...
+  	* Remove that restriction on unpublishing old invoices...
+  	* And then we need to add a complemntary field in the invoices view? Nah - but show which payments are currently assigned as a read-only...
+
+* All of our read_attribute stuff, isn't "Caching"the new value. (I think - write a test for this ...)
+	* Use a find_invoice_with_totals
+		* then update an invoice
+		* then run an invoice.amunt(true)
+		* tune run an invice.amount .... This this treturn the prior amount value?
+	* THis has to be fixed/ested for all read attributes...
+
+
+* We should put proper transactions in place here too while we're in here...
 
 * Add Existing Client Representatives should show them in alaphabetical order
 

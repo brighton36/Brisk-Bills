@@ -2,12 +2,11 @@ class Payment < ActiveRecord::Base
   include ExtensibleObjectHelper
   include MoneyModelHelper
   
-  after_create  :create_invoice_payments
-  after_destroy :destroy_invoice_payments
-  # NOTE: after_update is not needed , because payment's can't be updated...
-  
   belongs_to :client
   belongs_to :payment_method
+  
+  after_destroy :destroy_invoice_payments # TODO: Remove!
+  after_create  :create_invoice_payments # TODO: Remove!
   
   has_many :invoices, :through => 'invoice_payments'
   
@@ -21,53 +20,25 @@ class Payment < ActiveRecord::Base
     self.paid_on = Time.now.beginning_of_day if paid_on.nil?
   end
   
-  def create_invoice_payments    
-    # NOTE: Orders by oldest outstanding date first:
-    unpaid_invoices = Invoice.find_with_totals(
-      :all, 
-      :conditions => [
-        [
-        'client_id = ?',
-        'IF(activities_total.total_in_cents IS NULL, 0,activities_total.total_in_cents) - '+
-        'IF(invoices_total.total_in_cents IS NULL, 0,invoices_total.total_in_cents) > ?'
-         ].join(' AND '),
-        client_id, 
-        0
-      ]
-    )
-
-    current_client_balance = Money.new(0)
-    unpaid_invoices.each { |inv| current_client_balance += inv.amount_outstanding }
-    
-    currently_unallocated = amount_unallocated
-
-    unpaid_invoices.each do |unpaid_invoice|
-      break if currently_unallocated <= 0 or current_client_balance <= 0
-
-      payment_allocation = (currently_unallocated >= unpaid_invoice.amount_outstanding) ? 
-        unpaid_invoice.amount_outstanding : 
-        currently_unallocated
-      
-      InvoicePayment.create! :payment => self, :invoice => unpaid_invoice, :amount => payment_allocation
-
-      current_client_balance -= payment_allocation
-      currently_unallocated  -= payment_allocation
-    end
+  def create_invoice_payments   # TODO: Delete me!?/convert to has_many
+    client.recommend_invoice_assignments_for(amount_unallocated).each {|inv_id, asgnmt|
+      InvoicePayment.create! :payment => self, :invoice_id => inv_id, :amount => asgnmt unless inv_id.nil?      
+    }
   end
   
   def destroy_invoice_payments
     InvoicePayment.destroy_all ['payment_id = ?', id]
   end
   
-  def amount_unallocated
-    (attribute_present? :amount_unallocated_in_cents) ? 
+  def amount_unallocated( force_reload = false )
+    (attribute_present? :amount_unallocated_in_cents  and !force_reload) ? 
       Money.new(read_attribute(:amount_unallocated_in_cents).to_i) : 
       (amount - amount_allocated)
   end
   
-  def amount_allocated
+  def amount_allocated( force_reload = false )
     Money.new(  
-      (attribute_present? :amount_allocated_in_cents) ? 
+      (attribute_present? :amount_allocated_in_cents  and !force_reload) ? 
         read_attribute(:amount_allocated_in_cents).to_i : 
         ( InvoicePayment.sum(:amount_in_cents, :conditions => ['payment_id = ?', id]) || 0 )
     )

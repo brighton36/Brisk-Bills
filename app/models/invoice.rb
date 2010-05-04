@@ -130,7 +130,7 @@ class Invoice < ActiveRecord::Base
   end
   
   def amount( force_reload = false )
-    (attribute_present? :amount_in_cents  and !force_reload) ?
+    (attribute_present? :amount_in_cents and !force_reload) ?
       Money.new(read_attribute(:amount_in_cents).to_i) :
       process_total( :amount, ACTIVITY_TOTAL_SQL )
   end
@@ -161,14 +161,7 @@ class Invoice < ActiveRecord::Base
       remove_invoice_payments
       
       if is_published
-        unallocated_payments = Payment.find_with_totals( 
-          :all, 
-          :conditions => [
-            'client_id = ? AND (payments.amount_in_cents - IF(payments_total.amount_allocated_in_cents IS NULL, 0, payments_total.amount_allocated_in_cents) ) > ?', 
-            client_id, 
-            0
-          ] 
-        )
+        unallocated_payments = client.unassigned_payments
     
         current_client_balance = 0.0.to_money
         unallocated_payments.each { |pmnt| current_client_balance -= pmnt.amount_unallocated }
@@ -209,7 +202,7 @@ class Invoice < ActiveRecord::Base
   def is_paid?( force_reload = false )
     (attribute_present? :is_paid  and !force_reload) ? 
       (read_attribute(:is_paid).to_i == 1) :
-      amount_outstanding.zero?
+      amount_outstanding(true).zero?
   end
   
   def amount_paid( force_reload = false )
@@ -220,8 +213,10 @@ class Invoice < ActiveRecord::Base
     )
   end
   
-  def amount_outstanding
-    amount - amount_paid
+  def amount_outstanding( force_reload = false )
+    (attribute_present? :amount_outstanding_in_cents and !force_reload) ? 
+      Money.new(read_attribute(:amount_outstanding_in_cents).to_i) :
+      (amount(true) - amount_paid(true))
   end
 
   def self.find_with_totals( how_many = :all, options = {} )
@@ -260,6 +255,7 @@ class Invoice < ActiveRecord::Base
       }.merge(options)
     )
   end
+
 
   def authorized_for?(options)
     case options[:action].to_s

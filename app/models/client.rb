@@ -77,8 +77,8 @@ class Client < ActiveRecord::Base
   def mailing_address
     ret = []
     
-    %w(name address1 address2).each do |f|
-      val = send(f.to_sym) and ( ret <<val if val.length )
+    %w( name address1 address2 ).each do |f|
+      val = send(f.to_sym) and ( ret << val if val.length )
     end
 
     ret << '%s%s %s' % [
@@ -88,6 +88,79 @@ class Client < ActiveRecord::Base
     ]
 
     ret
+  end
+  
+  # Here, we take a proposed payment amount, and return a map of unpaid invoice id's to amounts. The total amounts will 
+  # equal the provided amount, with any unmappable remainder assigned to the key of nil.
+  # If the provided amount exactly equals an outstanding invoice's amount, we return the oldest such matching invoice. 
+  # Otherwise, we start applying the amount to invoices in ascending order by issued_date.
+  # If verbose_inclusion - all outstanding invoices will be returned, and an assignment of 0 will returned as appropriate
+  def recommend_invoice_assignments_for(amount, verbose_inclusion = false)
+    amount = amount.to_money
+
+    ret = {}
+
+    invs = unpaid_invoices(
+      :all,
+      # Using this order forces the closest-amount match to be above anything else, followed by date sorting
+      :order => '(amount_outstanding_in_cents = %d) DESC, issued_on DESC, created_at DESC' % amount.cents
+    )
+
+    unassigned_outstanding = invs.inject(Money.new(0)){|total, inv| total + inv.amount_outstanding}
+    
+    invs.each do |inv|
+      ret[inv.id] = (amount <= Money.new(0) or unassigned_outstanding <= Money.new(0)) ?
+        Money.new(0) :
+        (amount >= inv.amount_outstanding) ? 
+          inv.amount_outstanding : 
+          amount
+
+      unassigned_outstanding -= ret[inv.id]
+      amount  -= ret[inv.id]
+    end
+
+    # Whatever's the leftover remainder - goes here:
+    ret[nil] = amount
+    
+    # We return with or without 0's depending on what they want:
+    verbose_inclusion ? ret : ret.reject{|id,amnt| amnt == Money.new(0) }
+  end
+
+  ## TODO?
+  def recommend_payment_assignments_for(amount, verbose_inclusion = false)
+    
+  end
+
+  # Returns all the client's invoices for which the allocated payments is less than the invoice amount. Perhaps this should be a has_many,
+  # But since we're using the find_with_totals that would get complicated... 
+  def unpaid_invoices( how_many = :all, options = {} )
+    Invoice.find_with_totals(
+      how_many, 
+      {:conditions => [
+        [
+        'client_id = ?',
+        'IF(activities_total.total_in_cents IS NULL, 0,activities_total.total_in_cents) - '+
+        'IF(invoices_total.total_in_cents IS NULL, 0,invoices_total.total_in_cents) > ?'
+        ].join(' AND '),
+        id, 0
+      ]}.merge(options.reject{|k,v| k == :conditions})
+    )
+  end
+
+  # Returns all the client's payments for which the invoice allocation is less than the payment amount. Perhaps this should be a has_many,
+  # But since we're using the find_with_totals that would get complicated... 
+  def unassigned_payments( how_many = :all, options = {} )
+    Payment.find_with_totals( 
+      how_many, 
+      {:conditions => [
+        [
+        'client_id = ?',
+        '(payments.amount_in_cents - IF(payments_total.amount_allocated_in_cents IS NULL, 0, payments_total.amount_allocated_in_cents) ) > ?'
+        ].join(' AND '),
+        id, 
+        0
+      ]}.merge(options.reject{|k,v| k == :conditions}) 
+    )
   end
 
 end
