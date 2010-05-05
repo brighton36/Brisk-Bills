@@ -89,15 +89,12 @@ class Client < ActiveRecord::Base
 
     ret
   end
-  
-  # Here, we take a proposed payment amount, and return a map of unpaid invoice id's to amounts. The total amounts will 
-  # equal the provided amount, with any unmappable remainder assigned to the key of nil.
-  # If the provided amount exactly equals an outstanding invoice's amount, we return the oldest such matching invoice. 
+    
+  # Returns an array of unsaved InvoicePayment objects, with unset payment_ids, and 'recommended' amounts.
+  # If the provided amount exactly equals an outstanding invoice's amount, we return a InvoicePayment for the oldest such matching invoice. 
   # Otherwise, we start applying the amount to invoices in ascending order by issued_date.
-  # If verbose_inclusion - all outstanding invoices will be returned, and an assignment of 0 will returned as appropriate
-  def recommend_invoice_assignments_for(amount, verbose_inclusion = false)
+  def recommend_invoice_assignments_for(amount)
     amount = amount.to_money
-    ret = {}
 
     invs = unpaid_invoices(
       :all,
@@ -107,22 +104,18 @@ class Client < ActiveRecord::Base
 
     unassigned_outstanding = invs.inject(Money.new(0)){|total, inv| total + inv.amount_outstanding}
     
-    invs.each do |inv|
-      ret[inv.id] = (amount <= 0 or unassigned_outstanding <= 0) ?
-        Money.new(0) :
-        (amount >= inv.amount_outstanding) ? 
-          inv.amount_outstanding : 
-          amount
-
-      unassigned_outstanding -= ret[inv.id]
-      amount  -= ret[inv.id]
-    end
-
-    # Whatever's the leftover remainder - goes here:
-    ret[nil] = amount
-    
-    # We return with or without 0's depending on what they want:
-    verbose_inclusion ? ret : ret.reject{|id,amnt| amnt.zero? }
+    invs.collect{ |inv|
+      if amount > 0 and unassigned_outstanding > 0
+        assignment = (amount >= inv.amount_outstanding) ? 
+            inv.amount_outstanding : 
+            amount
+        
+        unassigned_outstanding -= assignment
+        amount  -= assignment
+        
+        InvoicePayment.new :invoice => inv, :amount => assignment
+      end
+    }.compact
   end
 
   # Here, we take a proposed invoice amount, and return a map of assigned payment_id's to amounts. The total amounts will 
@@ -130,9 +123,12 @@ class Client < ActiveRecord::Base
   # If the provided amount exactly equals an outstanding payment's amount, we return the oldest such matching payment. 
   # Otherwise, we start applying the amount to payments in ascending order by issued_date.
   # If verbose_inclusion - all unassigned payments will be returned, and an corresponding assignment of 0 will be returned as appropriate
+  
+  # Returns an array of unsaved InvoicePayment objects, with unset invoice_ids, and 'recommended' amounts.
+  # If the provided amount exactly equals an payment's unalloated amount, we return a InvoicePayment for the oldest such matching payment. 
+  # Otherwise, we start applying the amount to payments in ascending order by issued_date.
   def recommend_payment_assignments_for(amount, verbose_inclusion = false)
     amount = amount.to_money
-    ret = {}
     
     pymnts = unassigned_payments(
       :all,
@@ -142,19 +138,18 @@ class Client < ActiveRecord::Base
 
     current_client_balance = pymnts.inject(Money.new(0)){|total, pmnt| total - pmnt.amount_unallocated}
   
-    pymnts.each do |unallocated_pmnt|      
-      ret[unallocated_pmnt.id] = (amount == 0 or current_client_balance >= 0) ?
-        Money.new(0) :
-        (unallocated_pmnt.amount_unallocated > amount) ?
+    pymnts.collect{ |unallocated_pmnt|
+      if amount > 0 or current_client_balance < 0
+        assignment = (unallocated_pmnt.amount_unallocated > amount) ?
           amount :
           unallocated_pmnt.amount_unallocated
-      
-      current_client_balance += ret[unallocated_pmnt.id]
-      amount -= ret[unallocated_pmnt.id]
-    end
-    
-    # We return with or without 0's depending on what they want:
-    verbose_inclusion ? ret : ret.reject{|id,amnt| amnt.zero? }
+        
+        current_client_balance += assignment
+        amount -= assignment
+        
+        InvoicePayment.new :payment => unallocated_pmnt, :amount => assignment
+      end
+    }.compact
   end
 
   # Returns all the client's invoices for which the allocated payments is less than the invoice amount. Perhaps this should be a has_many,

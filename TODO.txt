@@ -1,17 +1,19 @@
 *I want to delete that old ashbritt invoice ... I should be able to !
 
 Here's the current plan:
-	Model:
-	
-	* Perhaps we should change the payment has_many :invoices, :through => 'invoice_payments' to has_many :assigned_invoices, :through => 'invoice_payments'
-		* THis way we could assign payments at the time of creation.
-		
 	* Once create works, then disable the auto-assign on create. for payment
-	* Re-do the tests so that we use auto-assignment via a recommend_invoices_for_amount ... (Or leave it at the association approach)
-		* And make them pass..
+		* Re-do the tests so that we use auto-assignment via a recommend_invoices_for_amount ... (Or leave it at the association approach)
+
+	* Once create works, then disable the auto-assign on create. for invoices..	
+		* WHat to do about is_published status on invoices.	
+			* Currently - you can't pay an in_published invoice. Perhaps that should change? 
+			* Payments don't have this issue b/c here's no published status......
+				* Perhaps we only allow assignment to 'stick' if its published, and take care of most of that in the GUI... 
+		* Re-do the tests so that we use auto-assignment via a recommend_invoices_for_amount ... (Or leave it at the association approach)
+		
 	*Disable the auto-assign on create. for invoice
 		mAke tests pass
-	* Payments shuold be update-able as  well...
+
 	* Then add tests to ensure:
 		* find_unpaid_invoices works right
 		* The assignments make sense (equal value outstanding returned before any-outstanding)

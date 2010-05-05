@@ -16,7 +16,8 @@ class Invoice < ActiveRecord::Base
 
   belongs_to :client
   has_many :activities, :dependent => :nullify
-  has_many :payments, :through => 'invoice_payments'
+  has_many :payments, :through => :assigned_payments
+  has_many :payment_assignments, :class_name => 'InvoicePayment'
   
   has_and_belongs_to_many(
     :activity_types, 
@@ -160,9 +161,7 @@ class Invoice < ActiveRecord::Base
     if changes.has_key? "is_published"
       remove_invoice_payments
 
-      client.recommend_payment_assignments_for(amount).each {|pmt_id, asgnmt|
-        InvoicePayment.create! :invoice => self, :payment_id => pmt_id, :amount => asgnmt unless pmt_id.nil?      
-      } if is_published
+      self.payment_assignments = client.recommend_payment_assignments_for amount if is_published
     end
   end
   

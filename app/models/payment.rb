@@ -8,7 +8,8 @@ class Payment < ActiveRecord::Base
   after_destroy :destroy_invoice_payments # TODO: Remove!
   after_create  :create_invoice_payments # TODO: Remove!
   
-  has_many :invoices, :through => 'invoice_payments'
+  has_many :invoices, :through => :assigned_payments
+  has_many :invoice_assignments, :class_name => 'InvoicePayment'
   
   validates_presence_of :client_id, :payment_method_id
   validates_numericality_of :amount, :allow_nil => false
@@ -21,9 +22,7 @@ class Payment < ActiveRecord::Base
   end
   
   def create_invoice_payments   # TODO: Delete me!?/convert to has_many
-    client.recommend_invoice_assignments_for(amount_unallocated).each {|inv_id, asgnmt|
-      InvoicePayment.create! :payment => self, :invoice_id => inv_id, :amount => asgnmt unless inv_id.nil?      
-    }
+    self.invoice_assignments = client.recommend_invoice_assignments_for(amount_unallocated)
   end
   
   def destroy_invoice_payments
