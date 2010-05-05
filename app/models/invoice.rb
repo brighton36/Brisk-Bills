@@ -159,30 +159,11 @@ class Invoice < ActiveRecord::Base
   def mark_invoice_payments   
     if changes.has_key? "is_published"
       remove_invoice_payments
-      
-      if is_published
-        unallocated_payments = client.unassigned_payments
-    
-        current_client_balance = 0.0.to_money
-        unallocated_payments.each { |pmnt| current_client_balance -= pmnt.amount_unallocated }
-        
-        invoice_balance = amount
-    
-        unallocated_payments.each do |unallocated_pmnt|
-          break if invoice_balance == 0 or current_client_balance >= 0
-          
-          payment_allocation = (unallocated_pmnt.amount_unallocated > invoice_balance) ?
-            invoice_balance :
-            unallocated_pmnt.amount_unallocated
-          
-          InvoicePayment.create! :invoice => self, :payment => unallocated_pmnt, :amount => payment_allocation
-          
-          invoice_balance -= payment_allocation
-          current_client_balance += payment_allocation
-        end        
-      end
+
+      client.recommend_payment_assignments_for(amount).each {|pmt_id, asgnmt|
+        InvoicePayment.create! :invoice => self, :payment_id => pmt_id, :amount => asgnmt unless pmt_id.nil?      
+      } if is_published
     end
-    
   end
   
   def paid_on
@@ -255,7 +236,6 @@ class Invoice < ActiveRecord::Base
       }.merge(options)
     )
   end
-
 
   def authorized_for?(options)
     case options[:action].to_s

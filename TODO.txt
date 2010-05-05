@@ -2,8 +2,6 @@
 
 Here's the current plan:
 	Model:
-	* Fleshed out the invoice's after_update  :mark_invoice_payments in a similar capacity to payment's
-		* Get the client's recommend_payment_assignments_for working?
 	
 	* Perhaps we should change the payment has_many :invoices, :through => 'invoice_payments' to has_many :assigned_invoices, :through => 'invoice_payments'
 		* THis way we could assign payments at the time of creation.

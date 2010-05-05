@@ -125,9 +125,36 @@ class Client < ActiveRecord::Base
     verbose_inclusion ? ret : ret.reject{|id,amnt| amnt.zero? }
   end
 
-  ## TODO?
+  # Here, we take a proposed invoice amount, and return a map of assigned payment_id's to amounts. The total amounts will 
+  # equal the provided amount, with any unmappable remainder assigned to the key of nil.
+  # If the provided amount exactly equals an outstanding payment's amount, we return the oldest such matching payment. 
+  # Otherwise, we start applying the amount to payments in ascending order by issued_date.
+  # If verbose_inclusion - all unassigned payments will be returned, and an corresponding assignment of 0 will be returned as appropriate
   def recommend_payment_assignments_for(amount, verbose_inclusion = false)
+    amount = amount.to_money
+    ret = {}
     
+    pymnts = unassigned_payments(
+      :all,
+      # Using this order forces the closest-amount match to be above anything else, followed by date sorting
+      :order => '(amount_unallocated_in_cents = %d) DESC, paid_on DESC, created_at DESC' % amount.cents
+    )
+
+    current_client_balance = pymnts.inject(Money.new(0)){|total, pmnt| total - pmnt.amount_unallocated}
+  
+    pymnts.each do |unallocated_pmnt|      
+      ret[unallocated_pmnt.id] = (amount == 0 or current_client_balance >= 0) ?
+        Money.new(0) :
+        (unallocated_pmnt.amount_unallocated > amount) ?
+          amount :
+          unallocated_pmnt.amount_unallocated
+      
+      current_client_balance += ret[unallocated_pmnt.id]
+      amount -= ret[unallocated_pmnt.id]
+    end
+    
+    # We return with or without 0's depending on what they want:
+    verbose_inclusion ? ret : ret.reject{|id,amnt| amnt.zero? }
   end
 
   # Returns all the client's invoices for which the allocated payments is less than the invoice amount. Perhaps this should be a has_many,
