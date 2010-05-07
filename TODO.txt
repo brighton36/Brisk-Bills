@@ -2,21 +2,25 @@
 
 Here's the current plan:
 	* Now add tests to ensure:
-		* find_unpaid_invoices works right
-		* We need to make sure clear_invoice_payments_if_unpublished works on create and save...
-		* ensure that the   has_many :invoice_assignments, :class_name => 'InvoicePayment', :dependent => :delete_all 
-			* works the way we 'd think
-			* And works similarly on Invoice
-		* The assignments make sense (equal value outstanding returned before any-outstanding)
-		* overriding is possible/easy
-		* People can't specifify more payment_allocations than the total payment's amount
-		* We allow payments to be created without allocation - this is ok..
-		* We need a method for Invoices::find_unallocated, & Payments::find_unallocated
-  	* Then we can allow multiple invoices to be unpublished...
-  	
-  	* Write a test  (make sure that ) invoices aren't mared as 'paid' until the invoice_payments have been applied.  Even if the balance is 0
-  		* Also - in the case that an invoice price is adjusted after it was marked paid (becomes higher or lower) we don't need to have controller or payment logic to deal with this
+		* Flesh out client_test.rb
+		
+		* Invoice_payment_test:
+		  	* Write a test  (make sure that ) invoices aren't marked as 'paid' until the invoice_payments have been applied.  Even if the balance is 0
+  				* Also - in the case that an invoice price is adjusted after it was marked paid (becomes higher or lower) we don't need to have controller or payment logic to deal with this
+			* We need to make sure clear_invoice_payments_if_unpublished works on create and save...
 
+			* ensure that the has_many :invoice_assignments, :class_name => 'InvoicePayment', :dependent => :delete_all 
+				* works the way we 'd think
+				* And works similarly on Payment
+			* overriding defaults is possible/easy
+			
+			* People can't specifify more payment_allocations than the total payment's amount
+			* We allow payments to be created without allocation - this is ok..
+
+  	* Now we can allow multiple invoices to be unpublished and published invoices to be deleted....
+  		* Probably some tests will need adjustment here.
+  		* Model error-raises too...
+  	
   	Controllers:
   	* let's start by adding a detail that shows what payments are currently allocated..
   	* Show a warning if someone tries to commit a payment w/o allocating the full amount...
@@ -27,13 +31,14 @@ Here's the current plan:
   	* Remove that restriction on unpublishing old invoices...
   	* And then we need to add a complemntary field in the invoices view? Nah - but show which payments are currently assigned as a read-only...
 
-* All of our read_attribute stuff, isn't "Caching"the new value. (I think - write a test for this ...)
+* Start using 0.7-pre on mario...
+
+* All of our read_attribute stuff, isn't "Caching"the newest values. (I think - write a test for this ...)
 	* Use a find_invoice_with_totals
 		* then update an invoice
 		* then run an invoice.amunt(true)
 		* tune run an invice.amount .... This this treturn the prior amount value?
 	* THis has to be fixed/ested for all read attributes...
-
 
 * We should put proper transactions in place here too while we're in here...
 
@@ -43,6 +48,8 @@ Here's the current plan:
 
 * We should put tax before cost in the activities with prices controller...
 
+* Publish 0.7
+
 * Translate the time into the local zone for the user, probably each user/client should have a zone associtation in their account.
 	*  Its already stored in UTC everywhere...
 	* We need to factor this into invoices too, I think
@@ -51,8 +58,12 @@ Here's the current plan:
 * Showing the Client eventlogs as an unedutable nested list  might be nice... Hell, employee eventlogs too....
 * CC payments handling - not a plugin
 
----------------
-Plugin interface using engines?
+* Publish 0.8
+
+* Plugin interface...
+
+* Revise the site-settings interfaces...
+
 ---------------
 LONGER-TERM: (Needs re-prioritization...)
 
