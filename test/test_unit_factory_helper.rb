@@ -1,4 +1,3 @@
-
 module Factory
   def self.create_labor(attributes = {}, activity_attributes = {})
     employee = Employee.find(
@@ -111,8 +110,7 @@ module Factory
   end
 
 
-  def self.generate_invoice(total, attributes = {})
-    attributes[:client] ||= Factory.create_client
+  def self.generate_invoice(client, total, attributes = {})
     attributes[:issued_on] ||= Time.now
 
     activity_increments = (total.floor).to_f/10
@@ -127,7 +125,7 @@ module Factory
       a = Activity::Adjustment.new :label => 'test invoice'
       a.activity.cost = activity_cost.to_money
       a.activity.tax = activity_tax
-      a.activity.client = attributes[:client]
+      a.activity.client = client
       a.activity.occurred_on = (attributes[:issued_on] - 1.months)
       a.activity.is_published = true
       a.save! 
@@ -137,16 +135,16 @@ module Factory
     
     puts "\nWARNING: No activity types found in db... sure you're using the right fixtures?\n" unless activity_types.length >0
 
-    Invoice.create!( { :activity_types =>  activity_types }.merge(attributes) )
+    Invoice.create!( { :activity_types =>  activity_types, :client => client }.merge(attributes) )
   end
   
-  def self.generate_payment(amount, attributes = {})
-    attributes[:client] ||= Factory.create_client
-    
+  def self.generate_payment(client, amount, attributes = {})
     Payment.create!(
       {
+      :client => client,
       :amount => amount,
-      :payment_method_id => 1
+      :payment_method_id => 1,
+      :invoice_assignments => client.recommend_invoice_assignments_for(amount),
       }.merge(attributes)
     )
   end

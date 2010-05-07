@@ -12,12 +12,11 @@ class Invoice < ActiveRecord::Base
 
   after_update  :mark_invoice_payments
   after_create  :mark_invoice_payments
-  after_destroy :remove_invoice_payments
 
   belongs_to :client
   has_many :activities, :dependent => :nullify
   has_many :payments, :through => :assigned_payments
-  has_many :payment_assignments, :class_name => 'InvoicePayment'
+  has_many :payment_assignments, :class_name => 'InvoicePayment', :dependent => :delete_all
   
   has_and_belongs_to_many(
     :activity_types, 
@@ -152,14 +151,10 @@ class Invoice < ActiveRecord::Base
       ('$%.2f' % amount.to_s).gsub(/(\d)(?=\d{3}+(\.\d*)?$)/, '\1,')
     ]
   end
-
-  def remove_invoice_payments
-    InvoicePayment.destroy_all ['invoice_id = ?', id]    
-  end
   
   def mark_invoice_payments   
     if changes.has_key? "is_published"
-      remove_invoice_payments
+      payment_assignments.clear
 
       self.payment_assignments = client.recommend_payment_assignments_for amount if is_published
     end

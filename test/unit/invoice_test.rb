@@ -16,10 +16,10 @@ class InvoiceTest < ActiveSupport::TestCase
     
     # Once they're published they cant be unpublished unless they're the newest invoice...
     invoices = [
-      Factory.generate_invoice(100.00, :issued_on => (DateTime.now << 4), :is_published => true ),
-      Factory.generate_invoice(200.00, :issued_on => (DateTime.now << 3), :is_published => true ),
-      Factory.generate_invoice(300.00, :issued_on => (DateTime.now << 2), :is_published => true ),
-      Factory.generate_invoice(400.00, :issued_on => (DateTime.now << 1), :is_published => true )
+      Factory.generate_invoice( client, 100.00, :issued_on => (DateTime.now << 4), :is_published => true ),
+      Factory.generate_invoice( client, 200.00, :issued_on => (DateTime.now << 3), :is_published => true ),
+      Factory.generate_invoice( client, 300.00, :issued_on => (DateTime.now << 2), :is_published => true ),
+      Factory.generate_invoice( client, 400.00, :issued_on => (DateTime.now << 1), :is_published => true )
     ]
 
     invoices[0...2].each do |inv|
@@ -34,7 +34,7 @@ class InvoiceTest < ActiveSupport::TestCase
     client = Factory.create_client
     client2 = Factory.create_client :company_name => 'Client 2, Inc.'
     
-    invoice = Factory.generate_invoice 100.00, :client => client
+    invoice = Factory.generate_invoice client,  100.00
     
     assert_raise(ActiveRecord::RecordInvalid) do 
       invoice.client = client2
@@ -52,7 +52,7 @@ class InvoiceTest < ActiveSupport::TestCase
       :paid_on => (DateTime.now << 1)
     ) 
 
-    inv = Factory.generate_invoice 1000.00, :issued_on => (DateTime.now >> 12)
+    inv = Factory.generate_invoice client,  1000.00, :issued_on => (DateTime.now >> 12)
     
     # Change payment, save:
     assert_nothing_raised do
@@ -261,11 +261,12 @@ class InvoiceTest < ActiveSupport::TestCase
   end
 
   def test_invoice_deletes_only_if_recent    
+    client = Factory.create_client
     invoice_time = Time.new
     
     invoices = [20,40,80,160,320,640,1280].collect do |amt| 
       invoice_time += 1.weeks
-      Factory.generate_invoice amt, :issued_on => invoice_time
+      Factory.generate_invoice client,  amt, :issued_on => invoice_time
     end
 
     while invoices.length > 0

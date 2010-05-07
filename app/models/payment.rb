@@ -5,11 +5,8 @@ class Payment < ActiveRecord::Base
   belongs_to :client
   belongs_to :payment_method
   
-  after_destroy :destroy_invoice_payments # TODO: Remove!
-  after_create  :create_invoice_payments # TODO: Remove!
-  
   has_many :invoices, :through => :assigned_payments
-  has_many :invoice_assignments, :class_name => 'InvoicePayment'
+  has_many :invoice_assignments, :class_name => 'InvoicePayment', :dependent => :delete_all
   
   validates_presence_of :client_id, :payment_method_id
   validates_numericality_of :amount, :allow_nil => false
@@ -19,14 +16,6 @@ class Payment < ActiveRecord::Base
   def initialize(*args)
     super(*args)
     self.paid_on = Time.now.beginning_of_day if paid_on.nil?
-  end
-  
-  def create_invoice_payments   # TODO: Delete me!?/convert to has_many
-    self.invoice_assignments = client.recommend_invoice_assignments_for(amount_unallocated)
-  end
-  
-  def destroy_invoice_payments
-    InvoicePayment.destroy_all ['payment_id = ?', id]
   end
   
   def amount_unallocated( force_reload = false )
