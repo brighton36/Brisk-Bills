@@ -112,6 +112,7 @@ module Factory
 
   def self.generate_invoice(client, total, attributes = {})
     attributes[:issued_on] ||= Time.now
+    attributes[:is_published] ||= false
 
     activity_increments = (total.floor).to_f/10
     1.upto(10) do |i|
@@ -135,7 +136,14 @@ module Factory
     
     puts "\nWARNING: No activity types found in db... sure you're using the right fixtures?\n" unless activity_types.length >0
 
-    Invoice.create!( { :activity_types =>  activity_types, :client => client }.merge(attributes) )
+    Invoice.create!( 
+      { 
+      :activity_types => activity_types, 
+      :client => client,
+      :payment_assignments => (attributes[:is_published]) ? client.recommend_payment_assignments_for(total) : []
+      }.merge(attributes)
+    )
+    
   end
   
   def self.generate_payment(client, amount, attributes = {})

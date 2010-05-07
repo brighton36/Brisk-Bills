@@ -1,26 +1,9 @@
 *I want to delete that old ashbritt invoice ... I should be able to !
 
 Here's the current plan:
-	* Perhaps - rather than revising the tests - we change the after_update stuff to only add the defaults if there's nothing passed to the object at creation/update...?
-		* perhaps... or using a before_save... Think about it...
-	
-	* Once create works, then disable the auto-assign on create. for payment
-		* Re-do the tests so that we use auto-assignment via a recommend_invoices_for_amount ... (Or leave it at the association approach)
-
-	* Once create works, then disable the auto-assign on create. for invoices..	
-		* WHat to do about is_published status on invoices.	
-			* Currently - you can't pay an in_published invoice. Perhaps that should change? 
-			* Payments don't have this issue b/c here's no published status......
-				* Perhaps we only allow assignment to 'stick' if its published, and take care of most of that in the GUI... 
-		* Re-do the tests so that we use auto-assignment via a recommend_invoices_for_amount ... (Or leave it at the association approach)
-		
-	*Disable the auto-assign on create. for invoice
-		mAke tests pass
-
-	* REstructute the tests to remove the client = Factory.create_client being implicit - we should have to specifiy that to all the factory methods...
-
-	* Then add tests to ensure:
+	* Now add tests to ensure:
 		* find_unpaid_invoices works right
+		* We need to make sure clear_invoice_payments_if_unpublished works on create and save...
 		* ensure that the   has_many :invoice_assignments, :class_name => 'InvoicePayment', :dependent => :delete_all 
 			* works the way we 'd think
 			* And works similarly on Invoice
@@ -29,7 +12,6 @@ Here's the current plan:
 		* People can't specifify more payment_allocations than the total payment's amount
 		* We allow payments to be created without allocation - this is ok..
 		* We need a method for Invoices::find_unallocated, & Payments::find_unallocated
-  	* REmove mark_invoice_payments ?
   	* Then we can allow multiple invoices to be unpublished...
   	
   	* Write a test  (make sure that ) invoices aren't mared as 'paid' until the invoice_payments have been applied.  Even if the balance is 0

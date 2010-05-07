@@ -7,11 +7,9 @@ class Invoice < ActiveRecord::Base
 
   before_update :ensure_not_published_on_update
 
-  after_create :reattach_activities
-  after_update :reattach_activities
-
-  after_update  :mark_invoice_payments
-  after_create  :mark_invoice_payments
+  after_save :reattach_activities
+  
+  before_save :clear_invoice_payments_if_unpublished
 
   belongs_to :client
   has_many :activities, :dependent => :nullify
@@ -152,14 +150,6 @@ class Invoice < ActiveRecord::Base
     ]
   end
   
-  def mark_invoice_payments   
-    if changes.has_key? "is_published"
-      payment_assignments.clear
-
-      self.payment_assignments = client.recommend_payment_assignments_for amount if is_published
-    end
-  end
-  
   def paid_on
     raise StandardError unless is_paid?
 
@@ -244,6 +234,12 @@ class Invoice < ActiveRecord::Base
   
   def process_total(name, field_sql)   
     Money.new Activity.sum(field_sql, :conditions => ['invoice_id = ?', id]).to_i
+  end
+
+  # When/if we save an invoice, and we determine that its changed or created as unpublished, we need to ensure that no payments are assigned to the invoice.
+  # This means deleting any existing assignments should there be any.
+  def clear_invoice_payments_if_unpublished   
+    payment_assignments.clear if changes.has_key? "is_published" and !is_published
   end
 
   handle_extensions
