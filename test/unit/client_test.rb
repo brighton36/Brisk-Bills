@@ -27,6 +27,8 @@ class ClientTest < ActiveSupport::TestCase
   def test_basic_unpaid_invoices
     client = Factory.create_client
     
+    payments = []
+    
     paid_invoices = []
     unpaid_invoices = []
     unpaid_invoices << Factory.generate_invoice( client, 100.00, :issued_on => (DateTime.now << 4), :is_published => true )
@@ -35,7 +37,7 @@ class ClientTest < ActiveSupport::TestCase
     unpaid_invoices << Factory.generate_invoice( client, 400.00, :issued_on => (DateTime.now << 1), :is_published => true )
     
     # This is a basic test in an obvious and typical scenario. Note that we should be matching payments up when they equal invoices..
-    Factory.generate_payment client, 202.00
+    payments << Factory.generate_payment( client, 202.00 )
 
     client_unpaid_invoices = client.unpaid_invoices
     
@@ -43,7 +45,7 @@ class ClientTest < ActiveSupport::TestCase
     client_unpaid_invoices.each{ |inv| assert unpaid_invoices.collect{|un_inv| un_inv.id}.include?(inv.id) }
     
     # Now we test a half payment, which shouldn't make a difference in what's marked as fully-paid:
-    Factory.generate_payment client, 99.00
+    payments << Factory.generate_payment( client, 99.00 )
 
     client_unpaid_invoices = client.unpaid_invoices
     
@@ -51,16 +53,16 @@ class ClientTest < ActiveSupport::TestCase
     client_unpaid_invoices.each{ |inv| assert unpaid_invoices.collect{|un_inv| un_inv.id}.include?(inv.id) }
     
     # Delete all the invoices we just created:
-    (paid_invoices+unpaid_invoices).reject!{|inv| inv.delete }
-    paid_invoices, unpaid_invoices = [], [] 
+    (paid_invoices+unpaid_invoices+payments).reject!{|o| o.delete }
+    paid_invoices, unpaid_invoices, payments = [], [], []
     
     # Now try this for the case of a payment created before the invoices...
-    Factory.generate_payment client, 23.00
+    payments << Factory.generate_payment(client, 23.00)
 
-    paid_invoices   << Factory.generate_invoice( client, 8.00, :issued_on => (DateTime.now << 4), :is_published => true )
+    paid_invoices   << Factory.generate_invoice( client, 8.00,  :issued_on => (DateTime.now << 4), :is_published => true )
     paid_invoices   << Factory.generate_invoice( client, 14.00, :issued_on => (DateTime.now << 4), :is_published => true )
     unpaid_invoices << Factory.generate_invoice( client, 30.00, :issued_on => (DateTime.now << 1), :is_published => true )
-    unpaid_invoices << Factory.generate_invoice( client, 2.00, :issued_on => (DateTime.now << 1), :is_published => true )
+    unpaid_invoices << Factory.generate_invoice( client, 2.00,  :issued_on => (DateTime.now << 1), :is_published => true )
 
     client_unpaid_invoices = client.unpaid_invoices
     
@@ -69,14 +71,145 @@ class ClientTest < ActiveSupport::TestCase
   end
   
   def test_basic_unassigned_payments
-    # TODO: this should be very simlar to test_basic_unpaid_invoices
+    client = Factory.create_client
+    
+    invoices = []
+    
+    unassigned_payments = []
+    assigned_payments   = []
+    unassigned_payments << Factory.generate_payment( client,  230.00 )
+    unassigned_payments << Factory.generate_payment( client,  132.00 )
+    assigned_payments   << Factory.generate_payment( client,  23.00 )
+    unassigned_payments << Factory.generate_payment( client,  993.00 )
+    
+    # This is a basic test in an obvious and typical scenario. Note that we should be matching payments up when they equal invoices..
+    invoices << Factory.generate_invoice( client, 23.00, :issued_on => (DateTime.now << 1), :is_published => true )
+    
+    client_unassigned_payments = client.unassigned_payments
+    
+    assert_equal unassigned_payments.length, client_unassigned_payments.length
+    client_unassigned_payments.each{ |pymt| assert unassigned_payments.collect{|un_pymnt| un_pymnt.id}.include?(pymt.id) }
+
+    # Now we test a partial invoice, which shouldn't make a difference in what's marked as unassigned:
+    invoices << Factory.generate_invoice( client, 100.00 )
+
+    client_unassigned_payments = client.unassigned_payments
+    
+    assert_equal unassigned_payments.length, client_unassigned_payments.length
+    client_unassigned_payments.each{ |pymt| assert unassigned_payments.collect{|un_pymnt| un_pymnt.id}.include?(pymt.id) }
+
+    # Delete all the payments we just created:
+    (unassigned_payments+assigned_payments+invoices).reject!{|o| o.delete }
+    assigned_payments, unassigned_payments, invoices = [], [], []
+    
+    # Now try this for the case of an invoice created before the payments...
+    invoices << Factory.generate_invoice(client, 23.00, :issued_on => (DateTime.now << 1), :is_published => true )
+
+    assigned_payments   << Factory.generate_payment( client, 8.00 )
+    assigned_payments   << Factory.generate_payment( client, 14.00 )
+    unassigned_payments << Factory.generate_payment( client, 30.00 )
+    unassigned_payments << Factory.generate_payment( client, 2.00 )
+    
+    client_unassigned_payments = client.unassigned_payments
+    
+    assert_equal unassigned_payments.length, client_unassigned_payments.length
+    client_unassigned_payments.each{ |pymt| assert unassigned_payments.collect{|un_pymnt| un_pymnt.id}.include?(pymt.id) }
   end
 
   def test_recommend_payment_assignments_for
-    # TODO: make sure the assignments make sense (equal value outstanding returned before any-outstanding)
+    # Make sure the assignments make sense (equal value outstanding returned before any-outstanding)
+    client = Factory.create_client
+    
+    payments = [
+      Factory.generate_payment( client,  23.45,  :paid_on => (DateTime.now << 5) ),
+      Factory.generate_payment( client,  202.02, :paid_on => (DateTime.now << 4) ),
+      Factory.generate_payment( client,  2.40,   :paid_on => (DateTime.now << 3) ),
+      Factory.generate_payment( client,  94.00,  :paid_on => (DateTime.now << 2) ),
+      Factory.generate_payment( client,  2.40,   :paid_on => (DateTime.now << 1) )
+    ]
+    
+    # First test that exact-matches are properly assigned:
+    reccomended = client.recommend_payment_assignments_for(2.40)
+    assert_equal 1, reccomended.length
+    assert_equal payments[2].id, reccomended.first.payment_id
+    
+    reccomended = client.recommend_payment_assignments_for(94)
+    assert_equal 1, reccomended.length
+    assert_equal payments[3].id, reccomended.first.payment_id
+    
+    reccomended = client.recommend_payment_assignments_for(23.45)
+    assert_equal 1, reccomended.length
+    assert_equal payments[0].id, reccomended.first.payment_id
+
+    # Now test partials:
+    reccomended = client.recommend_payment_assignments_for(5.40)
+    assert_equal 1, reccomended.length
+    assert_equal payments[0].id, reccomended.first.payment_id
+    
+    reccomended = client.recommend_payment_assignments_for(225.47)
+    assert_equal 2, reccomended.length
+    assert_equal payments[0].id, reccomended[0].payment_id
+    assert_equal payments[1].id, reccomended[1].payment_id
+
+    reccomended = client.recommend_payment_assignments_for(229)
+    assert_equal 4, reccomended.length
+    assert_equal payments[0].id, reccomended[0].payment_id
+    assert_equal payments[1].id, reccomended[1].payment_id
+    assert_equal payments[2].id, reccomended[2].payment_id
+    assert_equal payments[3].id, reccomended[3].payment_id
+
+    reccomended = client.recommend_payment_assignments_for(25)
+    assert_equal 2, reccomended.length
+    assert_equal payments[0].id, reccomended[0].payment_id
+    assert_equal payments[1].id, reccomended[1].payment_id
+
   end
   
   def test_recommend_invoice_assignments_for 
-    # TODO: make sure the assignments make sense (equal value outstanding returned before any-outstanding)  
+    # Make sure the assignments make sense (equal value outstanding returned before any-outstanding)  
+    client = Factory.create_client
+    
+    invoices = [
+      Factory.generate_invoice( client,  23.45,  :issued_on => (DateTime.now << 5) ),
+      Factory.generate_invoice( client,  202.02, :issued_on => (DateTime.now << 4) ),
+      Factory.generate_invoice( client,  2.40,   :issued_on => (DateTime.now << 3) ),
+      Factory.generate_invoice( client,  94.00,  :issued_on => (DateTime.now << 2) ),
+      Factory.generate_invoice( client,  2.40,   :issued_on => (DateTime.now << 1) )
+    ]
+    
+    # First test that exact-matches are properly assigned:
+    reccomended = client.recommend_invoice_assignments_for(2.40)
+    assert_equal 1, reccomended.length
+    assert_equal invoices[2].id, reccomended.first.invoice_id
+    
+    reccomended = client.recommend_invoice_assignments_for(94)
+    assert_equal 1, reccomended.length
+    assert_equal invoices[3].id, reccomended.first.invoice_id
+    
+    reccomended = client.recommend_invoice_assignments_for(23.45)
+    assert_equal 1, reccomended.length
+    assert_equal invoices[0].id, reccomended.first.invoice_id
+
+    # Now test partials:
+    reccomended = client.recommend_invoice_assignments_for(5.40)
+    assert_equal 1, reccomended.length
+    assert_equal invoices[0].id, reccomended.first.invoice_id
+    
+    reccomended = client.recommend_invoice_assignments_for(225.47)
+    assert_equal 2, reccomended.length
+    assert_equal invoices[0].id, reccomended[0].invoice_id
+    assert_equal invoices[1].id, reccomended[1].invoice_id
+
+    reccomended = client.recommend_invoice_assignments_for(229)
+    assert_equal 4, reccomended.length
+    assert_equal invoices[0].id, reccomended[0].invoice_id
+    assert_equal invoices[1].id, reccomended[1].invoice_id
+    assert_equal invoices[2].id, reccomended[2].invoice_id
+    assert_equal invoices[3].id, reccomended[3].invoice_id
+
+    reccomended = client.recommend_invoice_assignments_for(25)
+    assert_equal 2, reccomended.length
+    assert_equal invoices[0].id, reccomended[0].invoice_id
+    assert_equal invoices[1].id, reccomended[1].invoice_id
   end
 end

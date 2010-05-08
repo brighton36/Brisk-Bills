@@ -1,27 +1,13 @@
 *I want to delete that old ashbritt invoice ... I should be able to !
 
 Here's the current plan:
-	* Now add tests to ensure:
-		* Flesh out client_test.rb
-		
-		* Invoice_payment_test:
-		  	* Write a test  (make sure that ) invoices aren't marked as 'paid' until the invoice_payments have been applied.  Even if the balance is 0
-  				* Also - in the case that an invoice price is adjusted after it was marked paid (becomes higher or lower) we don't need to have controller or payment logic to deal with this
-			* We need to make sure clear_invoice_payments_if_unpublished works on create and save...
-
-			* ensure that the has_many :invoice_assignments, :class_name => 'InvoicePayment', :dependent => :delete_all 
-				* works the way we 'd think
-				* And works similarly on Payment
-			* overriding defaults is possible/easy
-			
-			* People can't specifify more payment_allocations than the total payment's amount
-			* We allow payments to be created without allocation - this is ok..
+	* flesh out invoice_payment_test
 
   	* Now we can allow multiple invoices to be unpublished and published invoices to be deleted....
   		* Probably some tests will need adjustment here.
-  		* Model error-raises too...
+  		* remove Model error-raises too...
   	
-  	Controllers:
+  	Now for the Controllers:
   	* let's start by adding a detail that shows what payments are currently allocated..
   	* Show a warning if someone tries to commit a payment w/o allocating the full amount...
   	* Don't forget to Add the right show-action fields too (in the payments controller)
@@ -41,14 +27,21 @@ Here's the current plan:
 	* THis has to be fixed/ested for all read attributes...
 
 * We should put proper transactions in place here too while we're in here...
-
+* I'd like to see a payment identifier listed in the payments list ... (check no/cc#)
 * Add Existing Client Representatives should show them in alaphabetical order
 
 * We should add an unpublished Open Invoices controller ...
 
+* Payment:::is_allocated should probably be added to a view and then list controller...
+	* Code is there - but no view supports it...
+
 * We should put tax before cost in the activities with prices controller...
 
 * Publish 0.7
+
+* Probably - when prompted to delete an invoice, we should give the option to also remove the activities (or preserve them and leave them unsassigned)
+
+* Move_to_invoice function should allow us to Move_to '(Unassigned)', and ideally that would be a radio group
 
 * Translate the time into the local zone for the user, probably each user/client should have a zone associtation in their account.
 	*  Its already stored in UTC everywhere...

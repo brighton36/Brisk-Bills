@@ -26,6 +26,8 @@ class Client < ActiveRecord::Base
       (Activity.sum( Invoice::ACTIVITY_TOTAL_SQL, :conditions => ['client_id = ? AND is_published = ? AND invoice_id IS NULL',id, true] ) or 0.0)
   end
   
+  # THis is the client's outstanding balance. This value is calculated based off the total invoices amount - total payments amount. And is 
+  # Not determined based on invoice/payment assignments 
   def balance( force_reload = false )
     Money.new(
       (attribute_present? :balance_in_cents and !force_reload) ?
@@ -99,7 +101,7 @@ class Client < ActiveRecord::Base
     invs = unpaid_invoices(
       :all,
       # Using this order forces the closest-amount match to be above anything else, followed by date sorting
-      :order => '(amount_outstanding_in_cents = %d) DESC, issued_on DESC, created_at DESC' % amount.cents
+      :order => '(amount_outstanding_in_cents = %d) DESC, issued_on ASC, created_at ASC' % amount.cents
     )
 
     unassigned_outstanding = invs.inject(Money.new(0)){|total, inv| total + inv.amount_outstanding}
@@ -113,16 +115,10 @@ class Client < ActiveRecord::Base
         unassigned_outstanding -= assignment
         amount  -= assignment
         
-        InvoicePayment.new :invoice => inv, :amount => assignment
+        InvoicePayment.new :invoice => inv, :amount => assignment if assignment > 0
       end
     }.compact
   end
-
-  # Here, we take a proposed invoice amount, and return a map of assigned payment_id's to amounts. The total amounts will 
-  # equal the provided amount, with any unmappable remainder assigned to the key of nil.
-  # If the provided amount exactly equals an outstanding payment's amount, we return the oldest such matching payment. 
-  # Otherwise, we start applying the amount to payments in ascending order by issued_date.
-  # If verbose_inclusion - all unassigned payments will be returned, and an corresponding assignment of 0 will be returned as appropriate
   
   # Returns an array of unsaved InvoicePayment objects, with unset invoice_ids, and 'recommended' amounts.
   # If the provided amount exactly equals an payment's unalloated amount, we return a InvoicePayment for the oldest such matching payment. 
@@ -133,7 +129,7 @@ class Client < ActiveRecord::Base
     pymnts = unassigned_payments(
       :all,
       # Using this order forces the closest-amount match to be above anything else, followed by date sorting
-      :order => '(amount_unallocated_in_cents = %d) DESC, paid_on DESC, created_at DESC' % amount.cents
+      :order => '(amount_unallocated_in_cents = %d) DESC, paid_on ASC, created_at ASC' % amount.cents
     )
 
     current_client_balance = pymnts.inject(Money.new(0)){|total, pmnt| total - pmnt.amount_unallocated}
@@ -147,7 +143,7 @@ class Client < ActiveRecord::Base
         current_client_balance += assignment
         amount -= assignment
         
-        InvoicePayment.new :payment => unallocated_pmnt, :amount => assignment
+        InvoicePayment.new :payment => unallocated_pmnt, :amount => assignment if assignment > 0
       end
     }.compact
   end

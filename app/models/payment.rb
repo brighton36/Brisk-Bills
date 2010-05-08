@@ -32,6 +32,12 @@ class Payment < ActiveRecord::Base
     )
   end
   
+  def is_allocated?( force_reload = false )
+    (attribute_present? :is_allocated  and !force_reload) ? 
+      (read_attribute(:is_allocated).to_i == 1) :
+      amount_unallocated(true).zero?
+  end
+  
   def validate_on_update
     errors.add_to_base "Payments can't be updated after creation"
   end
