@@ -65,7 +65,7 @@ class ClientTest < ActiveSupport::TestCase
     unpaid_invoices << Factory.generate_invoice( client, 2.00,  :issued_on => (DateTime.now << 1), :is_published => true )
 
     client_unpaid_invoices = client.unpaid_invoices
-    
+
     assert_equal client_unpaid_invoices.uniq.length, client_unpaid_invoices.length
     client_unpaid_invoices.each{ |inv| assert unpaid_invoices.collect{|un_inv| un_inv.id}.include?(inv.id) }
   end
@@ -84,7 +84,7 @@ class ClientTest < ActiveSupport::TestCase
     
     # This is a basic test in an obvious and typical scenario. Note that we should be matching payments up when they equal invoices..
     invoices << Factory.generate_invoice( client, 23.00, :issued_on => (DateTime.now << 1), :is_published => true )
-    
+
     client_unassigned_payments = client.unassigned_payments
     
     assert_equal unassigned_payments.length, client_unassigned_payments.length

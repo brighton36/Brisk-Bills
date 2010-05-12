@@ -1,14 +1,34 @@
-*I want to delete that old ashbritt invoice ... I should be able to !
+Here's the current Models plan:
+	* 1. Get the invoices.reattach_activities to work via a collection and setting at invoice create time... 
+		* We'll likely need to refactor the activity code now, to return an array of 'suggested' activity ids that will be associated with the invoice
+		* (*then*)  we could nix this after-update functionality entirely, and do these associations the same way we're doing the invoice associations ...
+			* That wayy, all we have to do is an inject through the invoice.activities! (much smarter! and let's us grow better in the future)
 
-Here's the current plan:
-	* flesh out invoice_payment_test
+	* 2. Fix the amount_not_greater_than_payment_or_invoice_totals validate
+		* See the commented out TODO, and read
+		* Probably that commented block should go into a separate amount_not_greater_than_invoice_totals method
 
-  	* Now we can allow multiple invoices to be unpublished and published invoices to be deleted....
-  		* Probably some tests will need adjustment here.
-  		* remove Model error-raises too...
+	* 3. Flesh out the invoice_payment::test_bogus_allocations 
+	
+	* 4. Now we can allow multiple invoices to be unpublished and published invoices to be deleted..
+		* Write-new/revise-existing tests to accomdate this change
+		
+	* 5. We need to remove the clearing of payments on a is_published change.
+  		* THis causes a new problem, InvoicePayments need to be adjusted/removed/added, when the balance is adjusted...
+  			* THis could be complicated, b/c the activities themselves are what will change... this will need to be an after_change on the activities model
+  		* is_published is only used to determine whther to show a client their bill
+  		* Some tests will need adjustment here. Remove existing Model error-raises if/when appropriate...
+  		* Add some new tests to make sure our activity after_change hook is working the way it should...
+  			* In the case that an invoice price is adjusted after it was marked paid, it needs to change back to unpaid status:
+  			* Raise and lower the prices of invoices - make sure the markings adjust appropriately
+  			* Do we allow payment changes? I kind of think not ... they can create and delete these, for now...
   	
   	Now for the Controllers:
+  	* Invoice_id should be settable on the labor/materials/proposals/etc controllers. (though not the activities controller..not yet at least)
+  	
+  	* Keep in mind - we may need/want to update InvoicePayments and not just delete/create them (say an amount changes from $4.00 -> $3.00 on the same invoice/payment
   	* let's start by adding a detail that shows what payments are currently allocated..
+  	* We don't need to get sart about allocating, unless there's 0 allocated payments whcih are currently assigned...
   	* Show a warning if someone tries to commit a payment w/o allocating the full amount...
   	* Don't forget to Add the right show-action fields too (in the payments controller)
   	* There's should be a way in the invoices to show which payments were applied to the invoice... (perhaps on the edit detail - just a listing?)
