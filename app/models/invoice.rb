@@ -40,47 +40,11 @@ class Invoice < ActiveRecord::Base
   end
   
   def reattach_activities
-    included_activity_types = activity_types.collect{ |a| a.label.downcase }
-    unincluded_activity_types = ActivityType.find(:all).collect{ |a| a.label.downcase } - included_activity_types
-
-    # First we NULL'ify (remove) existing attachments that no longer should be:
-    nullify_conditions = []
-    nullify_parameters = [] 
-        
-    # Conditions for occurance adjutments
-    nullify_conditions << '(DATEDIFF(occurred_on, DATE(?)) > 0)'
-    nullify_parameters << issued_on
-    
-    # For the ActivityType Adjustments:
-    unless unincluded_activity_types.empty?
-      nullify_conditions << '(%s)' % ( ['activity_type = ?'] * unincluded_activity_types.size).join(' OR ')
-      nullify_parameters += unincluded_activity_types
-    end
-
-    Activity.update_all( 
-      'invoice_id = NULL', 
-      [ ['invoice_id = ?', 'is_published = ?', ('(%s)' % nullify_conditions.join(' OR ')) ].join(' AND ') ]+
-      [id, true]+nullify_parameters
-    ) unless new_record?
-    
+    included_activity_types = activity_types.collect{|a| a.label.downcase}
+   
     # Now we attach the new records :
-    update_where = [
-      ['invoice_id IS NULL'],
-      ['is_published = ?', true],
-      ['client_id = ?', client_id],
-      ['DATEDIFF(occurred_on, DATE(?)) <= 0', issued_on],
-      
-      # Slightly more complicated, for the type includes:
-      ( (included_activity_types.size > 0) ? 
-        [ '('+(['activity_type = ?'] * included_activity_types.size).join(' OR ')+')', included_activity_types ] :
-        [ 'activity_type IS NULL' ] )
-    ]
-    
-    Activity.update_all(
-      ['invoice_id = ?', id ],
-      # This is what ActiveRecord actually expects...
-      update_where.collect{|c| c[0]}.join(' AND ').to_a + update_where.reject{|c| c.length < 2 }.collect{|c| c[1]}.flatten
-    )
+    self.activities.clear
+    self.activities = Activity.recommended_invoice_activities_for client_id, issued_on, included_activity_types
   end
   
   def is_most_recent_invoice?

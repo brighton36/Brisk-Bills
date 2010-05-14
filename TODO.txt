@@ -1,6 +1,6 @@
 Here's the current Models plan:
 	* 1. Get the invoices.reattach_activities to work via a collection and setting at invoice create time... 
-		* We'll likely need to refactor the activity code now, to return an array of 'suggested' activity ids that will be associated with the invoice
+		* Why do we need that self.activities.clear? in there ....
 		* (*then*)  we could nix this after-update functionality entirely, and do these associations the same way we're doing the invoice associations ...
 			* That wayy, all we have to do is an inject through the invoice.activities! (much smarter! and let's us grow better in the future)
 
@@ -11,6 +11,8 @@ Here's the current Models plan:
 	* 3. Flesh out the invoice_payment::test_bogus_allocations 
 	
 	* 4. Now we can allow multiple invoices to be unpublished and published invoices to be deleted..
+		* Maybe we should re-enable Activity.validate_on_update ?
+			* Probably not - I say remove what's commented out b/c I think this should be working now ...
 		* Write-new/revise-existing tests to accomdate this change
 		
 	* 5. We need to remove the clearing of payments on a is_published change.
@@ -22,11 +24,15 @@ Here's the current Models plan:
   			* In the case that an invoice price is adjusted after it was marked paid, it needs to change back to unpaid status:
   			* Raise and lower the prices of invoices - make sure the markings adjust appropriately
   			* Do we allow payment changes? I kind of think not ... they can create and delete these, for now...
-  	
-  	Now for the Controllers:
+
+* Get the controllers working 'the old way' by manually specifying autmatic activity associations and invoice_payments and start using 0.7 pre on mario
+
+Now for the Controller Adjustments:
   	* Invoice_id should be settable on the labor/materials/proposals/etc controllers. (though not the activities controller..not yet at least)
+  	* Invoice create/update Activity assignments will likely need to be adjusted...
+  		* Be sure to adjust any invoice_create tasks as well...
   	
-  	* Keep in mind - we may need/want to update InvoicePayments and not just delete/create them (say an amount changes from $4.00 -> $3.00 on the same invoice/payment
+  	* Keep in mind - we may need/want to update InvoicePayments and not just delete/create them (say an allocaed amount changes from $4.00 -> $3.00 on the same invoice/payment
   	* let's start by adding a detail that shows what payments are currently allocated..
   	* We don't need to get sart about allocating, unless there's 0 allocated payments whcih are currently assigned...
   	* Show a warning if someone tries to commit a payment w/o allocating the full amount...
@@ -97,7 +103,7 @@ BUG: We should probably write a plugin that better displays delete errors in the
 	* Create two invoices - both unpublished, try to delete the oldest one
 
 * Use polymorphic relationship for sub activities
-	* Maybe ..
+	* I really don't like the way we're uing dont_validate_type_associations. ..
 
 * all delete confirms should go through the modal box - make this a plugin
 

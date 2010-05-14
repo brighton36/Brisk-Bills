@@ -30,7 +30,7 @@ class Activity < ActiveRecord::Base
     activity_type_sym = (activity_type.nil? or activity_type.empty?) ? nil : activity_type.to_sym
     
     unless dont_validate_type_associations or !self.class.reflections.has_key?(activity_type_sym)
-      type_association = instance_variable_get("@#{activity_type}")
+      type_association = self.send activity_type_sym
 
       if type_association.nil?
         errors.add activity_type_sym, 'missing'
@@ -67,9 +67,10 @@ class Activity < ActiveRecord::Base
     end
   end
   
-  def validate_on_update
-    errors.add_to_base "Activity can't be adjusted once its invoice is published" if is_published? and changed_attributes.length > 0 
-  end
+#  def validate_on_update
+#    # TODO: 
+#    # errors.add_to_base "Activity can't be adjusted once its invoice is published" if is_published? and changed_attributes.length > 0 
+#  end
   # /No updates/destroys
   
   def sub_activity
@@ -98,6 +99,29 @@ class Activity < ActiveRecord::Base
     @dont_validate_type_associations = true
     save!
     @dont_validate_type_associations = false
+  end
+  
+  # Given a client_id, cut_at_or_before date, and an array of types, we'll return the activities that should go into a corresponding invoice.
+  # THis was placed here, b/c its conceivable that in the future, we may support an array for the client_id parameter...
+  def self.recommended_invoice_activities_for(client_id, occurred_on_or_before, included_activity_types = [])
+    client_id = client_id.id if client_id.class == Client
+    
+    where = [
+      ['invoice_id IS NULL'],
+      ['is_published = ?', true],
+      ['client_id = ?', client_id],
+      ['DATEDIFF(occurred_on, DATE(?)) <= 0', occurred_on_or_before],
+      
+      # Slightly more complicated, for the type includes:
+      ( (included_activity_types and included_activity_types.size > 0) ? 
+        [ '('+(['activity_type = ?'] * included_activity_types.size).join(' OR ')+')', included_activity_types ] :
+        [ 'activity_type IS NULL' ] )
+    ]
+
+    Activity.find(
+      :all,
+      :conditions => where.collect{|c| c[0]}.join(' AND ').to_a + where.reject{|c| c.length < 2 }.collect{|c| c[1]}.flatten
+    )
   end
   
   handle_extensions

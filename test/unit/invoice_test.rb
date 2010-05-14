@@ -127,7 +127,7 @@ class InvoiceTest < ActiveSupport::TestCase
     ]
 
     assert_nothing_raised { invoice = Invoice.create! :client => client, :issued_on => (DateTime.now+1), :activity_types => @activity_types }
-    
+
     # Make sure the right activities were included:
     assert_equal 4, invoice.activities.length
     invoice.activities.each { |a| assert_equal true, valid_activities.include?(a.id) }
