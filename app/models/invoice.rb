@@ -40,11 +40,42 @@ class Invoice < ActiveRecord::Base
   end
   
   def reattach_activities
-    included_activity_types = activity_types.collect{|a| a.label.downcase}
-   
     # Now we attach the new records :
-    self.activities.clear
-    self.activities = Activity.recommended_invoice_activities_for client_id, issued_on, included_activity_types
+    self.activities = recommended_activities_for client_id, issued_on
+  end
+  
+  # Given a client_id, cut_at_or_before date, and (optionally) an array of types, we'll return the activities that should go into a corresponding invoice.
+  # THis was placed here, b/c its conceivable that in the future, we may support an array for the client_id parameter...
+  def recommended_activities_for(for_client_id, occurred_on_or_before, included_activity_types = nil)
+    for_client_id = for_client_id.id if for_client_id.class == Client
+    included_activity_types ||= activity_types.collect{|a| a.label.downcase}
+    
+    conditions = [
+      'is_published = ? AND client_id = ? AND DATEDIFF(occurred_on, DATE(?)) <= 0',
+      true,
+      for_client_id,
+      occurred_on_or_before
+    ]
+    
+    # Slightly more complicated, for the type includes:
+    if included_activity_types and included_activity_types.size > 0
+      conditions[0] += ' AND ('+(['activity_type = ?'] * included_activity_types.size).join(' OR ')+')'
+      conditions.push *included_activity_types
+    else
+      conditions[0] += ' AND activity_type IS NULL'
+    end
+    
+    if self.id
+      conditions[0] += ' AND ( invoice_id IS NULL OR invoice_id = ? )'
+      conditions << self.id
+    else
+      conditions[0] += ' AND invoice_id IS NULL'
+    end
+
+    Activity.find(
+      :all,
+      :conditions => conditions #where.collect{|c| c[0]}.join(' AND ').to_a + where.reject{|c| c.length < 2 }.collect{|c| c[1]}.flatten
+    )
   end
   
   def is_most_recent_invoice?

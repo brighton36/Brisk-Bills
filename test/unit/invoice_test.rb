@@ -167,7 +167,7 @@ class InvoiceTest < ActiveSupport::TestCase
     
     # Make sure they can't destroy:
     assert_equal false, invoice.destroy
-    
+
     # Make sure they can't update:
     invoice.comments = "This shouldn't be retained!"
     assert_raise(ActiveRecord::RecordInvalid) { invoice.save! }
