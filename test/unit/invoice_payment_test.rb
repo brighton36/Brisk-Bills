@@ -1,4 +1,6 @@
 require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../test_unit_factory_helper'
+
 
 class InvoicePaymentTest < ActiveSupport::TestCase
 
@@ -114,11 +116,42 @@ class InvoicePaymentTest < ActiveSupport::TestCase
     assert_equal 0, InvoicePayment.find(:all).length
   end
 
-  def test_bogus_allocations
-    #  TODO: * People can't specifify more payment_allocations than the total payment's amount
-    #  TODO: * People can't specifify more invoice_allocations than the total invoice's amount
-    #     TODO: Make sure the updates do/don't trigger an error too ...
+  def test_bogus_invoice_payment_amounts
+    client = Factory.create_client
+    
+    ip = nil
+    
+    #  People can't specifify more payment_allocations than the total payment's amount
+    invoice = Factory.generate_invoice client,  100.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
+    paymentA = Factory.generate_payment client,  20.00, :invoice_assignments => []
+    paymentB = Factory.generate_payment client, 110.00, :invoice_assignments => []
+    
+    # Let's make sure single payments/inoices over the threshold fail...
+    ip = InvoicePayment.new :payment => paymentA, :invoice => invoice, :amount => 21.00
+    assert_equal false, ip.valid?
+    assert_equal "exceeds the payment's remainder amount", ip.errors.on('amount')
+
+    ip = InvoicePayment.create :payment => paymentB, :invoice => invoice, :amount => 101.00
+    assert_equal false, ip.valid?
+    assert_equal "exceeds the invoice's remainder balance", ip.errors.on('amount')
+        
+    # TODO: Now try the case of multiple payments which exceed the invoice balance..
+    # TODO: Now try the case of multiple invoices which exceed the payment balance..
+    # TODO: Make sure that IP updates do/don't trigger an error when appropriate ...
+  end
+  
+  def test_invoice_payment_amount_not_negative
     #  TODO: * People can't specifify negative payment_allocations
+  end
+
+  def test_bogus_invoice_allocations
+    # TODO: People can't specifify more invoice_allocations than the total invoice's amount
+    # TODO: Make sure that invoice collection updates do/don't trigger an error when appropriate ...
+  end
+
+  def test_bogus_payment_allocations
+    #  TODO: * People can't specifify more payment_allocations than the total payments's amount
+    # TODO: Make sure that invoice collection updates do/don't trigger an error when appropriate ...
   end
 
 end

@@ -67,11 +67,14 @@ class Activity < ActiveRecord::Base
     end
   end
   
-#  def validate_on_update
-#    # TODO: 
-#    # errors.add_to_base "Activity can't be adjusted once its invoice is published" if is_published? and changed_attributes.length > 0 
-#  end
-  # /No updates/destroys
+  def validate_on_update
+    errors.add_to_base "Activity can't be adjusted once its invoice is published" if ( 
+      # If we're published, and someone's trying to change us ....
+      is_published? and changed_attributes.length > 0 and 
+      # *But* this change isn't the case of an invoice association from nil to (not nil) [this case is cool]:
+      !(changed_attributes.length == 1 and changed_attributes.keys.include? "invoice_id" and invoice_id_change[0].nil?)
+    )
+  end
   
   def sub_activity
     send activity_type unless activity_type.nil?

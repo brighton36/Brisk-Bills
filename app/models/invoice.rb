@@ -6,8 +6,6 @@ class Invoice < ActiveRecord::Base
   before_destroy :ensure_were_the_most_recent
 
   before_update :ensure_not_published_on_update
-
-  after_save :reattach_activities
   
   before_save :clear_invoice_payments_if_unpublished
 
@@ -37,45 +35,6 @@ class Invoice < ActiveRecord::Base
     
   def invalid_if_published(collection_record = nil)
     raise "Can't adjust an already-published invoice." if !new_record? and is_published
-  end
-  
-  def reattach_activities
-    # Now we attach the new records :
-    self.activities = recommended_activities_for client_id, issued_on
-  end
-  
-  # Given a client_id, cut_at_or_before date, and (optionally) an array of types, we'll return the activities that should go into a corresponding invoice.
-  # THis was placed here, b/c its conceivable that in the future, we may support an array for the client_id parameter...
-  def recommended_activities_for(for_client_id, occurred_on_or_before, included_activity_types = nil)
-    for_client_id = for_client_id.id if for_client_id.class == Client
-    included_activity_types ||= activity_types.collect{|a| a.label.downcase}
-    
-    conditions = [
-      'is_published = ? AND client_id = ? AND DATEDIFF(occurred_on, DATE(?)) <= 0',
-      true,
-      for_client_id,
-      occurred_on_or_before
-    ]
-    
-    # Slightly more complicated, for the type includes:
-    if included_activity_types and included_activity_types.size > 0
-      conditions[0] += ' AND ('+(['activity_type = ?'] * included_activity_types.size).join(' OR ')+')'
-      conditions.push *included_activity_types
-    else
-      conditions[0] += ' AND activity_type IS NULL'
-    end
-    
-    if self.id
-      conditions[0] += ' AND ( invoice_id IS NULL OR invoice_id = ? )'
-      conditions << self.id
-    else
-      conditions[0] += ' AND invoice_id IS NULL'
-    end
-
-    Activity.find(
-      :all,
-      :conditions => conditions #where.collect{|c| c[0]}.join(' AND ').to_a + where.reject{|c| c.length < 2 }.collect{|c| c[1]}.flatten
-    )
   end
   
   def is_most_recent_invoice?
@@ -177,6 +136,45 @@ class Invoice < ActiveRecord::Base
     (attribute_present? :amount_outstanding_in_cents and !force_reload) ? 
       Money.new(read_attribute(:amount_outstanding_in_cents).to_i) :
       (amount(true) - amount_paid(true))
+  end
+
+  # This is a shortcut to the self.recommended_activities_for , and is provided as a shortcut when its necessary to update an existing invoice's
+  # activities inclusion
+  def recommended_activities
+    Invoice.recommended_activities_for client_id, issued_on, self.activity_types, self.id
+  end
+
+  # Given a client_id, cut_at_or_before date, and (optionally) an array of types, we'll return the activities that should go into a corresponding invoice.
+  # THis was placed here, b/c its conceivable that in the future, we may support an array for the client_id parameter...
+  def self.recommended_activities_for(for_client_id, occurred_on_or_before, included_activity_types, for_invoice_id = nil)
+    for_client_id = for_client_id.id if for_client_id.class == Client
+    for_invoice_id = for_invoice_id.id if for_invoice_id.class == Invoice
+    
+    included_activity_types = included_activity_types.collect{|a| a.label.downcase}
+    
+    conditions = [
+      'is_published = ? AND client_id = ? AND DATEDIFF(occurred_on, DATE(?)) <= 0',
+      true,
+      for_client_id,
+      occurred_on_or_before
+    ]
+    
+    # Slightly more complicated, for the type includes:
+    if included_activity_types and included_activity_types.size > 0
+      conditions[0] += ' AND ('+(['activity_type = ?'] * included_activity_types.size).join(' OR ')+')'
+      conditions.push *included_activity_types
+    else
+      conditions[0] += ' AND activity_type IS NULL'
+    end
+    
+    if for_invoice_id
+      conditions[0] += ' AND ( invoice_id IS NULL OR invoice_id = ? )'
+      conditions << for_invoice_id
+    else
+      conditions[0] += ' AND invoice_id IS NULL'
+    end
+
+    Activity.find :all, :conditions => conditions
   end
 
   def self.find_with_totals( how_many = :all, options = {} )

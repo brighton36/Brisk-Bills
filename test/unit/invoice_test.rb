@@ -126,7 +126,16 @@ class InvoiceTest < ActiveSupport::TestCase
       Factory.create_adjustment.activity.id
     ]
 
-    assert_nothing_raised { invoice = Invoice.create! :client => client, :issued_on => (DateTime.now+1), :activity_types => @activity_types }
+    assert_nothing_raised do
+      issued_on = (DateTime.now+1)
+
+      invoice = Invoice.create!(
+        :client => client, 
+        :issued_on => issued_on, 
+        :activity_types => @activity_types,
+        :activities => Invoice.recommended_activities_for(client, issued_on, @activity_types)
+      )
+    end
 
     # Make sure the right activities were included:
     assert_equal 4, invoice.activities.length
@@ -155,10 +164,12 @@ class InvoiceTest < ActiveSupport::TestCase
     invoice = nil
     
     assert_nothing_raised do
+      issued_on = DateTime.now
       invoice = Invoice.create!(
         :client => client, 
-        :issued_on => DateTime.now,
-        :activity_types => @activity_types 
+        :issued_on => issued_on,
+        :activity_types => @activity_types,
+        :activities => Invoice.recommended_activities_for(client, issued_on, @activity_types)
       )
 
       invoice.is_published = true
@@ -221,7 +232,14 @@ class InvoiceTest < ActiveSupport::TestCase
     ]
     
     invoice = nil
-    assert_nothing_raised { invoice = Invoice.create! :client => client, :issued_on => present_date, :activity_types => @activity_types  }
+    assert_nothing_raised do
+      invoice = Invoice.create!( 
+        :client => client, 
+        :issued_on => present_date,
+        :activity_types => @activity_types,
+        :activities => Invoice.recommended_activities_for(client, present_date, @activity_types)
+      )
+    end
     
     # Make sure the right activities were included:
     assert_equal 4, invoice.activities(true).size
@@ -234,6 +252,7 @@ class InvoiceTest < ActiveSupport::TestCase
     # Now let's set to the way future:
     assert_nothing_raised do
       invoice.issued_on = present_date >> 2
+      invoice.activities = invoice.recommended_activities
       invoice.save!
     end
     
@@ -247,6 +266,7 @@ class InvoiceTest < ActiveSupport::TestCase
     # Now let's set back to present:
     assert_nothing_raised do
       invoice.issued_on = present_date
+      invoice.activities = invoice.recommended_activities
       invoice.save!
     end
     
@@ -285,7 +305,7 @@ class InvoiceTest < ActiveSupport::TestCase
     a_type_map = HashWithIndifferentAccess.new
     @activity_types.each{|at| a_type_map[at.label.downcase] = at }
     
-    # First, let's Make sure this includion feature actually works during a create
+    # First, let's Make sure this inclusion feature actually works during a create
     present_date = DateTime.now
     past_date    = (present_date << 1)
     
@@ -306,7 +326,8 @@ class InvoiceTest < ActiveSupport::TestCase
       invoice = Invoice.create!(
         :client => client, 
         :issued_on => present_date, 
-        :activity_types => [ a_type_map[:material], a_type_map[:labor] ]
+        :activity_types => [ a_type_map[:material], a_type_map[:labor] ],
+        :activities => Invoice.recommended_activities_for(client, present_date, [ a_type_map[:material], a_type_map[:labor] ])
       )
     end
 
@@ -322,6 +343,7 @@ class InvoiceTest < ActiveSupport::TestCase
     # Let's remove a type and see if this works the way it should:
     assert_nothing_raised do
       invoice.activity_types.delete a_type_map[:material]
+      invoice.activities = invoice.recommended_activities
       invoice.save!
       
       # We have to expire the cache here....
@@ -340,6 +362,7 @@ class InvoiceTest < ActiveSupport::TestCase
     # Now let's add the rest of the types, and see if it works the way it should:
     assert_nothing_raised do
       invoice.activity_types.push a_type_map[:material], a_type_map[:proposal]
+      invoice.activities = invoice.recommended_activities
       invoice.save!
       
       # We have to expire the cache here....
@@ -389,15 +412,18 @@ class InvoiceTest < ActiveSupport::TestCase
 
     subactivities = [labor, material, proposal, adjustment]
     
+    present_date = DateTime.now
+    
     invoice_src = Invoice.create!(
       :client => client_src, 
-      :issued_on => DateTime.now,
-      :activity_types => @activity_types 
+      :issued_on => present_date,
+      :activity_types => @activity_types,
+      :activities => Invoice.recommended_activities_for(client_src, present_date, @activity_types)
     )
 
     invoice_dest = Invoice.create!(
       :client => client_dest, 
-      :issued_on => DateTime.now
+      :issued_on => present_date
     )
     
     subactivities.each do |activity_type|

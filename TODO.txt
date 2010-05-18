@@ -1,30 +1,39 @@
 Here's the current Models plan:
-	* 1. Get the invoices.reattach_activities to work via a collection and setting at invoice create time... 
-		* (*then*)  we could nix this after-update functionality entirely, and do these associations the same way we're doing the invoice associations ...
-			* That wayy, all we have to do is an inject through the invoice.activities! (much smarter! and let's us grow better in the future)
-
-	* 2. Fix the amount_not_greater_than_payment_or_invoice_totals validate
-		* See the commented out TODO, and read
-		* Probably that commented block should go into a separate amount_not_greater_than_invoice_totals method
-
 	* 3. Flesh out the invoice_payment::test_bogus_allocations 
+		* test_bogus_invoice_payment_amounts first
+		* then test_invoice_payment_amount_not_negative
+		* then, WE need to add validations in the Invoice and payment models ...
+			* and finish up the last of the invoice_payment tests...
+		
+	* 3.5 We should take activity_types out of the invoice object ... there's no need for them there anymore
+		* We do need the activity type table, and we'll keep it there, but, remove the habtm table that joins invoices, and we can compute the types
+		  based off what's been included thus far in the controller... 
 	
 	* 4. Now we can allow multiple invoices to be unpublished and published invoices to be deleted..
-		* Maybe we should re-enable Activity.validate_on_update ?
-			* Probably not - I say remove what's commented out b/c I think this should be working now ...
+		* Maybe we should re-move Activity.validate_on_update ?
+			* I say keep it. I think activities should change n published inovices...
 		* Write-new/revise-existing tests to accomdate this change
 		
 	* 5. We need to remove the clearing of payments on a is_published change.
+		* WE should think HARD about whether to allow activities to be updateable in a published invoice...
+			* Another nicety- is that if we force users to publish and unpublish, then we can assign version numbers to the bill
+			* WHich is a nice feature ....
   		* THis causes a new problem, InvoicePayments need to be adjusted/removed/added, when the balance is adjusted...
   			* THis could be complicated, b/c the activities themselves are what will change... this will need to be an after_change on the activities model
-  		* is_published is only used to determine whther to show a client their bill
+  		* is_published is only used to determine whther to show a client their bill and whether to solidify the activities in that bill
   		* Some tests will need adjustment here. Remove existing Model error-raises if/when appropriate...
   		* Add some new tests to make sure our activity after_change hook is working the way it should...
-  			* In the case that an invoice price is adjusted after it was marked paid, it needs to change back to unpaid status:
-  			* Raise and lower the prices of invoices - make sure the markings adjust appropriately
-  			* Do we allow payment changes? I kind of think not ... they can create and delete these, for now...
+  			* In the case that an invoice price is adjusted (up or down) after it was marked paid, it needs to change back to unpaid status (should already be done - but, make this a test...)
+  			* In the case that a payment price is adjusted (up or down) after it was marked paid, it needs to change back to unpaid status
+  				* But, should we allow payment changes? I kind of think not ... they can create and delete these, for now...
+  				* THey might be taking payments online - and those should not be editable ....
 
-* Get the controllers working 'the old way' by manually specifying autmatic activity associations and invoice_payments and start using 0.7 pre on mario
+* Get the controllers working 'the old way' by ...
+	* manually specifying otherwise-autmatic activity associations in the invoices controller
+	* Specifying invoice_payments in the controller (just using the recommended ones
+	* algorithmically etermining the invoice activity_types...
+	* start using 0.7 pre on mario
+	
 
 Now for the Controller Adjustments:
   	* Invoice_id should be settable on the labor/materials/proposals/etc controllers. (though not the activities controller..not yet at least)
@@ -44,48 +53,54 @@ Now for the Controller Adjustments:
 
 * Start using 0.7-pre on mario...
 
-* All of our read_attribute stuff, isn't "Caching"the newest values. (I think - write a test for this ...)
-	* Use a find_invoice_with_totals
-		* then update an invoice
-		* then run an invoice.amunt(true)
-		* tune run an invice.amount .... This this treturn the prior amount value?
-	* THis has to be fixed/ested for all read attributes...
-
-* We should put proper transactions in place here too while we're in here...
-* I'd like to see a payment identifier listed in the payments list ... (check no/cc#)
-* Add Existing Client Representatives should show them in alaphabetical order
-
 * We should add an unpublished Open Invoices controller ...
+
+* I'd like to see a payment identifier listed in the payments list ... (check no/cc#)
 
 * Payment:::is_allocated should probably be added to a view and then list controller...
 	* Code is there - but no view supports it...
 
+* Add Existing Client Representatives should show them in alaphabetical order
+
 * We should put tax before cost in the activities with prices controller...
 
-* Publish 0.7
-
-* Probably - when prompted to delete an invoice, we should give the option to also remove the activities (or preserve them and leave them unsassigned)
+* WHen Assigning employees to labr_rates - the form stays open between updates and shouldnt...
 
 * Move_to_invoice function should allow us to Move_to '(Unassigned)', and ideally that would be a radio group
+
+* Publish 0.7 !!!!!
+---------------
+* Probably - when prompted to delete an invoice, we should give the option to also remove the activities (or preserve them and leave them unsassigned)
 
 * Translate the time into the local zone for the user, probably each user/client should have a zone associtation in their account.
 	*  Its already stored in UTC everywhere...
 	* We need to factor this into invoices too, I think
 
 * Public interface
+
 * Showing the Client eventlogs as an unedutable nested list  might be nice... Hell, employee eventlogs too....
-* CC payments handling - not a plugin
 
-* Publish 0.8
-
-* Plugin interface...
+* Publish 0.8 !!!!!
+---------------
+* CC payments handling built-in- not a plugin
 
 * Revise the site-settings interfaces...
 
----------------
-LONGER-TERM: (Needs re-prioritization...)
+* Plugin interface...
 
-Feature:
+* Publish 0.9 !!!!!
+---------------
+---------------
+LONGER-TERM Features: (Needs re-prioritization...)
+
+* We should audit for proper transaction support, and test!
+
+* All of our read_attribute stuff, isn't "Caching"the newest values. (I think - write a test for this ...)
+	* Use a find_invoice_with_totals
+		* then update an invoice
+		* then run an invoice.amunt(true)
+		* tune run an invice.amount .... This this treturn the prior amount value?
+	* THis has to be fixed/ested for all read attributes...
 
 * I'd like some tests cases written for the view objects, make sure they work just like the non-views... ...
 	* Boy this is getting hard, I think it has something to do wioth the transactions... Oddly, the tests work on their own, outside of the rake test	

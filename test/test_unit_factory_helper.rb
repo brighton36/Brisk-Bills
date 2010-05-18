@@ -140,7 +140,8 @@ module Factory
       { 
       :activity_types => activity_types, 
       :client => client,
-      :payment_assignments => (attributes[:is_published]) ? client.recommend_payment_assignments_for(total) : []
+      :payment_assignments => (attributes[:is_published]) ? client.recommend_payment_assignments_for(total) : [],
+      :activities => Invoice.recommended_activities_for(client, attributes[:issued_on], activity_types)
       }.merge(attributes)
     )
     

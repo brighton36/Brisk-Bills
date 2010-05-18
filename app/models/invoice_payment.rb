@@ -24,7 +24,7 @@ class InvoicePayment < ActiveRecord::Base
   def amount_not_greater_than_payment_or_invoice_totals
     conditions_fields = []
     conditions_values = []    
-    
+
     # If we're updating an existing payment, it gets a little more complicated:
     if id
       conditions_fields << 'id != ?'
@@ -39,15 +39,14 @@ class InvoicePayment < ActiveRecord::Base
         ).to_i
       ) + amount)
 
-    # TODO: This doesn't work, b/c we're checking the invoie amount at the time of creation... Problem is, that invoice_activities don't get associated until after validation!
-    # So, this means all new invoices will shiow a balance of zero here...
-    # Also - we probably need t put this in another method ....
-    # errors.add :amount, "exceeds the invoice's remainder balance" if invoice_id and invoice.amount < (
-    #  Money.new(
-    #    InvoicePayment.sum(
-    #      :amount_in_cents, 
-    #      :conditions => [(conditions_fields+['invoice_id = ?']).join(' AND ')]+conditions_values+[invoice_id] 
-    #    ).to_i
-    #  ) + amount)
+    # This could act flaky on you if you didn't specify activities for your invoice at creation time (and did specify invoice_payments)
+    # this , b/c we're checking the invoice amount below and unlike payments, invoices have no amount field
+     errors.add :amount, "exceeds the invoice's remainder balance" if invoice_id and invoice.amount < (
+      Money.new(
+        InvoicePayment.sum(
+          :amount_in_cents, 
+          :conditions => [(conditions_fields+['invoice_id = ?']).join(' AND ')]+conditions_values+[invoice_id] 
+        ).to_i
+      ) + amount)
   end
 end
