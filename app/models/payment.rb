@@ -10,7 +10,8 @@ class Payment < ActiveRecord::Base
   
   validates_presence_of :client_id, :payment_method_id
   validates_numericality_of :amount, :allow_nil => false
-  
+  validate :validate_invoice_payments_not_greater_than_amount
+    
   money :amount, :currency => false
   
   def initialize(*args)
@@ -36,6 +37,10 @@ class Payment < ActiveRecord::Base
     (attribute_present? :is_allocated  and !force_reload) ? 
       (read_attribute(:is_allocated).to_i == 1) :
       amount_unallocated(true).zero?
+  end
+  
+  def validate_invoice_payments_not_greater_than_amount
+    errors.add :invoice_assignments, "total is greater than payment amount" if self.invoice_assignments.inject(Money.new(0)){|sum,ip| ip.amount+sum } > self.amount
   end
   
   def validate_on_update

@@ -1,7 +1,4 @@
 Here's the current Models plan:
-	* 3. Flesh out the invoice_payment::test_bogus_payment_allocations
-		* Use test_bogus_invoice_allocations as a model
-
 	* I think we should revisit process_total in the invoice
 		* We should work directly off the activities collections if not (true)
 		* maybe see if we're using these elsewhere? ...

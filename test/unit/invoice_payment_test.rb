@@ -175,7 +175,7 @@ class InvoicePaymentTest < ActiveSupport::TestCase
   def test_bogus_invoice_allocations
     client = Factory.create_client
     
-    # This is a repeat of some of the above tests, but we're ensuring that we fail during the model creation
+    # This is a repeat of some of the above tests, but we're ensuring that we fail during the invoice model's creation
     paymentA = Factory.generate_payment client,  4.00, :invoice_assignments => []
     paymentB = Factory.generate_payment client,  8.00, :invoice_assignments => []
     paymentC = Factory.generate_payment client,  8.00, :invoice_assignments => []
@@ -198,8 +198,29 @@ class InvoicePaymentTest < ActiveSupport::TestCase
   end
 
   def test_bogus_payment_allocations
-    #  TODO: * People can't specifify more payment_allocations than the total payments's amount
-    # TODO: Make sure that payment collection updates do/don't trigger an error when appropriate ...
+    client = Factory.create_client
+    
+    # This is a repeat of some of the above tests, but we're ensuring that we fail during the payment model's creation
+    invoiceA = Factory.generate_invoice client,  3.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
+    invoiceB = Factory.generate_invoice client,  6.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
+    invoiceC = Factory.generate_invoice client,  6.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
+    
+    assert_raise ActiveRecord::RecordInvalid do
+      Factory.generate_payment client,  12.00, :invoice_assignments => [
+        InvoicePayment.new( :invoice => invoiceA, :amount => 3.00 ),
+        InvoicePayment.new( :invoice => invoiceB, :amount => 6.00 ),
+        InvoicePayment.new( :invoice => invoiceC, :amount => 4.00 ) # <-- this one's invalid, b/c its greater than the payment price
+      ]
+    end
+
+    assert_raise ActiveRecord::RecordInvalid do
+      Factory.generate_payment client,  12.00, :invoice_assignments => [
+        InvoicePayment.new( :invoice => invoiceA, :amount => 6.00 ),# <-- this one's invalid, b/c its greater than the invoice total
+        InvoicePayment.new( :invoice => invoiceB, :amount => 3.00 ),
+        InvoicePayment.new( :invoice => invoiceC, :amount => 3.00 ) 
+      ]
+    end
+
   end
 
 end
