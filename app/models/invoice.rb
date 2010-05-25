@@ -23,6 +23,8 @@ class Invoice < ActiveRecord::Base
   )
   
   validates_presence_of :client_id, :issued_on
+  
+  validate :validate_invoice_payments_not_greater_than_amount
 
   # This just ends up being useful in a couple places
   ACTIVITY_TOTAL_SQL = '(IF(activities.cost_in_cents IS NULL, 0, activities.cost_in_cents)+IF(activities.tax_in_cents IS NULL, 0, activities.tax_in_cents))'
@@ -73,6 +75,10 @@ class Invoice < ActiveRecord::Base
     ) if changes.has_key?('is_published') and is_published_was and !is_most_recent_invoice?
   end
 
+  def validate_invoice_payments_not_greater_than_amount
+    errors.add :payment_assignments, "total is greater than invoice amount" if self.payment_assignments.inject(Money.new(0)){|sum,ip| ip.amount+sum } > self.amount
+  end
+
   def taxes_total
     process_total :taxes_total, :tax_in_cents
   end
@@ -84,7 +90,7 @@ class Invoice < ActiveRecord::Base
   def amount( force_reload = false )
     (attribute_present? :amount_in_cents and !force_reload) ?
       Money.new(read_attribute(:amount_in_cents).to_i) :
-      process_total( :amount, ACTIVITY_TOTAL_SQL )
+      self.activities.inject(Money.new(0)){|sum,a| sum + ((a.cost) ? a.cost : Money.new(0)) + ((a.tax) ? a.tax : Money.new(0)) }
   end
   
   def grand_total

@@ -1,9 +1,14 @@
 Here's the current Models plan:
-	* 3. Flesh out the invoice_payment::test_bogus_allocations 
-		* test_bogus_invoice_payment_amounts first
-		* then test_invoice_payment_amount_not_negative
-		* then, WE need to add validations in the Invoice and payment models ...
-			* and finish up the last of the invoice_payment tests...
+	* 3. Flesh out the invoice_payment::test_bogus_payment_allocations
+		* Use test_bogus_invoice_allocations as a model
+
+	* I think we should revisit process_total in the invoice
+		* We should work directly off the activities collections if not (true)
+		* maybe see if we're using these elsewhere? ...
+		* And probaby we should remove that grand_total method...
+
+	* WHat if someone adjusts the issued_date or the types, and then saves...
+		* Now we'll have a greater invoice payment sum than we the invoice balance ...
 		
 	* 3.5 We should take activity_types out of the invoice object ... there's no need for them there anymore
 		* We do need the activity type table, and we'll keep it there, but, remove the habtm table that joins invoices, and we can compute the types
@@ -53,6 +58,8 @@ Now for the Controller Adjustments:
 
 * Start using 0.7-pre on mario...
 
+* (negative numbers) on invoices_with_cost are showing negative sign ...
+
 * We should add an unpublished Open Invoices controller ...
 
 * I'd like to see a payment identifier listed in the payments list ... (check no/cc#)
@@ -70,6 +77,11 @@ Now for the Controller Adjustments:
 
 * Publish 0.7 !!!!!
 ---------------
+
+* What happens with negative baance invoices? 
+	* Payments can't be negative - so do they show up as paid? 
+	* THere's no negative payments right?
+
 * Probably - when prompted to delete an invoice, we should give the option to also remove the activities (or preserve them and leave them unsassigned)
 
 * Translate the time into the local zone for the user, probably each user/client should have a zone associtation in their account.

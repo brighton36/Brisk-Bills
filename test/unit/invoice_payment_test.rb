@@ -121,37 +121,85 @@ class InvoicePaymentTest < ActiveSupport::TestCase
     
     ip = nil
     
-    #  People can't specifify more payment_allocations than the total payment's amount
     invoice = Factory.generate_invoice client,  100.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
     paymentA = Factory.generate_payment client,  20.00, :invoice_assignments => []
     paymentB = Factory.generate_payment client, 110.00, :invoice_assignments => []
     
-    # Let's make sure single payments/inoices over the threshold fail...
+    #  Test: People can't specifify more allocations than the total payment's amount
     ip = InvoicePayment.new :payment => paymentA, :invoice => invoice, :amount => 21.00
     assert_equal false, ip.valid?
     assert_equal "exceeds the payment's remainder amount", ip.errors.on('amount')
 
+    #  Test: People can't specifify more allocations than the total invoice's amount
     ip = InvoicePayment.create :payment => paymentB, :invoice => invoice, :amount => 101.00
     assert_equal false, ip.valid?
     assert_equal "exceeds the invoice's remainder balance", ip.errors.on('amount')
         
-    # TODO: Now try the case of multiple payments which exceed the invoice balance..
-    # TODO: Now try the case of multiple invoices which exceed the payment balance..
-    # TODO: Make sure that IP updates do/don't trigger an error when appropriate ...
+    #  Test: Trying the case of a second/multiple payments which exceed the invoice balance..
+    invoice = Factory.generate_invoice client,  20.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
+    paymentA = Factory.generate_payment client,  12.00, :invoice_assignments => [
+      InvoicePayment.new( :invoice => invoice, :amount => 12.00)
+    ]
+    paymentB = Factory.generate_payment client,  12.00, :invoice_assignments => []
+
+    ip = InvoicePayment.create :payment => paymentB, :invoice => invoice, :amount => 12.00
+    assert_equal false, ip.valid?
+    assert_equal "exceeds the invoice's remainder balance", ip.errors.on('amount')
+
+    # Now try the case of multiple invoices which exceed the payment balance..
+    invoiceA = Factory.generate_invoice client,  40.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
+    invoiceB = Factory.generate_invoice client,  35.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
+    
+    payment = Factory.generate_payment client,  70.00, :invoice_assignments => [
+      InvoicePayment.new( :invoice => invoiceA, :amount => 40.00)
+    ]
+
+    ip = InvoicePayment.create :payment => payment, :invoice => invoiceB, :amount => 35.00
+    assert_equal false, ip.valid?
+    assert_equal "exceeds the payment's remainder amount", ip.errors.on('amount')
   end
   
   def test_invoice_payment_amount_not_negative
-    #  TODO: * People can't specifify negative payment_allocations
+    client = Factory.create_client
+    
+    # People can't specifify negative payment_allocations
+    invoice = Factory.generate_invoice client,  5.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
+    payment = Factory.generate_payment client,  5.00, :invoice_assignments => []
+    
+    ip = InvoicePayment.create :payment => payment, :invoice => invoice, :amount => -5.00
+    
+    assert_equal false, ip.valid?
+    assert_equal "must be greater than or equal to 0", ip.errors.on('amount')
   end
 
   def test_bogus_invoice_allocations
-    # TODO: People can't specifify more invoice_allocations than the total invoice's amount
-    # TODO: Make sure that invoice collection updates do/don't trigger an error when appropriate ...
+    client = Factory.create_client
+    
+    # This is a repeat of some of the above tests, but we're ensuring that we fail during the model creation
+    paymentA = Factory.generate_payment client,  4.00, :invoice_assignments => []
+    paymentB = Factory.generate_payment client,  8.00, :invoice_assignments => []
+    paymentC = Factory.generate_payment client,  8.00, :invoice_assignments => []
+    
+    assert_raise ActiveRecord::RecordInvalid do
+      Factory.generate_invoice client,  16.00,  :issued_on => (DateTime.now << 1), :payment_assignments => [
+        InvoicePayment.new( :payment => paymentA, :amount => 4.00 ),
+        InvoicePayment.new( :payment => paymentB, :amount => 8.00 ),
+        InvoicePayment.new( :payment => paymentC, :amount => 5.00 ) # <-- this one's invalid, b/c its greater than the invoice price
+      ]
+    end
+    
+    assert_raise ActiveRecord::RecordInvalid do
+      Factory.generate_invoice client,  16.00,  :issued_on => (DateTime.now << 1), :payment_assignments => [
+        InvoicePayment.new( :payment => paymentA, :amount => 8.00 ), # <-- this one's invalid, b/c its greater than the payment total
+        InvoicePayment.new( :payment => paymentB, :amount => 4.00 ),
+        InvoicePayment.new( :payment => paymentC, :amount => 4.00 )
+      ]
+    end
   end
 
   def test_bogus_payment_allocations
     #  TODO: * People can't specifify more payment_allocations than the total payments's amount
-    # TODO: Make sure that invoice collection updates do/don't trigger an error when appropriate ...
+    # TODO: Make sure that payment collection updates do/don't trigger an error when appropriate ...
   end
 
 end

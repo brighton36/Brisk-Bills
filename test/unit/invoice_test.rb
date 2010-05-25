@@ -443,6 +443,8 @@ class InvoiceTest < ActiveSupport::TestCase
       end
     end
 
+    invoice_dest.activities(true)
+    
     assert_equal 2448.99, invoice_dest.amount
     
     assert_equal 2448.99, (invoice_dest.sub_total+invoice_dest.taxes_total)
@@ -459,6 +461,8 @@ class InvoiceTest < ActiveSupport::TestCase
     assert_equal invoice_src.id, labor.activity.invoice_id
     assert_equal client_src.id, labor.activity.client_id
 
+    invoice_dest.activities(true)
+    
     assert_equal 2447.0, invoice_dest.amount
     
     assert_equal 2447.0, (invoice_dest.sub_total+invoice_dest.taxes_total)
