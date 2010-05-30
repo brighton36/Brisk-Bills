@@ -7,6 +7,7 @@ class Invoice < ActiveRecord::Base
 
   before_update :ensure_not_published_on_update
   
+  # NOTE: If we ever try removing this - we have a problem with invoice_payments exceeding the invoice price when activities are added/removed
   before_save :clear_invoice_payments_if_unpublished
 
   belongs_to :client
@@ -79,12 +80,16 @@ class Invoice < ActiveRecord::Base
     errors.add :payment_assignments, "total is greater than invoice amount" if self.payment_assignments.inject(Money.new(0)){|sum,ip| ip.amount+sum } > self.amount
   end
 
-  def taxes_total
-    process_total :taxes_total, :tax_in_cents
+  def taxes_total( force_reload = false )
+    (attribute_present? :tax_in_cents and !force_reload) ?
+      Money.new(read_attribute(:tax_in_cents).to_i) :
+      self.activities.inject(Money.new(0)){|sum,a| sum + ((a.tax) ? a.tax : Money.new(0)) }
   end
 
-  def sub_total
-    process_total :sub_total, :cost_in_cents
+  def sub_total( force_reload = false )
+    (attribute_present? :cost_in_cents and !force_reload) ?
+      Money.new(read_attribute(:cost_in_cents).to_i) :
+      self.activities.inject(Money.new(0)){|sum,a| sum + ((a.cost) ? a.cost : Money.new(0)) }
   end
   
   def amount( force_reload = false )
@@ -93,9 +98,7 @@ class Invoice < ActiveRecord::Base
       self.activities.inject(Money.new(0)){|sum,a| sum + ((a.cost) ? a.cost : Money.new(0)) + ((a.tax) ? a.tax : Money.new(0)) }
   end
   
-  def grand_total
-    process_total :grand_total, ACTIVITY_TOTAL_SQL
-  end
+  alias :grand_total :amount
   
   def name  
     '"%s" Invoice on %s'  % [ (client) ? client.company_name : '(Unknown Client)', issued_on.strftime("%m/%d/%Y %I:%M %p") ]
@@ -230,10 +233,6 @@ class Invoice < ActiveRecord::Base
   end
 
   private 
-  
-  def process_total(name, field_sql)   
-    Money.new Activity.sum(field_sql, :conditions => ['invoice_id = ?', id]).to_i
-  end
 
   # When/if we save an invoice, and we determine that its changed or created as unpublished, we need to ensure that no payments are assigned to the invoice.
   # This means deleting any existing assignments should there be any.
