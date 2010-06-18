@@ -71,13 +71,16 @@ class Invoice < ActiveRecord::Base
       "Invoice can't be updated once published."
     ) if is_published and changes.reject{|k,v| k == 'is_published'}.length > 0
 
-    errors.add_to_base(
-      "Invoice can't be unpublished, unless its the newest invoice in the client's queue."
-    ) if changes.has_key?('is_published') and is_published_was and !is_most_recent_invoice?
   end
 
   def validate_invoice_payments_not_greater_than_amount
-    errors.add :payment_assignments, "total is greater than invoice amount" if self.payment_assignments.inject(Money.new(0)){|sum,ip| ip.amount+sum } > self.amount
+    my_amount = self.amount
+    assignment_amount = self.payment_assignments.inject(Money.new(0)){|sum,ip| ip.amount+sum }
+    
+    # We use the funky :> /:< to differentiate between the case of a credit invoice and a (normal?) invoice
+    errors.add :payment_assignments, "exceeds invoice amount" if assignment_amount.send(
+      (my_amount >= 0) ? :> : :<, my_amount
+    )
   end
 
   def taxes_total( force_reload = false )

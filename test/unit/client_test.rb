@@ -212,4 +212,8 @@ class ClientTest < ActiveSupport::TestCase
     assert_equal invoices[0].id, reccomended[0].invoice_id
     assert_equal invoices[1].id, reccomended[1].invoice_id
   end
+  
+  def test_negative_recommend_invoice_payment_assignments_for
+    #TODO
+  end
 end

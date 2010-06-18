@@ -11,7 +11,7 @@ class InvoiceTest < ActiveSupport::TestCase
     @activity_types = ActivityType.find :all
   end
 
-  def test_only_newest_invoice_can_be_unpublished
+  def ensure_old_invoices_can_be_unpublished
     client = Factory.create_client
     
     # Once they're published they cant be unpublished unless they're the newest invoice...
@@ -23,11 +23,10 @@ class InvoiceTest < ActiveSupport::TestCase
     ]
 
     invoices[0...2].each do |inv|
-      assert_raise(ActiveRecord::RecordInvalid) {set_published inv, false}
+      assert_nothing_raised(ActiveRecord::RecordInvalid) {set_published inv, false}
     end
 
     assert_nothing_raised { set_published invoices[3], false }
-    
   end
 
   def test_ensure_client_cant_be_changed

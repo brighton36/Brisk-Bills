@@ -1,28 +1,25 @@
-Here's the current Models plan:
-	* 3.5 We should take activity_types out of the invoice object ... there's no need for them there anymore
-		* We do need the activity type table, and we'll keep it there, but, remove the habtm table that joins invoices, and we can compute the types
-		  based off what's been included thus far in the controller... 
-	
-	* 4. Now we can allow multiple invoices to be unpublished and published invoices to be deleted..
-		* Maybe we should re-move Activity.validate_on_update ?
-			* I say keep it. I think activities should not change n published inovices...
-		* Write-new/revise-existing tests to accomdate this change
+Here's the current Models plan:			
+	*Just make sure - are we validating each invoice paymens amount to be sure it doesnt exceed (for positiv and negative) the invoice/payment amout_free?
+	* invoie_payment:
+		test_negative_payment_allocations
+	* client_test
+		test_negative_recommend_invoice_payment_assignments_for
+	* invoice_payment: Maybe/probably we should test against bogus allocations as they relate to negative amounts
+	* WHat if the invoice (or payment) amount is greater than the payment assignment, but only b/c the credits are weirdo?
+		(SO let's say they have an invoice for -$500, and an invoice for +$5. Their outstanding balance is -$495, but if they try to make a payment
+		for $5, will we freak on them? (probably - fix)
+	* We should test invoice_payment assignments on old unpublished invoices
+		* create three published invoices
+		* Set the second and third to unpublished
+		* Create a payment for the first
+		* Set the third published
+		* Create a payment for the third
+		* Set the second published
+		* Create a payment for the second
+		* Then test all the invoice_payment mappings to be sure they make sense 
 		
-	* 5. We need to remove the clearing of payments on a is_published change.
-		* I think we shouldn't do this - b/c it makes life difficult when adding or removing activities due to activity_type inclusion changes
-		and/or issued_date changes. What will happen is invoice_payments could exceed the invoice total
-		* WE should think HARD about whether to allow activities to be updateable in a published invoice...
-			* Another nicety- is that if we force users to publish and unpublish, then we can assign version numbers to the bill
-			* WHich is a nice feature ....
-  		* THis causes a new problem, InvoicePayments need to be adjusted/removed/added, when the balance is adjusted...
-  			* THis could be complicated, b/c the activities themselves are what will change... this will need to be an after_change on the activities model
-  		* is_published is only used to determine whther to show a client their bill and whether to solidify the activities in that bill
-  		* Some tests will need adjustment here. Remove existing Model error-raises if/when appropriate...
-  		* Add some new tests to make sure our activity after_change hook is working the way it should...
-  			* In the case that an invoice price is adjusted (up or down) after it was marked paid, it needs to change back to unpaid status (should already be done - but, make this a test...)
-  			* In the case that a payment price is adjusted (up or down) after it was marked paid, it needs to change back to unpaid status
-  				* But, should we allow payment changes? I kind of think not ... they can create and delete these, for now...
-  				* THey might be taking payments online - and those should not be editable ....
+	* Assign version numbers to the invoice based on the number of times an invoice is published...
+		* I don't know if we should/need-to adjust the invoice pdfs out here just yet ....
 
 * Get the controllers working 'the old way' by ...
 	* manually specifying otherwise-autmatic activity associations in the invoices controller
@@ -48,6 +45,8 @@ Now for the Controller Adjustments:
   	* And then we need to add a complemntary field in the invoices view? Nah - but show which payments are currently assigned as a read-only...
 
 * Start using 0.7-pre on mario...
+
+* BUG: Adjusting the Slimtimer Credentials for employees doesn't work (try changing the pass/email - FAIL!)
 
 * (negative numbers) on invoices_with_cost are showing negative sign ...
 

@@ -39,8 +39,14 @@ class Payment < ActiveRecord::Base
       amount_unallocated(true).zero?
   end
   
-  def validate_invoice_payments_not_greater_than_amount
-    errors.add :invoice_assignments, "total is greater than payment amount" if self.invoice_assignments.inject(Money.new(0)){|sum,ip| ip.amount+sum } > self.amount
+  def validate_invoice_payments_not_greater_than_amount    
+    my_amount = self.amount
+    assignment_amount = self.invoice_assignments.inject(Money.new(0)){|sum,ip| ip.amount+sum }
+    
+    # We use the funky :> /:< to differentiate between the case of a credit invoice and a (normal?) invoice
+    errors.add :invoice_assignments, "exceeds payment amount" if assignment_amount.send(
+      (my_amount >= 0) ? :> : :<, my_amount
+    )
   end
   
   def validate_on_update

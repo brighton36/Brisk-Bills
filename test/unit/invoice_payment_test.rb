@@ -77,6 +77,79 @@ class InvoicePaymentTest < ActiveSupport::TestCase
     assert_equal true, payments[4].is_allocated?
   end
 
+  # How well does find_recomended_invoices work for a negative invoice with a credit/negative amount -payment? Write a test:
+  def test_negative_invoice_payment_marking
+    client = Factory.create_client
+    
+    invoices = [
+      Factory.generate_invoice( client, 10.00,  :issued_on => (DateTime.now << 4), :payment_assignments => [] ),
+      Factory.generate_invoice( client, -15.00,  :issued_on => (DateTime.now << 3), :payment_assignments => [] ),
+      Factory.generate_invoice( client, -5.00,   :issued_on => (DateTime.now << 2), :payment_assignments => [] ),
+    ]
+
+    assert_equal -10.00, client.balance
+    
+    payments = [
+      Factory.generate_payment( client, 5.00,   :invoice_assignments => [] ),
+      Factory.generate_payment( client, 5.00,   :invoice_assignments => [] ),
+      Factory.generate_payment( client, -5.00,  :invoice_assignments => [] ),
+      Factory.generate_payment( client, -10.00, :invoice_assignments => [] ),
+      Factory.generate_payment( client, -5.00,  :invoice_assignments => [] )
+    ]
+
+    assert_equal 0.00, client.balance
+    
+    # Ensure that invoices aren't marked as 'paid' until the invoice_payments have been applied.  Even though the balance is 0
+    assert_equal false, invoices[0].is_paid?
+    assert_equal false, invoices[1].is_paid?
+    assert_equal false, invoices[2].is_paid?
+
+    # Ensure that payments aren't marked as 'paid' until the invoice_payments have been applied.  Even though the balance is 0
+    assert_equal false, payments[0].is_allocated?
+    assert_equal false, payments[1].is_allocated?
+    assert_equal false, payments[2].is_allocated?
+    assert_equal false, payments[3].is_allocated?
+    assert_equal false, payments[4].is_allocated?
+    
+    # Now start marking payments/invocies, and testing the corresponding is_ methods :
+    InvoicePayment.quick_create! invoices[0], payments[0], 5.00
+    InvoicePayment.quick_create! invoices[0], payments[1], 5.00
+
+    assert_equal true, invoices[0].is_paid?
+    assert_equal false, invoices[1].is_paid?
+    assert_equal false, invoices[2].is_paid?
+    assert_equal true, payments[0].is_allocated?
+    assert_equal true, payments[1].is_allocated?
+    assert_equal false, payments[2].is_allocated?
+    assert_equal false, payments[3].is_allocated?
+    assert_equal false, payments[4].is_allocated?
+
+    InvoicePayment.quick_create! invoices[1], payments[2], -5.00
+    InvoicePayment.quick_create! invoices[1], payments[3], -10.00
+
+    assert_equal true, invoices[0].is_paid?
+    assert_equal true, invoices[1].is_paid?
+    assert_equal false, invoices[2].is_paid?
+    assert_equal true, payments[0].is_allocated?
+    assert_equal true, payments[1].is_allocated?
+    assert_equal true, payments[2].is_allocated?
+    assert_equal true, payments[3].is_allocated?
+    assert_equal false, payments[4].is_allocated?
+
+    InvoicePayment.quick_create! invoices[2], payments[4], -5.00
+    
+    # Everything should be allocated now - retest is_paid/allocated code
+    assert_equal true, invoices[0].is_paid?
+    assert_equal true, invoices[1].is_paid?
+    assert_equal true, invoices[2].is_paid?
+
+    assert_equal true, payments[0].is_allocated?
+    assert_equal true, payments[1].is_allocated?
+    assert_equal true, payments[2].is_allocated?
+    assert_equal true, payments[3].is_allocated?
+    assert_equal true, payments[4].is_allocated?
+  end
+
   def test_invoice_dependent_delete
     client = Factory.create_client
     
@@ -158,19 +231,6 @@ class InvoicePaymentTest < ActiveSupport::TestCase
     assert_equal false, ip.valid?
     assert_equal "exceeds the payment's remainder amount", ip.errors.on('amount')
   end
-  
-  def test_invoice_payment_amount_not_negative
-    client = Factory.create_client
-    
-    # People can't specifify negative payment_allocations
-    invoice = Factory.generate_invoice client,  5.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
-    payment = Factory.generate_payment client,  5.00, :invoice_assignments => []
-    
-    ip = InvoicePayment.create :payment => payment, :invoice => invoice, :amount => -5.00
-    
-    assert_equal false, ip.valid?
-    assert_equal "must be greater than or equal to 0", ip.errors.on('amount')
-  end
 
   def test_bogus_invoice_allocations
     client = Factory.create_client
@@ -220,7 +280,19 @@ class InvoicePaymentTest < ActiveSupport::TestCase
         InvoicePayment.new( :invoice => invoiceC, :amount => 3.00 ) 
       ]
     end
+  end
 
+  def test_invoice_payment_amount_not_negative
+    client = Factory.create_client
+    
+    # People can't specifify negative payment_allocations
+    invoice = Factory.generate_invoice client,  5.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
+    payment = Factory.generate_payment client,  5.00, :invoice_assignments => []
+    
+    ip = InvoicePayment.create :payment => payment, :invoice => invoice, :amount => -5.00
+    
+    assert_equal false, ip.valid?
+    assert_equal "must be greater than or equal to 0", ip.errors.on('amount')
   end
 
 end
