@@ -10,6 +10,7 @@ class Payment < ActiveRecord::Base
   
   validates_presence_of :client_id, :payment_method_id
   validates_numericality_of :amount, :allow_nil => false
+  validates_numericality_of :amount, :greater_than_or_equal_to => 0
   validate :validate_invoice_payments_not_greater_than_amount
     
   money :amount, :currency => false

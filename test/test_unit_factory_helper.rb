@@ -112,7 +112,7 @@ module Factory
 
   def self.generate_invoice(client, total, attributes = {})
     attributes[:issued_on] ||= Time.now
-    attributes[:is_published] ||= false
+    attributes[:is_published] = true if !attributes.has_key?(:is_published) or attributes[:is_published].nil?
 
     activity_increments = (total.floor).to_f/10
     1.upto(10) do |i|

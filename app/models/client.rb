@@ -156,10 +156,11 @@ class Client < ActiveRecord::Base
       {:conditions => [
         [
         'client_id = ?',
+        'is_published = ?',
         'IF(activities_total.total_in_cents IS NULL, 0,activities_total.total_in_cents) - '+
         'IF(invoices_total.total_in_cents IS NULL, 0,invoices_total.total_in_cents) > ?'
         ].join(' AND '),
-        id, 0
+        id, true, 0
       ]}.merge(options.reject{|k,v| k == :conditions})
     )
   end
@@ -174,8 +175,7 @@ class Client < ActiveRecord::Base
         'client_id = ?',
         '(payments.amount_in_cents - IF(payments_total.amount_allocated_in_cents IS NULL, 0, payments_total.amount_allocated_in_cents) ) > ?'
         ].join(' AND '),
-        id, 
-        0
+        id, 0
       ]}.merge(options.reject{|k,v| k == :conditions}) 
     )
   end

@@ -16,10 +16,10 @@ class InvoiceTest < ActiveSupport::TestCase
     
     # Once they're published they cant be unpublished unless they're the newest invoice...
     invoices = [
-      Factory.generate_invoice( client, 100.00, :issued_on => (DateTime.now << 4), :is_published => true ),
-      Factory.generate_invoice( client, 200.00, :issued_on => (DateTime.now << 3), :is_published => true ),
-      Factory.generate_invoice( client, 300.00, :issued_on => (DateTime.now << 2), :is_published => true ),
-      Factory.generate_invoice( client, 400.00, :issued_on => (DateTime.now << 1), :is_published => true )
+      Factory.generate_invoice( client, 100.00, :issued_on => (DateTime.now << 4) ),
+      Factory.generate_invoice( client, 200.00, :issued_on => (DateTime.now << 3) ),
+      Factory.generate_invoice( client, 300.00, :issued_on => (DateTime.now << 2) ),
+      Factory.generate_invoice( client, 400.00, :issued_on => (DateTime.now << 1) )
     ]
 
     invoices[0...2].each do |inv|
@@ -51,7 +51,7 @@ class InvoiceTest < ActiveSupport::TestCase
       :paid_on => (DateTime.now << 1)
     ) 
 
-    inv = Factory.generate_invoice client,  1000.00, :issued_on => (DateTime.now >> 12)
+    inv = Factory.generate_invoice client,  1000.00, :issued_on => (DateTime.now >> 12), :is_published => false
     
     # Change payment, save:
     assert_nothing_raised do
@@ -275,23 +275,6 @@ class InvoiceTest < ActiveSupport::TestCase
     invoice.activities.each do |a| 
       assert_equal true,  past_activities.include?(a.id) 
       assert_equal false, future_activities.include?(a.id)
-    end
-    
-  end
-
-  def test_invoice_deletes_only_if_recent    
-    client = Factory.create_client
-    invoice_time = Time.new
-    
-    invoices = [20,40,80,160,320,640,1280].collect do |amt| 
-      invoice_time += 1.weeks
-      Factory.generate_invoice client,  amt, :issued_on => invoice_time
-    end
-
-    while invoices.length > 0
-      0.upto(invoices.length-2)  { |i| assert_equal false, invoices[i].destroy }
-    
-      assert_not_equal false, invoices.delete_at(invoices.length-1).destroy
     end
     
   end

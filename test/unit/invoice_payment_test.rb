@@ -83,84 +83,71 @@ class InvoicePaymentTest < ActiveSupport::TestCase
     
     invoices = [
       Factory.generate_invoice( client, 10.00,  :issued_on => (DateTime.now << 4), :payment_assignments => [] ),
-      Factory.generate_invoice( client, -15.00,  :issued_on => (DateTime.now << 3), :payment_assignments => [] ),
-      Factory.generate_invoice( client, -5.00,   :issued_on => (DateTime.now << 2), :payment_assignments => [] ),
+      Factory.generate_invoice( client, -15.00, :issued_on => (DateTime.now << 3), :payment_assignments => [] ),
+      Factory.generate_invoice( client, -5.00,  :issued_on => (DateTime.now << 2), :payment_assignments => [] ),
     ]
 
     assert_equal -10.00, client.balance
+
+    # Negative invoices are always marked paid
+    assert_equal false, invoices[0].is_paid?
+    assert_equal true,  invoices[1].is_paid?
+    assert_equal true,  invoices[2].is_paid?
     
     payments = [
-      Factory.generate_payment( client, 5.00,   :invoice_assignments => [] ),
-      Factory.generate_payment( client, 5.00,   :invoice_assignments => [] ),
-      Factory.generate_payment( client, -5.00,  :invoice_assignments => [] ),
-      Factory.generate_payment( client, -10.00, :invoice_assignments => [] ),
-      Factory.generate_payment( client, -5.00,  :invoice_assignments => [] )
+      Factory.generate_payment( client, 5.00,   :invoice_assignments => 
+        [InvoicePayment.new(:invoice => invoices[0], :amount => 5.00 )]
+      ),
+      Factory.generate_payment( client, 5.00,   :invoice_assignments => 
+        [InvoicePayment.new(:invoice => invoices[0], :amount => 5.00 )]
+      )
     ]
 
-    assert_equal 0.00, client.balance
-    
-    # Ensure that invoices aren't marked as 'paid' until the invoice_payments have been applied.  Even though the balance is 0
-    assert_equal false, invoices[0].is_paid?
-    assert_equal false, invoices[1].is_paid?
-    assert_equal false, invoices[2].is_paid?
+    assert_equal -20.00, client.balance
 
-    # Ensure that payments aren't marked as 'paid' until the invoice_payments have been applied.  Even though the balance is 0
-    assert_equal false, payments[0].is_allocated?
-    assert_equal false, payments[1].is_allocated?
-    assert_equal false, payments[2].is_allocated?
-    assert_equal false, payments[3].is_allocated?
-    assert_equal false, payments[4].is_allocated?
-    
-    # Now start marking payments/invocies, and testing the corresponding is_ methods :
-    InvoicePayment.quick_create! invoices[0], payments[0], 5.00
-    InvoicePayment.quick_create! invoices[0], payments[1], 5.00
-
-    assert_equal true, invoices[0].is_paid?
-    assert_equal false, invoices[1].is_paid?
-    assert_equal false, invoices[2].is_paid?
-    assert_equal true, payments[0].is_allocated?
-    assert_equal true, payments[1].is_allocated?
-    assert_equal false, payments[2].is_allocated?
-    assert_equal false, payments[3].is_allocated?
-    assert_equal false, payments[4].is_allocated?
-
-    InvoicePayment.quick_create! invoices[1], payments[2], -5.00
-    InvoicePayment.quick_create! invoices[1], payments[3], -10.00
-
-    assert_equal true, invoices[0].is_paid?
-    assert_equal true, invoices[1].is_paid?
-    assert_equal false, invoices[2].is_paid?
-    assert_equal true, payments[0].is_allocated?
-    assert_equal true, payments[1].is_allocated?
-    assert_equal true, payments[2].is_allocated?
-    assert_equal true, payments[3].is_allocated?
-    assert_equal false, payments[4].is_allocated?
-
-    InvoicePayment.quick_create! invoices[2], payments[4], -5.00
-    
-    # Everything should be allocated now - retest is_paid/allocated code
+    # Everything should be paid now:
     assert_equal true, invoices[0].is_paid?
     assert_equal true, invoices[1].is_paid?
     assert_equal true, invoices[2].is_paid?
+    
+    # Now what if the invoice they have an invoice for -$20, and an invoice for +$12. Their outstanding balance is -$8,
+    # but if they try to make a payment for $5, will we freak on them?
+    
+    # Just for goo measure let's generate a new invoice:
+    invoices << Factory.generate_invoice( client, 12.00,  :issued_on => (DateTime.now << 1), :payment_assignments => [] )
 
-    assert_equal true, payments[0].is_allocated?
-    assert_equal true, payments[1].is_allocated?
-    assert_equal true, payments[2].is_allocated?
-    assert_equal true, payments[3].is_allocated?
-    assert_equal true, payments[4].is_allocated?
+    assert_equal -8.00, client.balance
+    
+    assert_equal true, invoices[0].is_paid?
+    assert_equal true, invoices[1].is_paid?
+    assert_equal true, invoices[2].is_paid?
+    assert_equal false, invoices[3].is_paid?
+    
+    payments << Factory.generate_payment( client, 12.00,   :invoice_assignments => 
+        [InvoicePayment.new(:invoice => invoices[3], :amount => 12.00 )]
+    )
+    
+    # and make sure we're cool:
+    assert_equal true, invoices[0].is_paid?
+    assert_equal true, invoices[1].is_paid?
+    assert_equal true, invoices[2].is_paid?
+    assert_equal true, invoices[3].is_paid?
+    
+    assert_equal -20.00, client.balance
   end
 
   def test_invoice_dependent_delete
     client = Factory.create_client
     
-    invoice = Factory.generate_invoice client, 99.00,  :issued_on => (DateTime.now << 1), :payment_assignments => [] 
+    invoice = Factory.generate_invoice client, 99.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
     Factory.generate_payment client, 40.00,  :invoice_assignments => [InvoicePayment.new(:invoice => invoice, :amount => 40.00 )]
     Factory.generate_payment client, 40.00,  :invoice_assignments => [InvoicePayment.new(:invoice => invoice, :amount => 40.00 )]
     Factory.generate_payment client, 20.00,  :invoice_assignments => [InvoicePayment.new(:invoice => invoice, :amount => 19.00 )]
     
     assert_equal 3, InvoicePayment.find(:all).length
 
-    invoice.destroy
+    invoice.is_published = false
+    assert_not_equal false, invoice.destroy # False would indicate that the invoice didnt delete successfully
     
     # Now make sure all our InvoicePayments were also destroyed:
     assert_equal 0, InvoicePayment.find(:all).length
@@ -194,7 +181,7 @@ class InvoicePaymentTest < ActiveSupport::TestCase
     
     ip = nil
     
-    invoice = Factory.generate_invoice client,  100.00,  :issued_on => (DateTime.now << 1), :payment_assignments => []
+    invoice = Factory.generate_invoice client,  100.00,  :issued_on => (DateTime.now << 1),  :payment_assignments => []
     paymentA = Factory.generate_payment client,  20.00, :invoice_assignments => []
     paymentB = Factory.generate_payment client, 110.00, :invoice_assignments => []
     
@@ -294,5 +281,21 @@ class InvoicePaymentTest < ActiveSupport::TestCase
     assert_equal false, ip.valid?
     assert_equal "must be greater than or equal to 0", ip.errors.on('amount')
   end
+  
+  def test_payments_unapplyable_to_unpublished_invoices
+    client = Factory.create_client
+    
+    # TODO: Ensure Invoice :payment_assignments create fails with unpublished unvoice
+    payment = Factory.generate_payment( client,  40.00 )
+    
+    invoice = Factory.generate_invoice( client, 40.00, :is_published => false, :payment_assignments => [
+      InvoicePayment.new( :payment => payment, :amount => 40.00 ) 
+    ] )
+    
 
+    
+    # TODO: Ensure Payment :invoice_assignments create fails with unpublished unvoice
+    
+    # TODO: Test InvoicePayment create fails with unpublished unvoice
+  end
 end

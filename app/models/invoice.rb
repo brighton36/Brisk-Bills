@@ -74,13 +74,11 @@ class Invoice < ActiveRecord::Base
   end
 
   def validate_invoice_payments_not_greater_than_amount
-    my_amount = self.amount
+    inv_amount = self.amount
     assignment_amount = self.payment_assignments.inject(Money.new(0)){|sum,ip| ip.amount+sum }
     
     # We use the funky :> /:< to differentiate between the case of a credit invoice and a (normal?) invoice
-    errors.add :payment_assignments, "exceeds invoice amount" if assignment_amount.send(
-      (my_amount >= 0) ? :> : :<, my_amount
-    )
+    errors.add :payment_assignments, "exceeds invoice amount" if inv_amount >= 0 and self.amount < assignment_amount
   end
 
   def taxes_total( force_reload = false )
@@ -133,7 +131,7 @@ class Invoice < ActiveRecord::Base
   def is_paid?( force_reload = false )
     (attribute_present? :is_paid  and !force_reload) ? 
       (read_attribute(:is_paid).to_i == 1) :
-      amount_outstanding(true).zero?
+      amount_outstanding(true) <= 0
   end
   
   def amount_paid( force_reload = false )
@@ -216,6 +214,9 @@ class Invoice < ActiveRecord::Base
           'invoices.client_id',
           'invoices.comments',
           'invoices.issued_on',
+          'invoices.is_published',
+          'invoices.created_at',
+          'invoices.updated_at',
           "#{cast_amount} AS amount_in_cents",
           "#{cast_amount_paid} AS amount_paid_in_cents",
           "#{cast_amount} - #{cast_amount_paid} AS amount_outstanding_in_cents"
