@@ -1,16 +1,13 @@
 Here's the current Models plan:			
-	* Also - add a test to invoice_payments/invoices? to ensure that we can't assign payments to an unpublished invoice manually.
-		* test both invoices/payments!
-		
-	* Assign version numbers to the invoice based on the number of times an invoice is published...
-		* I don't know if we should/need-to adjust the invoice pdfs out here just yet ....
-		* Might as well put this in migration 29 while we're publishing anyways
-
 * Get the controllers working 'the old way' by ...
 	* manually specifying otherwise-autmatic activity associations in the invoices controller
 	* Specifying invoice_payments in the controller (just using the recommended ones
 	* algorithmically etermining the invoice activity_types...
 	* start using 0.7 pre on mario	
+
+* Assign version numbers to the invoice based on the number of times an invoice is published...
+	* I don't know if we should/need-to adjust the invoice pdfs out here just yet ....
+	* Might as well put this in migration 29 while we're publishing anyways
 
 Now for the Controller Adjustments:
   	* Invoice_id should be settable on the labor/materials/proposals/etc controllers. (though not the activities controller..not yet at least)

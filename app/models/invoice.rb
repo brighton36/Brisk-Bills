@@ -24,8 +24,8 @@ class Invoice < ActiveRecord::Base
   )
   
   validates_presence_of :client_id, :issued_on
-  
   validate :validate_invoice_payments_not_greater_than_amount
+  validate :validate_payment_assignments_only_if_published
 
   # This just ends up being useful in a couple places
   ACTIVITY_TOTAL_SQL = '(IF(activities.cost_in_cents IS NULL, 0, activities.cost_in_cents)+IF(activities.tax_in_cents IS NULL, 0, activities.tax_in_cents))'
@@ -35,7 +35,11 @@ class Invoice < ActiveRecord::Base
     end_of_last_month = Time.utc(*Time.now.to_a).last_month.end_of_month
     self.issued_on = end_of_last_month unless self.issued_on
   end
-    
+  
+  def validate_payment_assignments_only_if_published
+    errors.add :payment_assignments, "can only be set for published invoices" if !is_published and payment_assignments and payment_assignments.length > 0 
+  end
+  
   def invalid_if_published(collection_record = nil)
     raise "Can't adjust an already-published invoice." if !new_record? and is_published
   end

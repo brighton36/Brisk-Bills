@@ -285,17 +285,34 @@ class InvoicePaymentTest < ActiveSupport::TestCase
   def test_payments_unapplyable_to_unpublished_invoices
     client = Factory.create_client
     
-    # TODO: Ensure Invoice :payment_assignments create fails with unpublished unvoice
-    payment = Factory.generate_payment( client,  40.00 )
+    invoice = nil
+    payment = nil
     
-    invoice = Factory.generate_invoice( client, 40.00, :is_published => false, :payment_assignments => [
-      InvoicePayment.new( :payment => payment, :amount => 40.00 ) 
-    ] )
+    # Ensure Invoice :payment_assignments create fails with unpublished unvoice
+    payment = Factory.generate_payment( client,  40.00 , :invoice_assignments => [] )
     
+    assert_raise(ActiveRecord::RecordInvalid) do
+      invoice = Factory.generate_invoice( client, 40.00, :is_published => false, :payment_assignments => [
+        InvoicePayment.new( :payment => payment, :amount => 40.00 ) 
+      ] )
+    end
 
+    # Ensure Payment :invoice_assignments create fails with unpublished unvoice
+    invoice = Factory.generate_invoice( client, 50.00, :is_published => false, :payment_assignments => [])
+
+    assert_raise(ActiveRecord::RecordInvalid) do
+      payment = Factory.generate_payment( client,  50.00 , :invoice_assignments => [
+        InvoicePayment.new( :invoice => invoice, :amount => 50.00 ) 
+      ] )
+    end
+
+    # Test InvoicePayment create fails with unpublished unvoice
+    invoice = Factory.generate_invoice( client, 60.00, :is_published => false, :payment_assignments => [])
+    payment = Factory.generate_payment( client, 60.00, :invoice_assignments => [] )
     
-    # TODO: Ensure Payment :invoice_assignments create fails with unpublished unvoice
+    ip = InvoicePayment.new :invoice => invoice, :payment => payment, :amount => 60.00
     
-    # TODO: Test InvoicePayment create fails with unpublished unvoice
+    assert_raise(ActiveRecord::RecordInvalid) { ip.save! }
+    assert ip.errors.invalid?(:invoice)
   end
 end
