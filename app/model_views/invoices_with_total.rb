@@ -22,6 +22,8 @@ class InvoicesWithTotal < Invoice
   def invoice_assign_and_save!(inv)
     invoice_columns = Invoice.columns.collect{|c| c.name}-['id']
 
+    inv.activity_ids = activity_ids
+    inv.payment_assignments = payment_assignments
     inv.activity_type_ids = activity_type_ids
     
     attributes.reject{|k,v| true unless invoice_columns.include? k }.each{ |k,v| inv.send "#{k}=", v }

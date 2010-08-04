@@ -65,10 +65,29 @@ class Admin::InvoicesController < ApplicationController
     (klass == Activity) ? Admin::ActivitiesWithPricesController : super
   end
 
+  def before_update_save(invoice)
+    super
+    invoice.activities = invoice.recommended_activities if (
+      invoice.new_record? or 
+      (!invoice.is_published and (invoice.issued_on_changed? || invoice.activities.changed?))
+    )
+
+    invoice.payment_assignments.clear if !invoice.is_published and invoice.is_published_changed?
+
+    # We're going to need this in the after_update_save... Note it now.
+    @invoice_changes = invoice.changes.keys.collect(&:to_sym)
+    @invoice_new_record = invoice.new_record?
+  end
+
+  alias before_create_save before_update_save
+
   def after_update_save(invoice)
     super
-    
-    if successful? and invoice.is_published # TODO: And only if is_published has changed?...
+
+    if successful? and invoice.is_published and (@invoice_new_record || @invoice_changes.include?(:is_published))
+      # We're going to want to auto-assign payments to this invoice (for now...)
+      invoice.payment_assignments = invoice.client.recommend_payment_assignments_for invoice.amount
+logger.error "Well? #{invoice.payment_assignments.inspect}"
       define_invoice invoice
       
       attachments = [

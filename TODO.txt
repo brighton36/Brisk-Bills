@@ -1,13 +1,41 @@
 Here's the current Models plan:			
 * Get the controllers working 'the old way' by ...
-	* manually specifying otherwise-autmatic activity associations in the invoices controller
-	* Specifying invoice_payments in the controller (just using the recommended ones
-	* algorithmically etermining the invoice activity_types...
-	* start using 0.7 pre on mario	
+	* DONE: Test payment mapping on INvoice update
+	* DONE: Test payment mapping on Payment create/destropy
+
+	* TODO: Test payment mapping on INvoice create 
+		* Its not working .... I think it has something to do with the invoice id being nil
+		
+	* TODO: Test payment mapping on INvoice destroy	 
+
+	* TODO: Test activity mapping on Invoice create/update
+	 * Remember this should only update on date/activity type changes
+	 
+
+		
+* TODO: Weird JS Error on payment delete
+	* I think this is a prototype issue b/c it affects deletes on sublists (or at least on invoices too)- update prototype?
+	
+* Invoice deleting isnt working quite right with some rjs errors ....
 
 * Assign version numbers to the invoice based on the number of times an invoice is published...
 	* I don't know if we should/need-to adjust the invoice pdfs out here just yet ....
 	* Might as well put this in migration 29 while we're publishing anyways
+
+* start using 0.7 pre on mario
+
+Bug: Brisk Bills Amount bug!
+	I htink its the VIEW on a credit - see NUF and bnai was it?
+
+Bug: during invoice generation for DTI
+	NoMethodError (undefined method `tr' for nil:NilClass):
+	  /usr/lib/ruby/gems/1.8/gems/brisk-bills-0.6.0/app/models/activity/labor.rb:82:in `as_legacy_ledger_row'
+	  /usr/lib/ruby/gems/1.8/gems/brisk-bills-0.6.0/app/controllers/admin/invoices_controller.rb:161:in `define_invoice'
+	  /usr/lib/ruby/gems/1.8/gems/brisk-bills-0.6.0/app/controllers/admin/invoices_controller.rb:161:in `collect'
+	  /usr/lib/ruby/gems/1.8/gems/brisk-bills-0.6.0/app/controllers/admin/invoices_controller.rb:161:in `define_invoice'
+	  /usr/lib/ruby/gems/1.8/gems/brisk-bills-0.6.0/app/controllers/admin/invoices_controller.rb:72:in `after_update_save'
+
+	Rendering /var/www/derosetechnologies.com-briskbills/public/500.html (500 Internal Server Error)
 
 Now for the Controller Adjustments:
   	* Invoice_id should be settable on the labor/materials/proposals/etc controllers. (though not the activities controller..not yet at least)
@@ -25,7 +53,9 @@ Now for the Controller Adjustments:
   	* Remove that restriction on unpublishing old invoices...
   	* And then we need to add a complemntary field in the invoices view? Nah - but show which payments are currently assigned as a read-only...
 
-* Start using 0.7-pre on mario...
+* Start using 0.8-pre on mario...
+
+* Things might be a little awkward with out activity assignment if people are going back and editing old stuff... we should really have an activity selector...
 
 * BUG: Adjusting the Slimtimer Credentials for employees doesn't work (try changing the pass/email - FAIL!)
 

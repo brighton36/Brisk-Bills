@@ -40,6 +40,13 @@ class Admin::PaymentsController < ApplicationController
 #    observe_active_scaffold_form_fields :fields => %w(client amount), :action => :on_invoice_assignment_observation
   end
 
+  def before_update_save(payment)      
+    payment.invoice_assignments = payment.client.recommend_invoice_assignments_for payment.amount
+  end
+
+  alias before_create_save before_update_save
+
+
   def on_invoice_assignment_observation
     record_id = (/^[\d]+$/.match(params[:record_id])) ? params[:record_id].to_i : nil
     

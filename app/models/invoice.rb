@@ -3,7 +3,6 @@ class Invoice < ActiveRecord::Base
   
   # NOTE: this has to be above the has_many, otherwise activities would get nullified before this callback had a chance to return fals
   before_destroy :ensure_not_published_on_destroy
-  before_destroy :ensure_were_the_most_recent
 
   before_update :ensure_not_published_on_update
   
@@ -50,13 +49,6 @@ class Invoice < ActiveRecord::Base
     (newest_invoice.nil? or newest_invoice.id == id) ? true : false
   end
   
-  def ensure_were_the_most_recent
-    unless is_most_recent_invoice?
-      errors.add_to_base "Can't destroy an invoice if its not the client's most recent invoice"
-      return false
-    end
-  end
-  
   def ensure_not_published_on_destroy
     if is_published and !changes.has_key? :is_published
       errors.add_to_base "Can't destroy a published invoice"
@@ -73,7 +65,7 @@ class Invoice < ActiveRecord::Base
 
     errors.add_to_base(
       "Invoice can't be updated once published."
-    ) if is_published and changes.reject{|k,v| k == 'is_published'}.length > 0
+    ) if is_published and changes.reject{|k,v| /(?:is_published|payment_assignments)/.match k}.length > 0
 
   end
 
@@ -85,6 +77,15 @@ class Invoice < ActiveRecord::Base
     errors.add :payment_assignments, "exceeds invoice amount" if inv_amount >= 0 and self.amount < assignment_amount
   end
 
+  def authorized_for?(options)
+    case options[:action].to_s
+      when /^(destroy)$/
+        !is_published
+      else
+        true
+    end
+  end
+  
   def taxes_total( force_reload = false )
     (attribute_present? :tax_in_cents and !force_reload) ?
       Money.new(read_attribute(:tax_in_cents).to_i) :
@@ -231,20 +232,11 @@ class Invoice < ActiveRecord::Base
     )
   end
 
-  def authorized_for?(options)
-    case options[:action].to_s
-      when /^(update|destroy)$/
-        (is_published and !is_most_recent_invoice?) ? false : true
-      else
-        true
-    end
-  end
-
   private 
 
   # When/if we save an invoice, and we determine that its changed or created as unpublished, we need to ensure that no payments are assigned to the invoice.
   # This means deleting any existing assignments should there be any.
-  def clear_invoice_payments_if_unpublished   
+  def clear_invoice_payments_if_unpublished
     payment_assignments.clear if changes.has_key? "is_published" and !is_published
   end
 
