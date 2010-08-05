@@ -1,28 +1,8 @@
 Here's the current Models plan:			
-* Get the controllers working 'the old way' by ...
-	* DONE: Test payment mapping on INvoice update
-	* DONE: Test payment mapping on Payment create/destropy
-
-	* TODO: Test payment mapping on INvoice create 
-		* Its not working .... I think it has something to do with the invoice id being nil
 		
-	* TODO: Test payment mapping on INvoice destroy	 
-
-	* TODO: Test activity mapping on Invoice create/update
-	 * Remember this should only update on date/activity type changes
-	 
-
-		
-* TODO: Weird JS Error on payment delete
-	* I think this is a prototype issue b/c it affects deletes on sublists (or at least on invoices too)- update prototype?
-	
-* Invoice deleting isnt working quite right with some rjs errors ....
-
 * Assign version numbers to the invoice based on the number of times an invoice is published...
 	* I don't know if we should/need-to adjust the invoice pdfs out here just yet ....
 	* Might as well put this in migration 29 while we're publishing anyways
-
-* start using 0.7 pre on mario
 
 Bug: Brisk Bills Amount bug!
 	I htink its the VIEW on a credit - see NUF and bnai was it?
@@ -37,7 +17,14 @@ Bug: during invoice generation for DTI
 
 	Rendering /var/www/derosetechnologies.com-briskbills/public/500.html (500 Internal Server Error)
 
-Now for the Controller Adjustments:
+
+* BUG: Adjusting the Slimtimer Credentials for employees doesn't work (try changing the pass/email - FAIL!)
+
+* (negative numbers) on invoices_with_cost are showing negative sign ...
+
+* start using 0.7 pre on mario
+
+Now for the final Controller Adjustments:
   	* Invoice_id should be settable on the labor/materials/proposals/etc controllers. (though not the activities controller..not yet at least)
   	* Invoice create/update Activity assignments will likely need to be adjusted...
   		* Be sure to adjust any invoice_create tasks as well...
@@ -57,10 +44,6 @@ Now for the Controller Adjustments:
 
 * Things might be a little awkward with out activity assignment if people are going back and editing old stuff... we should really have an activity selector...
 
-* BUG: Adjusting the Slimtimer Credentials for employees doesn't work (try changing the pass/email - FAIL!)
-
-* (negative numbers) on invoices_with_cost are showing negative sign ...
-
 * We should add an unpublished Open Invoices controller ...
 
 * I'd like to see a payment identifier listed in the payments list ... (check no/cc#)
@@ -76,13 +59,11 @@ Now for the Controller Adjustments:
 
 * Move_to_invoice function should allow us to Move_to '(Unassigned)', and ideally that would be a radio group
 
-* Publish 0.7 !!!!!
+* Publish !!!!!
 ---------------
 
-* What happens with negative baance invoices? 
-	* Payments can't be negative - so do they show up as paid? 
-	* THere's no negative payments right?
-
+* Probably - we should prompt on invoice update, when appropriate, whether to email the client. 
+	* Probably too, publish should be a row-action and not a form control
 * Probably - when prompted to delete an invoice, we should give the option to also remove the activities (or preserve them and leave them unsassigned)
 
 * Translate the time into the local zone for the user, probably each user/client should have a zone associtation in their account.
@@ -93,7 +74,7 @@ Now for the Controller Adjustments:
 
 * Showing the Client eventlogs as an unedutable nested list  might be nice... Hell, employee eventlogs too....
 
-* Publish 0.8 !!!!!
+* Publish !!!!!
 ---------------
 * CC payments handling built-in- not a plugin
 

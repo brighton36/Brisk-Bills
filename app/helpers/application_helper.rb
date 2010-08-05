@@ -24,4 +24,11 @@ module ApplicationHelper
     @javascripts = ['scriptaculous.js?load=effects', 'modalbox.js','briskbills-quick-helpers.js']
     @stylesheets = ['modalbox.css']
   end
+  
+  # This fixes a javascript bug in active_scaffold 1.2RC1. If the controller id starts with a number, prototype 
+  # pukes during delete and create when called in a sublist on recent firefox/safari's
+  def controller_id
+    @controller_id ||= 'as_' + super
+  end
+
 end

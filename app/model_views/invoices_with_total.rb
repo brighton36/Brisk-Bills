@@ -30,6 +30,9 @@ class InvoicesWithTotal < Invoice
 
     inv.save!
 
+    # For the case of a create! this assign the id to the current view
+    self.id ||= inv.id
+
     inv.errors.each { |attr,msg| errors.add attr, msg }
     
     inv

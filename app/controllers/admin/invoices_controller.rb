@@ -65,11 +65,24 @@ class Admin::InvoicesController < ApplicationController
     (klass == Activity) ? Admin::ActivitiesWithPricesController : super
   end
 
+  # We ovverride the defaut behavior here only so that we can use this method as a hook to detyermine the invoice.activity_type_ids
+  # Before they've been updated by the form. We reference @activity_type_ids_before in before_update_save to determine whether we
+  # need to update the activity associations for this invoice.
+  def update_record_from_params(*args)
+    @activity_type_ids_before = @record.activity_type_ids.dup if @record
+    super
+  end
+
   def before_update_save(invoice)
     super
+       
     invoice.activities = invoice.recommended_activities if (
-      invoice.new_record? or 
-      (!invoice.is_published and (invoice.issued_on_changed? || invoice.activities.changed?))
+      invoice.new_record? or (
+        !invoice.is_published and
+        # Unfortunately, there's no easy way to accomplish a invoice.activity_types.changed?, so - this will 
+        # effectively ascertain that answer by comparing the params against the activity_type_ids 
+        (invoice.issued_on_changed? || (@activity_type_ids_before != invoice.activity_type_ids))
+      )
     )
 
     invoice.payment_assignments.clear if !invoice.is_published and invoice.is_published_changed?
@@ -85,9 +98,13 @@ class Admin::InvoicesController < ApplicationController
     super
 
     if successful? and invoice.is_published and (@invoice_new_record || @invoice_changes.include?(:is_published))
-      # We're going to want to auto-assign payments to this invoice (for now...)
-      invoice.payment_assignments = invoice.client.recommend_payment_assignments_for invoice.amount
-logger.error "Well? #{invoice.payment_assignments.inspect}"
+      # Unfortunately we have to assign payments using the quick_create and not by concat'ing on the
+      # invoice AssociationProxy. THis is due to a bug in my InvoicesWithTotal wrapper that I think is related
+      # to the association proxy not resettting its owenr id on an id change (as is the case of a create)
+      invoice.client.recommend_payment_assignments_for(invoice.amount).each do |ip|
+         InvoicePayment.quick_create! invoice.id, ip.payment_id, ip.amount
+      end
+
       define_invoice invoice
       
       attachments = [
