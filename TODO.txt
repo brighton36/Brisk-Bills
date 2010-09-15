@@ -1,26 +1,16 @@
+DONE: * BUG: (negative numbers) on invoices_with_cost are showing negative sign ...
+DONE: * BUG: Adjusting the Slimtimer Credentials for employees doesn't work (try changing the pass/email - FAIL!)
+DONE: Bug: Showing payments no workie (in production at least)
+
 Here's the current Models plan:			
-		
+
+Bug: It seems that updates to employees and clients and invoices, which fail validation, returns a form without any errors ... (create works though...)
+
+* (Install the rails-debugger on your laptop)
+	
 * Assign version numbers to the invoice based on the number of times an invoice is published...
 	* I don't know if we should/need-to adjust the invoice pdfs out here just yet ....
 	* Might as well put this in migration 29 while we're publishing anyways
-
-Bug: Brisk Bills Amount bug!
-	I htink its the VIEW on a credit - see NUF and bnai was it?
-
-Bug: during invoice generation for DTI
-	NoMethodError (undefined method `tr' for nil:NilClass):
-	  /usr/lib/ruby/gems/1.8/gems/brisk-bills-0.6.0/app/models/activity/labor.rb:82:in `as_legacy_ledger_row'
-	  /usr/lib/ruby/gems/1.8/gems/brisk-bills-0.6.0/app/controllers/admin/invoices_controller.rb:161:in `define_invoice'
-	  /usr/lib/ruby/gems/1.8/gems/brisk-bills-0.6.0/app/controllers/admin/invoices_controller.rb:161:in `collect'
-	  /usr/lib/ruby/gems/1.8/gems/brisk-bills-0.6.0/app/controllers/admin/invoices_controller.rb:161:in `define_invoice'
-	  /usr/lib/ruby/gems/1.8/gems/brisk-bills-0.6.0/app/controllers/admin/invoices_controller.rb:72:in `after_update_save'
-
-	Rendering /var/www/derosetechnologies.com-briskbills/public/500.html (500 Internal Server Error)
-
-
-* BUG: Adjusting the Slimtimer Credentials for employees doesn't work (try changing the pass/email - FAIL!)
-
-* (negative numbers) on invoices_with_cost are showing negative sign ...
 
 * start using 0.7 pre on mario
 

@@ -44,6 +44,26 @@ class Employee < ActiveRecord::Base
         true
     end
   end
-  
+
+  # There were some issues in rails 2.3.2 that caused associations (slimtimer/credential/etc) to not save without this hack
+  # we may have to do it for all active record objects in the project ...
+  def with_unsaved_associated
+    associations_for_update.all? do |association|
+      association_proxy = instance_variable_get("@#{association.name}")
+
+      if association_proxy
+        records = association_proxy
+
+        records = [records] unless records.is_a? Array # convert singular associations into collections for ease of use
+
+        records.select {|r| r.changed? and not r.readonly?}.all?{|r| yield r} # must use select instead of find_all, which Rails overrides on association proxies for db access
+      else
+        true
+      end
+
+      association_proxy
+    end
+  end
+
   handle_extensions
 end

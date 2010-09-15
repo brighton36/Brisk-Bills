@@ -14,6 +14,10 @@ class InvoicePayment < ActiveRecord::Base
   def validate_invoice_is_published
     errors.add :invoice, "can't be assigned to an unpublished invoice" if invoice and !invoice.is_published
   end
+  
+  def label
+    '%s @ (Invoice %d, Payment %d)' % [amount.format, invoice.id,payment.id,  ]
+  end
 
   # This is just to make the code a little easier to type/read. Its a create!, just without all the option verbosity.
   # Note: We accept either and invoice object or invoice_id, and either a payment object or payment_id

@@ -79,7 +79,7 @@ class Activity::Labor < ActiveRecord::Base
     '%.2f' % activity.cost.to_f,
     item_name,
     occurred_on.strftime('%m/%d/%y'),
-    comments.tr("\r\n", '')
+    comments.try(:tr, "\r\n", '')
     ]
   end
 

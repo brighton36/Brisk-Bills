@@ -6,7 +6,7 @@ class Admin::PaymentsController < ApplicationController
   active_scaffold :payment do |config|
     config.label = "Payments"
 
-    config.columns = [:paid_on, :client, :payment_method, :payment_method_identifier, :amount, :invoice_assignment, :unallocated_amount, :created_at, :updated_at]
+    config.columns = [:paid_on, :client, :payment_method, :payment_method_identifier, :amount, :invoice_assignments, :amount_unallocated, :created_at, :updated_at]
 
     config.columns[:client].form_ui = :select
     config.columns[:client].sort_by :sql => 'clients.company_name'
@@ -17,8 +17,8 @@ class Admin::PaymentsController < ApplicationController
     config.columns[:payment_method_identifier].description = 'Last four card digits, check number...'
     config.columns[:payment_method_identifier].label = 'Method Identifier'
 
-    config.columns[:unallocated_amount].label = 'Unallocated'
-    config.columns[:invoice_assignment].label = 'Posted To'
+    config.columns[:amount_unallocated].label = 'Unallocated'
+    config.columns[:invoice_assignments].label = 'Posted To'
     
     config.columns[:amount].sort_by :sql => 'amount_in_cents'
     
@@ -30,9 +30,9 @@ class Admin::PaymentsController < ApplicationController
       :client, 
       :payment_method, 
       :payment_method_identifier, 
-      :amount, 
-#      :unallocated_amount, 
-#      :invoice_assignment
+      :amount
+#      :amount_unallocated, 
+#      :invoice_assignments
     ]
     
     config.update.link = nil

@@ -13,8 +13,14 @@ module Admin::PaymentsHelper
     )
   end
 
-  def unallocated_amount_form_column(record, input_name)
-    '<span class="active-scaffold_detail_value" id="record_unallocated_amount_%s">%s</span>' % [record.id, '(Enter a Payment Amount)']
+  def amount_unallocated_form_column(record, input_name)
+    '<span class="active-scaffold_detail_value" id="record_amount_unallocated_%s">%s</span>' % [record.id, '(Enter a Payment Amount)']
+  end
+  
+  def invoice_assignments_column(record)
+    record.invoice_assignments.collect{|ia| 
+      '%s to Invoice %d' % [ia.amount.format, ia.invoice.id   ]
+    }.join ', '
   end
   
   def invoice_assignment_form_column(record, input_name)

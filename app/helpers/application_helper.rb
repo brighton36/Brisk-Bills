@@ -2,9 +2,9 @@
 module ApplicationHelper
   
   def h_money(amount, inverse_polarity = false)    
-    '<span class="%s">$%s</span>' % [ 
+    '<span class="%s">%s</span>' % [ 
       ( (inverse_polarity ? (amount > 0 ) : (amount < 0 )) ? 'money_negative':'money_positive' ), 
-      amount.to_s.gsub(/(\d)(?=\d{3}+(\.\d*)?$)/, '\1,')
+      amount.format
     ] unless amount.nil?
   end
   
