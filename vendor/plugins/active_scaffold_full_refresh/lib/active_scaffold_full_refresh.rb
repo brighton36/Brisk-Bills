@@ -9,7 +9,7 @@ module ActiveScaffoldFullRefresh
       if successful?
         do_list unless @records
       
-        render(:update) do |page| 
+        render(:update) do |page|
           page.replace_html active_scaffold_content_id, :partial => 'list', :layout => false
           
           if on_action == :create
@@ -21,7 +21,9 @@ module ActiveScaffoldFullRefresh
           end
         end
       else
-        render :action => "#{on_action}.html.erb", :layout => false
+        render(:update) do |page|
+          page.replace_html element_form_id(:action => :update), :partial => 'update_form', :layout => false
+        end
       end
 
     else

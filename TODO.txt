@@ -1,10 +1,9 @@
 DONE: * BUG: (negative numbers) on invoices_with_cost are showing negative sign ...
 DONE: * BUG: Adjusting the Slimtimer Credentials for employees doesn't work (try changing the pass/email - FAIL!)
 DONE: Bug: Showing payments no workie (in production at least)
+DONE: Bug: Fixed a bug where errors on update didn't properly appear on the form
 
 Here's the current Models plan:			
-
-Bug: It seems that updates to employees and clients and invoices, which fail validation, returns a form without any errors ... (create works though...)
 
 * (Install the rails-debugger on your laptop)
 	

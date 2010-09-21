@@ -27,6 +27,6 @@ class Admin::EmployeesController < ApplicationController
   def conditions_for_collection
     ['is_active = ?', true]
   end
-  
+ 
   handle_extensions
 end
