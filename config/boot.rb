@@ -69,7 +69,7 @@ module BriskBills
         require 'brisk-bills'
         require 'brisk-bills/initializer'
       rescue LoadError => e
-        $stderr.puts %(BriskBills could not be initialized. #{load_error_message})
+        $stderr.puts %(BriskBills could not be initialized: #{e.to_s} #{load_error_message})
         exit 1
       end
       BriskBills::Initializer.run(:set_load_path)

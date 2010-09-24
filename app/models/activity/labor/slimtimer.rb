@@ -1,3 +1,5 @@
+require "#{BRISKBILLS_ROOT}/lib/utilities.rb"
+
 class Activity::Labor < ActiveRecord::Base
   has_one :slimtimer_time_entry, :foreign_key => :activity_labor_id, :class_name => "::SlimtimerTimeEntry"
 end

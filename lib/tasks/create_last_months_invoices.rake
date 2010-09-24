@@ -28,7 +28,7 @@ namespace :brisk_bills do
         inv = Invoice.create!(
            :client => client, 
            :activity_types => all_activity_types,
-           :activities => Invoice.recommended_activities_for client.id, end_of_last_month, all_activity_types
+           :activities => Invoice.recommended_activities_for( client.id, end_of_last_month, all_activity_types )
         )
         
         puts "  Created: id (%d) amount: $%s" % [
