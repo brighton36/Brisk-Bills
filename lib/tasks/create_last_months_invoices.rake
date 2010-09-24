@@ -2,7 +2,8 @@ namespace :brisk_bills do
   desc "Create a batch of invoices for the prior month, on all accounts with an uninvoiced balance"
   
   task :create_last_months_invoices => :environment do
-    
+    end_of_last_month = Time.utc(*Time.now.to_a).last_month.end_of_month
+ 
     invoiceable_client_ids = Activity.find(
       :all, 
       :select => 'DISTINCT client_id', 
@@ -14,7 +15,7 @@ namespace :brisk_bills do
         'occurred_on <= ?'
         ].join(' AND '),
         true,
-        Time.utc(*Time.now.to_a).last_month.end_of_month
+        end_of_last_month
       ]
     ).collect{|a| a.client.id}
     
@@ -24,7 +25,11 @@ namespace :brisk_bills do
       Client.find(:all, :conditions => ['id IN (?)', invoiceable_client_ids], :order => 'company_name ASC').each do |client|
         puts "Creating invoice for client \"#{client.company_name}\"..."
         
-        inv = Invoice.create! :client => client, :activity_types => all_activity_types
+        inv = Invoice.create!(
+           :client => client, 
+           :activity_types => all_activity_types,
+           :activities => Invoice.recommended_activities_for client.id, end_of_last_month, all_activity_types
+        )
         
         puts "  Created: id (%d) amount: $%s" % [
           inv.id,

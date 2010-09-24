@@ -5,6 +5,8 @@ DONE: Bug: Fixed a bug where errors on update didn't properly appear on the form
 
 Here's the current Models plan:			
 
+* make an Invoice.end_of_last_month and use it in Invoice create and create_last_months invoice tasks
+
 * (Install the rails-debugger on your laptop)
 	
 * Assign version numbers to the invoice based on the number of times an invoice is published...
