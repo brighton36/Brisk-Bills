@@ -18,5 +18,13 @@ class ClientRepresentative < ActiveRecord::Base
     
     ret
   end
-  
+
+  # This fixes (I guess its a bug?) in _add_existing_form.html when ClientReps are being shown
+  # as a sublist in Clients, and the user chooses to "Add Existing". Without this - the order
+  # Is totally effed.  
+  def self.find(*args)
+    (args == [:all]) ? super(:all, :order => 'first_name ASC, last_name ASC') : super(*args)
+  end
+
+
 end

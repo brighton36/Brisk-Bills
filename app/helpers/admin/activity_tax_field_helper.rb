@@ -1,7 +1,7 @@
 module Admin::ActivityTaxFieldHelper
   
   def tax_column(record)
-    h_money (record.tax) ? record.tax : 0.0
+    h_money (record.tax) ? record.tax : Money.new(0)
   end  
   
   def apply_tax_form_column(record, input_name)

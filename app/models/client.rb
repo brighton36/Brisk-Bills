@@ -23,7 +23,7 @@ class Client < ActiveRecord::Base
   def uninvoiced_activities_balance( force_reload = false )
     (attribute_present? :uninvoiced_activities_balance_in_cents and !force_reload) ?
       Money.new(read_attribute(:uninvoiced_activities_balance_in_cents).to_i) :
-      (Activity.sum( Invoice::ACTIVITY_TOTAL_SQL, :conditions => ['client_id = ? AND is_published = ? AND invoice_id IS NULL',id, true] ) or 0.0)
+      (Activity.sum( Invoice::ACTIVITY_TOTAL_SQL, :conditions => ['client_id = ? AND is_published = ? AND invoice_id IS NULL',id, true] ) or 0)
   end
   
   # THis is the client's outstanding balance. This value is calculated based off the total invoices amount - total payments amount. And is 

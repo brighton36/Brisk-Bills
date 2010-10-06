@@ -1,19 +1,10 @@
-DONE: * BUG: (negative numbers) on invoices_with_cost are showing negative sign ...
-DONE: * BUG: Adjusting the Slimtimer Credentials for employees doesn't work (try changing the pass/email - FAIL!)
-DONE: Bug: Showing payments no workie (in production at least)
-DONE: Bug: Fixed a bug where errors on update didn't properly appear on the form
+* start using 0.7 pre on mario
 
-Here's the current Models plan:			
-
-* make an Invoice.end_of_last_month and use it in Invoice create and create_last_months invoice tasks
-
-* (Install the rails-debugger on your laptop)
-	
 * Assign version numbers to the invoice based on the number of times an invoice is published...
 	* I don't know if we should/need-to adjust the invoice pdfs out here just yet ....
 	* Might as well put this in migration 29 while we're publishing anyways
 
-* start using 0.7 pre on mario
+* (Install the rails-debugger on your laptop)
 
 Now for the final Controller Adjustments:
   	* Invoice_id should be settable on the labor/materials/proposals/etc controllers. (though not the activities controller..not yet at least)
@@ -31,8 +22,6 @@ Now for the final Controller Adjustments:
   	* Remove that restriction on unpublishing old invoices...
   	* And then we need to add a complemntary field in the invoices view? Nah - but show which payments are currently assigned as a read-only...
 
-* Start using 0.8-pre on mario...
-
 * Things might be a little awkward with out activity assignment if people are going back and editing old stuff... we should really have an activity selector...
 
 * We should add an unpublished Open Invoices controller ...
@@ -42,16 +31,17 @@ Now for the final Controller Adjustments:
 * Payment:::is_allocated should probably be added to a view and then list controller...
 	* Code is there - but no view supports it...
 
-* Add Existing Client Representatives should show them in alaphabetical order
-
 * We should put tax before cost in the activities with prices controller...
 
 * WHen Assigning employees to labr_rates - the form stays open between updates and shouldnt...
 
 * Move_to_invoice function should allow us to Move_to '(Unassigned)', and ideally that would be a radio group
 
+* Start using 0.8-pre on mario...
+
 * Publish !!!!!
 ---------------
+* all delete confirms should go through the modal box
 
 * Probably - we should prompt on invoice update, when appropriate, whether to email the client. 
 	* Probably too, publish should be a row-action and not a form control
@@ -68,6 +58,8 @@ Now for the final Controller Adjustments:
 * Publish !!!!!
 ---------------
 * CC payments handling built-in- not a plugin
+
+* Slimtimer-less time entry
 
 * Revise the site-settings interfaces...
 
@@ -87,8 +79,7 @@ LONGER-TERM Features: (Needs re-prioritization...)
 		* tune run an invice.amount .... This this treturn the prior amount value?
 	* THis has to be fixed/ested for all read attributes...
 
-* I'd like some tests cases written for the view objects, make sure they work just like the non-views... ...
-	* Boy this is getting hard, I think it has something to do wioth the transactions... Oddly, the tests work on their own, outside of the rake test	
+* Drop the VIEW hacks and de-normalize the payments/invoices tables. Just 'cache' the irksome values in here
 
 * Better searches by using the search sql fields...
 
@@ -103,8 +94,6 @@ BUG: We should probably write a plugin that better displays delete errors in the
 
 * Use polymorphic relationship for sub activities
 	* I really don't like the way we're uing dont_validate_type_associations. ..
-
-* all delete confirms should go through the modal box - make this a plugin
 
 * The ability to create an activity from the activities & invoices/activities list would be sweet
 	* With a little pop-up that asks for the activity type?
