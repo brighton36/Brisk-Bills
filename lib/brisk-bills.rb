@@ -3,7 +3,7 @@ BRISKBILLS_ROOT = File.expand_path(File.join(File.dirname(__FILE__), "..")) unle
 unless defined? BriskBills::Version
   module BriskBills::Version
     Major = '0'
-    Minor = '7'
+    Minor = '8'
     Tiny  = '0'
 
     class << self
