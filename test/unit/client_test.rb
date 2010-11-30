@@ -308,13 +308,13 @@ class ClientTest < ActiveSupport::TestCase
     payments << Factory.generate_payment( client, 500.00 )
     
     # Now we test all the invoice_payment mappings to be sure they make sense ..
-    assert_equal true, invoices[0].is_paid?
+    assert_equal true, invoices[0].is_paid?(true)
     assert_equal [payments[3].id], invoices[0].payment_assignments(true).collect(&:payment_id)
 
-    assert_equal true, invoices[1].is_paid?
+    assert_equal true, invoices[1].is_paid?(true)
     assert_equal [payments[1].id, payments[2].id], invoices[1].payment_assignments(true).collect(&:payment_id)
     
-    assert_equal true, invoices[2].is_paid?
+    assert_equal true, invoices[2].is_paid?(true)
     assert_equal [payments[0].id], invoices[2].payment_assignments(true).collect(&:payment_id)
   end
 end

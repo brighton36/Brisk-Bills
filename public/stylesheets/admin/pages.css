@@ -135,3 +135,23 @@
 .label-input {
 	width: 590px;
 }
+
+.invoice_assignment_inputs{
+	margin: 0;
+	padding :0;
+	display: block;
+	position: relative;
+	font-size:11px;
+	color:#555555;
+	font-family:verdana,sans-serif;
+}
+
+.invoice_assignment_inputs li {
+	margin:0;
+	padding:0 0 8px 0; 
+	list-style-image:none;
+	list-style-position:outside;
+	list-style-type:none;
+	float: left;
+	clear:both;
+}

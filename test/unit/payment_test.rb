@@ -41,7 +41,7 @@ class PaymentTest < ActiveSupport::TestCase
     
     assert_equal 0.0.to_money, client.balance
     
-    assert_equal true, invoices[1].is_paid?
+    assert_equal true, invoices[1].is_paid?(true)
     
     payments << Factory.generate_payment( client, 300.20)
     
@@ -60,26 +60,26 @@ class PaymentTest < ActiveSupport::TestCase
     
     invoice_one = Factory.generate_invoice client,  290.00
 
-    assert_equal true, invoice_one.is_paid? 
+    assert_equal true, invoice_one.is_paid?(true) 
     assert_equal -10.00, client.balance
     
     Factory.generate_payment client,  200.00
     
     invoice_two = Factory.generate_invoice client,  220.00
 
-    assert_equal false, invoice_two.is_paid?
+    assert_equal false, invoice_two.is_paid?(true)
     assert_equal 10.00, client.balance
     
     Factory.generate_payment client,  10.00
     
-    assert_equal true, invoice_two.is_paid?
+    assert_equal true, invoice_two.is_paid?(true)
     assert_equal 0.00, client.balance
     
     Factory.generate_payment client,  300.00
     
     invoice_three = Factory.generate_invoice client,  300.00
     
-    assert_equal true, invoice_three.is_paid?
+    assert_equal true, invoice_three.is_paid?(true)
     assert_equal 0.00, client.balance
   end
 

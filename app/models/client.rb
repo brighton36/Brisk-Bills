@@ -123,7 +123,7 @@ class Client < ActiveRecord::Base
   # Returns an array of unsaved InvoicePayment objects, with unset invoice_ids, and 'recommended' amounts.
   # If the provided amount exactly equals an payment's unalloated amount, we return a InvoicePayment for the oldest such matching payment. 
   # Otherwise, we start applying the amount to payments in ascending order by issued_date.
-  def recommend_payment_assignments_for(amount, verbose_inclusion = false)
+  def recommend_payment_assignments_for(amount)
     amount = amount.to_money
     
     pymnts = unassigned_payments(

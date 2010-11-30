@@ -1,0 +1,4 @@
+observed_field_id = options_for_column(@observed_column)[:id]
+
+page[observed_field_id].focus
+page.visual_effect :highlight, observed_field_id, :duration => 3, :startcolor => "#FF0000"

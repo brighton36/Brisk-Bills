@@ -23,21 +23,21 @@ class Payment < ActiveRecord::Base
   def amount_unallocated( force_reload = false )
     (attribute_present? :amount_unallocated_in_cents  and !force_reload) ? 
       Money.new(read_attribute(:amount_unallocated_in_cents).to_i) : 
-      (amount - amount_allocated)
+      (amount(force_reload) - amount_allocated(force_reload))
   end
   
   def amount_allocated( force_reload = false )
     Money.new(  
       (attribute_present? :amount_allocated_in_cents  and !force_reload) ? 
         read_attribute(:amount_allocated_in_cents).to_i : 
-        ( InvoicePayment.sum(:amount_in_cents, :conditions => ['payment_id = ?', id]) || 0 )
+        ( invoice_assignments(force_reload).collect(&:amount_in_cents).sum || 0 )
     )
   end
   
   def is_allocated?( force_reload = false )
     (attribute_present? :is_allocated  and !force_reload) ? 
       (read_attribute(:is_allocated).to_i == 1) :
-      amount_unallocated(true).zero?
+      amount_unallocated(force_reload).zero?
   end
   
   def validate_invoice_payments_not_greater_than_amount    

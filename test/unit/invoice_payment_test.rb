@@ -1,7 +1,6 @@
 require File.dirname(__FILE__) + '/../test_helper'
 require File.dirname(__FILE__) + '/../test_unit_factory_helper'
 
-
 class InvoicePaymentTest < ActiveSupport::TestCase
 
   def test_invoice_payment_marking
@@ -26,55 +25,55 @@ class InvoicePaymentTest < ActiveSupport::TestCase
     assert_equal 0.00, client.balance
     
     # Ensure that invoices aren't marked as 'paid' until the invoice_payments have been applied.  Even though the balance is 0
-    assert_equal false, invoices[0].is_paid?
-    assert_equal false, invoices[1].is_paid?
-    assert_equal false, invoices[2].is_paid?
+    assert_equal false, invoices[0].is_paid?(true)
+    assert_equal false, invoices[1].is_paid?(true)
+    assert_equal false, invoices[2].is_paid?(true)
 
     # Ensure that payments aren't marked as 'paid' until the invoice_payments have been applied.  Even though the balance is 0
-    assert_equal false, payments[0].is_allocated?
-    assert_equal false, payments[1].is_allocated?
-    assert_equal false, payments[2].is_allocated?
-    assert_equal false, payments[3].is_allocated?
-    assert_equal false, payments[4].is_allocated?
+    assert_equal false, payments[0].is_allocated?(true)
+    assert_equal false, payments[1].is_allocated?(true)
+    assert_equal false, payments[2].is_allocated?(true)
+    assert_equal false, payments[3].is_allocated?(true)
+    assert_equal false, payments[4].is_allocated?(true)
     
     # Now start marking payments/invocies, and testing the corresponding is_ methods :
     InvoicePayment.quick_create! invoices[0], payments[2], 10.00
 
-    assert_equal true, invoices[0].is_paid?
-    assert_equal false, invoices[1].is_paid?
-    assert_equal false, invoices[2].is_paid?
-    assert_equal false, payments[0].is_allocated?
-    assert_equal false, payments[1].is_allocated?
-    assert_equal false, payments[2].is_allocated?
-    assert_equal false, payments[3].is_allocated?
-    assert_equal false, payments[4].is_allocated?
+    assert_equal true, invoices[0].is_paid?(true)
+    assert_equal false, invoices[1].is_paid?(true)
+    assert_equal false, invoices[2].is_paid?(true)
+    assert_equal false, payments[0].is_allocated?(true)
+    assert_equal false, payments[1].is_allocated?(true)
+    assert_equal false, payments[2].is_allocated?(true)
+    assert_equal false, payments[3].is_allocated?(true)
+    assert_equal false, payments[4].is_allocated?(true)
 
     InvoicePayment.quick_create! invoices[1], payments[2], 1.00
     InvoicePayment.quick_create! invoices[1], payments[3], 4.00    
     InvoicePayment.quick_create! invoices[1], payments[4], 10.00
 
-    assert_equal true, invoices[0].is_paid?
-    assert_equal true, invoices[1].is_paid?
-    assert_equal false, invoices[2].is_paid?
-    assert_equal false, payments[0].is_allocated?
-    assert_equal false, payments[1].is_allocated?
-    assert_equal true, payments[2].is_allocated?
-    assert_equal true, payments[3].is_allocated?
-    assert_equal true, payments[4].is_allocated?
+    assert_equal true, invoices[0].is_paid?(true)
+    assert_equal true, invoices[1].is_paid?(true)
+    assert_equal false, invoices[2].is_paid?(true)
+    assert_equal false, payments[0].is_allocated?(true)
+    assert_equal false, payments[1].is_allocated?(true)
+    assert_equal true, payments[2].is_allocated?(true)
+    assert_equal true, payments[3].is_allocated?(true)
+    assert_equal true, payments[4].is_allocated?(true)
 
     InvoicePayment.quick_create! invoices[2], payments[0], 2.00
     InvoicePayment.quick_create! invoices[2], payments[1], 3.00    
     
     # Everything should be allocated now - retest is_paid/allocated code
-    assert_equal true, invoices[0].is_paid?
-    assert_equal true, invoices[1].is_paid?
-    assert_equal true, invoices[2].is_paid?
+    assert_equal true, invoices[0].is_paid?(true)
+    assert_equal true, invoices[1].is_paid?(true)
+    assert_equal true, invoices[2].is_paid?(true)
 
-    assert_equal true, payments[0].is_allocated?
-    assert_equal true, payments[1].is_allocated?
-    assert_equal true, payments[2].is_allocated?
-    assert_equal true, payments[3].is_allocated?
-    assert_equal true, payments[4].is_allocated?
+    assert_equal true, payments[0].is_allocated?(true)
+    assert_equal true, payments[1].is_allocated?(true)
+    assert_equal true, payments[2].is_allocated?(true)
+    assert_equal true, payments[3].is_allocated?(true)
+    assert_equal true, payments[4].is_allocated?(true)
   end
 
   # How well does find_recomended_invoices work for a negative invoice with a credit/negative amount -payment? Write a test:
@@ -90,9 +89,9 @@ class InvoicePaymentTest < ActiveSupport::TestCase
     assert_equal -10.00, client.balance
 
     # Negative invoices are always marked paid
-    assert_equal false, invoices[0].is_paid?
-    assert_equal true,  invoices[1].is_paid?
-    assert_equal true,  invoices[2].is_paid?
+    assert_equal false, invoices[0].is_paid?(true)
+    assert_equal true,  invoices[1].is_paid?(true)
+    assert_equal true,  invoices[2].is_paid?(true)
     
     payments = [
       Factory.generate_payment( client, 5.00,   :invoice_assignments => 
@@ -106,9 +105,9 @@ class InvoicePaymentTest < ActiveSupport::TestCase
     assert_equal -20.00, client.balance
 
     # Everything should be paid now:
-    assert_equal true, invoices[0].is_paid?
-    assert_equal true, invoices[1].is_paid?
-    assert_equal true, invoices[2].is_paid?
+    assert_equal true, invoices[0].is_paid?(true)
+    assert_equal true, invoices[1].is_paid?(true)
+    assert_equal true, invoices[2].is_paid?(true)
     
     # Now what if the invoice they have an invoice for -$20, and an invoice for +$12. Their outstanding balance is -$8,
     # but if they try to make a payment for $5, will we freak on them?
@@ -118,20 +117,20 @@ class InvoicePaymentTest < ActiveSupport::TestCase
 
     assert_equal -8.00, client.balance
     
-    assert_equal true, invoices[0].is_paid?
-    assert_equal true, invoices[1].is_paid?
-    assert_equal true, invoices[2].is_paid?
-    assert_equal false, invoices[3].is_paid?
+    assert_equal true, invoices[0].is_paid?(true)
+    assert_equal true, invoices[1].is_paid?(true)
+    assert_equal true, invoices[2].is_paid?(true)
+    assert_equal false, invoices[3].is_paid?(true)
     
     payments << Factory.generate_payment( client, 12.00,   :invoice_assignments => 
         [InvoicePayment.new(:invoice => invoices[3], :amount => 12.00 )]
     )
     
     # and make sure we're cool:
-    assert_equal true, invoices[0].is_paid?
-    assert_equal true, invoices[1].is_paid?
-    assert_equal true, invoices[2].is_paid?
-    assert_equal true, invoices[3].is_paid?
+    assert_equal true, invoices[0].is_paid?(true)
+    assert_equal true, invoices[1].is_paid?(true)
+    assert_equal true, invoices[2].is_paid?(true)
+    assert_equal true, invoices[3].is_paid?(true)
     
     assert_equal -20.00, client.balance
   end
@@ -314,5 +313,37 @@ class InvoicePaymentTest < ActiveSupport::TestCase
     
     assert_raise(ActiveRecord::RecordInvalid) { ip.save! }
     assert ip.errors.invalid?(:invoice)
+  end
+  
+  # Mostly I did this to test out view-caching isn't screwing anything up here when we manually attach (and don't save InvoicePayment(s)
+  def test_payment_amount_unallocated
+    client = Factory.create_client
+    
+    invoice = Factory.generate_invoice( client, 50.00, :is_published => false, :payment_assignments => [])
+    payment = Factory.generate_payment( client, 60.00, :invoice_assignments => [] )
+    
+    assert_equal Money.new(0), payment.amount_allocated
+    assert_equal Money.new(6000), payment.amount_unallocated
+    
+    payment.invoice_assignments << InvoicePayment.new( :invoice => invoice, :amount => 50.00 )
+    
+    assert_equal Money.new(5000), payment.amount_allocated
+    assert_equal Money.new(1000), payment.amount_unallocated
+  end
+  
+  # Mostly I did this to test out view-caching isn't screwing anything up here when we manually attach (and don't save InvoicePayment(s)
+  def test_invoice_amount_outstanding
+    client = Factory.create_client
+    
+    invoice = Factory.generate_invoice( client, 60.00, :is_published => false, :payment_assignments => [])
+    payment = Factory.generate_payment( client, 50.00, :invoice_assignments => [] )
+    
+    assert_equal Money.new(0), invoice.amount_paid
+    assert_equal Money.new(6000), invoice.amount_outstanding
+    
+    invoice.payment_assignments << InvoicePayment.new( :payment => payment, :amount => 50.00 )
+    
+    assert_equal Money.new(1000), invoice.amount_outstanding
+    assert_equal Money.new(5000), invoice.amount_paid
   end
 end

@@ -120,7 +120,7 @@ class Invoice < ActiveRecord::Base
   end
   
   def paid_on
-    raise StandardError unless is_paid?
+    raise StandardError unless is_paid?(true)
 
     InvoicePayment.find(
       :first,
@@ -136,21 +136,21 @@ class Invoice < ActiveRecord::Base
   def is_paid?( force_reload = false )
     (attribute_present? :is_paid  and !force_reload) ? 
       (read_attribute(:is_paid).to_i == 1) :
-      amount_outstanding(true) <= 0
+      amount_outstanding(force_reload) <= 0
   end
   
   def amount_paid( force_reload = false )
     Money.new( 
       (attribute_present? :amount_paid_in_cents and !force_reload) ? 
       read_attribute(:amount_paid_in_cents).to_i :
-      InvoicePayment.sum( :amount_in_cents, :conditions => ['invoice_id = ?', id] ).to_i
+      (payment_assignments(force_reload).collect(&:amount_in_cents).sum  || 0)
     )
   end
   
   def amount_outstanding( force_reload = false )
     (attribute_present? :amount_outstanding_in_cents and !force_reload) ? 
       Money.new(read_attribute(:amount_outstanding_in_cents).to_i) :
-      (amount(true) - amount_paid(true))
+      (amount(force_reload) - amount_paid(force_reload))
   end
 
   # This is a shortcut to the self.recommended_activities_for , and is provided as a shortcut when its necessary to update an existing invoice's

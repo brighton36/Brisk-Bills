@@ -3,6 +3,11 @@ class Admin::PaymentsController < ApplicationController
   include ExtensibleObjectHelper
   include ApplicationHelper # We need h_money below...
 
+  VALID_INVOICE_ASSIGNMENT_INPUT = /^invoice_assignments_([\d]+)_amount$/
+  VALID_MONEY_INPUT = /^(?:[ ]*([\d]+\.[\d]{0,2}|[\d]+)[ ]*|)$/
+
+  class ObservedInvalidAmount < StandardError; end
+
   active_scaffold :payment do |config|
     config.label = "Payments"
 
@@ -18,7 +23,7 @@ class Admin::PaymentsController < ApplicationController
     config.columns[:payment_method_identifier].label = 'Method Identifier'
 
     config.columns[:amount_unallocated].label = 'Unallocated'
-    config.columns[:invoice_assignments].label = 'Posted To'
+    config.columns[:invoice_assignments].label = 'Applies To'
     
     config.columns[:amount].sort_by :sql => 'amount_in_cents'
     
@@ -28,16 +33,14 @@ class Admin::PaymentsController < ApplicationController
     config.create.columns = config.update.columns = [
       :paid_on, 
       :client, 
+      :amount,
       :payment_method, 
-      :payment_method_identifier, 
-      :amount
-#      :amount_unallocated, 
-#      :invoice_assignments
+      :payment_method_identifier,
+      :amount_unallocated, 
+      :invoice_assignments
     ]
     
-    config.update.link = nil
-    
-#    observe_active_scaffold_form_fields :fields => %w(client amount), :action => :on_invoice_assignment_observation
+    observe_active_scaffold_form_fields :fields => %w(client amount), :action => :on_invoice_assignment_observation
   end
 
   def before_update_save(payment)      
@@ -46,36 +49,72 @@ class Admin::PaymentsController < ApplicationController
 
   alias before_create_save before_update_save
 
-
   def on_invoice_assignment_observation
-    record_id = (/^[\d]+$/.match(params[:record_id])) ? params[:record_id].to_i : nil
-    
-    # TODO: if amount is no integer - highlight...
-    
-    render(:update) do |page|
-      
-      #TODO: We need to load the pre-existing payment here...
-      
-      # Let's do some (minimal) Amount input handling
-      unless params[:amount].empty?
-        begin
-          record_amount_js_id = "record_amount_#{record_id}"
-          
-          new_amount = Money.new($1.to_f*100) if /^[ ]*([\d]+\.[\d]{0,2}|[\d]+)[ ]*$/.match params[:amount]
-          
-          raise StandardError unless new_amount
-          
-          page[record_amount_js_id].value = new_amount.to_s
-          page.replace_html "record_unallocated_amount_#{record_id}", :text => h_money(new_amount)
-        rescue
-          page[record_amount_js_id].value = ''
-          page[record_amount_js_id].focus
-          page.visual_effect :highlight, record_amount_js_id, :duration => 3, :startcolor => "#FF0000"
-        end
-      end
-      
-      # TODO: Generate the invoices div...
+    @observed_column = params[:observed_column]
+
+    # First let's load the record in question (or create one) ...
+    @record = (/^[\d]+$/.match(params[:record_id])) ? 
+      Payment.find(params[:record_id].to_i) : Payment.new
+
+    # We'll need these later in the helper/rjs...
+    params[:id] = params[:record_id] # This is a hack to make the options_for_column work as expected
+    define_scaffold_observations
+
+    # We don't have to raise on this one really. Its not consequential if this is screwy
+    @record.client_id = params[:client].to_i if /^[\d]+$/.match params[:client]
+
+    # This is an important field to get right:
+    raise ObservedInvalidAmount unless VALID_MONEY_INPUT.match params[:amount]
+    @record.amount = ($1.nil?) ? nil : Money.new($1.to_f*100)
+
+    case @observed_column
+      when /^(?:amount|client)$/
+        # Let's try to guess the right assignments automatically:
+        @record.invoice_assignments = @record.client.recommend_invoice_assignments_for(
+          @record.amount
+        ) if @record.client and @record.amount
+
+      when VALID_INVOICE_ASSIGNMENT_INPUT
+        observed_invoice_id = $1.to_i
+
+        update_assignments_from_params @record
+
+        @observed_assignment = @record.invoice_assignments.to_a.find{|ia| ia.invoice_id == observed_invoice_id}
     end
+
+    rescue ObservedInvalidAmount
+      render :action => :observation_error
+  end
+
+  private
+
+  def update_assignments_from_params(record)
+    # First we build a lookup with all ids that were passed in the params, 
+    # and which have an assignment amount greater than 0
+    assignments = {}
+    
+    params.each_pair do |key,value|
+      if VALID_INVOICE_ASSIGNMENT_INPUT.match key
+        inv_id = $1.to_i
+        raise ObservedInvalidAmount unless VALID_MONEY_INPUT.match value
+        assignments[inv_id] = Money.new($1.to_f*100) 
+      end
+    end
+
+    # Now go ahead and delete the invoice_assignments that no longer have money attributed to them
+    record.invoice_assignments.each do |ia|
+      record.invoice_assignments.delete ia unless assignments.keys.include? ia.invoice_id
+    end
+  
+    # And lastly, add new the assignments and/or update existing assignments in the record:
+    assignments.each_pair do |inv_id,amount|
+      ia = record.invoice_assignments.to_a.find{|ia| ia.invoice_id == inv_id}
+      ia ||= record.invoice_assignments.build :invoice_id => inv_id
+      
+      ia.amount = amount
+    end
+    
+    record
   end
 
   handle_extensions
