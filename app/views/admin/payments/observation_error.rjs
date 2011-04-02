@@ -1,4 +1,29 @@
-observed_field_id = options_for_column(@observed_column)[:id]
+field_id_map = @invalid_amount_columns.inject({}){|ret,column| 
+  ret.merge({column => options_for_column(column)[:id]})
+}
 
-page[observed_field_id].focus
-page.visual_effect :highlight, observed_field_id, :duration => 3, :startcolor => "#FF0000"
+# Highlight all these baddies:
+field_id_map.values.each do |observed_field_id|
+  page.visual_effect :highlight, observed_field_id, :duration => 3, :startcolor => "#FF0000"
+end
+
+# Revert the amount_outstanding on the affected records:
+@invalid_amount_columns.each do |invalid_column|
+
+  if Admin::PaymentsController::VALID_INVOICE_ASSIGNMENT_INPUT.match invalid_column
+    invoice_id = $1.to_i
+    
+    page.replace_html(
+      "%s_outstanding" % field_id_map[invalid_column],
+      h_money(invoice_amount_outstanding_for(@invoice_map[invoice_id], @record.id ))
+    )
+    logger.error "HMM: "+h_money(@invoice_map[invoice_id].amount_outstanding).inspect
+  end
+end
+
+# We can only focus one of these:
+page[ 
+  (field_id_map.has_key? @observed_column) ? 
+    field_id_map[@observed_column] : 
+    field_id_map.values.first 
+].focus

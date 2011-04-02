@@ -6,11 +6,13 @@
       }
     },
     
+    :salt_is_missing => "Salt is missing - No Salt is a bad idea!",
+    
     :invoice_outstanding_details => 'for Invoice #{{inv_id}} ({{issued_on}}). Currently outstanding: {{amount_outstanding}}',
     :enter_a_payment_amount => '(Enter a Payment Amount)',
     :no_outstanding_invoices_for_account => 'There are no outstanding invoices on this account.',
     :choose_a_client => '(Choose a Client)',
-
+    :payment_method_identifier_description => 'Last four card digits, check number...',
     
     :first_time_setup_welcome => "\nWelcome to Brisk Bills!\nWhat follows is your first-time setup 'wizard'. This task, if successful, will test your database, run your migrations, and create your first employee log-in account. To ensure success,  hit 'y' when you don't understand a question.",
     :first_time_setup_confirm_env => "\nI see we're running in the #{RAILS_ENV.inspect} environment, with the following settings:",

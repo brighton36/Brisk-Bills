@@ -23,7 +23,7 @@ class Credential < ActiveRecord::Base
     begin
       @salt = Rails.configuration.authentication_salt
     rescue
-      @salt = "Salt is missing - No Salt is a bad idea!"
+      @salt = t(:salt_is_missing)
       logger.error @salt # cheeky?
     end unless @salt
 

@@ -19,7 +19,6 @@ class Admin::PaymentsController < ApplicationController
     config.columns[:payment_method].form_ui = :select
     config.columns[:payment_method].sort_by :sql => 'payment_methods.name'
     
-    config.columns[:payment_method_identifier].description = 'Last four card digits, check number...'
     config.columns[:payment_method_identifier].label = 'Method Identifier'
 
     config.columns[:amount_unallocated].label = 'Unallocated'
@@ -63,9 +62,23 @@ class Admin::PaymentsController < ApplicationController
     # We don't have to raise on this one really. Its not consequential if this is screwy
     @record.client_id = params[:client].to_i if /^[\d]+$/.match params[:client]
 
-    # This is an important field to get right:
-    raise ObservedInvalidAmount unless VALID_MONEY_INPUT.match params[:amount]
-    @record.amount = ($1.nil?) ? nil : Money.new($1.to_f*100)
+    # Let's make sure all the amounts we've been given are acceptable:
+    @invalid_amount_columns = params.to_enum(:each_pair).collect{|key,value| 
+      key if (VALID_INVOICE_ASSIGNMENT_INPUT.match key or key == 'amount') and !VALID_MONEY_INPUT.match value
+    }.compact
+
+    if @invalid_amount_columns.length > 0
+      # We'll end up needing this when we're clearing out amounts outstanding due to a mis-type
+      @invoice_map = Invoice.find(
+        :all,
+        :conditions => ['id IN (?)', @invalid_amount_columns.collect{|colname| $1 if VALID_INVOICE_ASSIGNMENT_INPUT.match colname}]
+      ).inject({}){|ret, inv| ret.merge({inv.id => inv})}
+      
+      raise ObservedInvalidAmount
+    end
+
+    # This is an important field to get right. Remember that we already validating this param above:
+    @record.amount = Money.new(params[:amount].to_f*100) if params.has_key? :amount
 
     case @observed_column
       when /^(?:amount|client)$/
@@ -75,11 +88,11 @@ class Admin::PaymentsController < ApplicationController
         ) if @record.client and @record.amount
 
       when VALID_INVOICE_ASSIGNMENT_INPUT
-        observed_invoice_id = $1.to_i
+        @observed_invoice = Invoice.find $1.to_i
 
         update_assignments_from_params @record
 
-        @observed_assignment = @record.invoice_assignments.to_a.find{|ia| ia.invoice_id == observed_invoice_id}
+        @observed_assignment = @record.invoice_assignments.to_a.find{|ia| ia.invoice_id == @observed_invoice.id}
     end
 
     rescue ObservedInvalidAmount
@@ -96,8 +109,7 @@ class Admin::PaymentsController < ApplicationController
     params.each_pair do |key,value|
       if VALID_INVOICE_ASSIGNMENT_INPUT.match key
         inv_id = $1.to_i
-        raise ObservedInvalidAmount unless VALID_MONEY_INPUT.match value
-        assignments[inv_id] = Money.new($1.to_f*100) 
+        assignments[inv_id] = Money.new(params[key].to_f*100) 
       end
     end
 

@@ -1,6 +1,15 @@
 if @observed_assignment
   # Make sure the observed input field looks properly formatted:
-  page[options_for_column(@observed_column)[:id]].value = @observed_assignment.amount.to_s if @observed_assignment.amount_in_cents_changed?
+  observed_column_id = options_for_column(@observed_column)[:id]
+  
+  page[observed_column_id].value = @observed_assignment.amount.to_s
+  
+  page.replace_html(
+    "%s_outstanding" % observed_column_id,
+    h_money(
+      invoice_amount_outstanding_for(@observed_invoice, @record.id, @observed_assignment.amount )
+    )
+  )
 else
   # Make sure the input field looks properly formatted:
   page[amount_field_id].value = @record.amount.to_s if @record.amount_in_cents_changed?
@@ -8,7 +17,7 @@ else
   # Now let's render these guessed assignments
   page.replace(
     'record_invoice_assignment_%s' % @record.id , 
-    :text => invoice_assignments_form_column(@record) 
+    invoice_assignments_form_column(@record) 
   )
 end
 

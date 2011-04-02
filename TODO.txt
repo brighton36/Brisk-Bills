@@ -1,28 +1,33 @@
+* Do a mila on-site inspection when you get back in town
+
 Now for the final Controller Adjustments:
-	* Disable all fields but assignments on pre-exisintg payments. Its just a bad idea
-	* We should be updating the assignment's corresponding amount_outstanding span when we adjust values
-	* Show a warning if someone tries to commit a payment w/o allocating the full amount...
-	* Test to make sure that we're properly deleting INvoice assignments when we remove them in set_invoice_assignments_from_params on edit-save 
-   	* Don't forget to notate the assignments on a show action
+	* Show a pop-up warning if someone tries to commit a payment w/o allocating the full amount...
 	* Get the actual create/update actions working 
-		* Test the case of an error in validation ( say... their assignments are larger than the amount)
+		* Test the case of an error in validation ( is there a limit on the method_identifier?)
+		* Don't allow someone to assign more than the payment amount via standard record errors
+		* Make sure that we cant submit a negative assignment value via standard record errors
+	* Test to make sure that we're properly deleting Invoice assignments when we remove them in set_invoice_assignments_from_params on edit-save 
+   	* Don't forget to notate the assignments on a show action
 
 * We should add a rake task that checks for 'assignment consistency' , and makes sure that the assignments line-up as we'd expect for all invoices in the database... 
  	* We should think about what a negative invoice might do to payment tracking, and be sure to confirm this behavior in our checks
- 	
+
+* BUG: If I try to delete a newly created client in /clients I get a 500
+
 --- Put a beta version on mario? ...
 
 * We shoud do the payment assignments on the invoices controller to
-	* I think so - this will help us on the redesign...
+	* Only on the show action
 	* Make the is_published a row_link
 	* But - only assignments should be editable on published invoices. Once they unpublish it - we can do more...
 		* The js might get tricky here
+		* Nah - we can probably use the model.is_editable? to show/hide the edit button on published invoices. perfect.
 	
-* Remove that restriction on unpublishing old invoices... (this done?)
+* Double check that we're removing payment assignments on invoice unpublish..
 * I think there's a bug saving invoice comments on unpublished invoices? ... (maybe its just when you're choosing no?)
  	
 * reocurring payments module with rake task
-	* DDC / GI / Manny Kadre bills
+	* DDC / GI / Ashbritt / Manny Kadre bills
 
 * Assign version numbers to the invoice based on the number of times an invoice is published...
 	* I don't know if we should/need-to adjust the invoice pdfs out here just yet ....

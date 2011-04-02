@@ -6,17 +6,22 @@ module Admin::PaymentsHelper
   end
   
   def client_form_column(record, input_name)
-    logger.error "hmmmm: #{self.inspect}"
-#TODO:    active_scaffold_input_singular_association
     (record.new_record?) ?
-      input(:record, :client, options_for_column('client')) :
-      span_field(h(record.client.label))
+      select_tag(
+        "record[client][id]", 
+        options_for_select(
+          [["- select -", nil]]+Client.find(:all, :order => 'company_name ASC').collect{|c| [c.company_name, c.id] },
+          record.client_id
+        ), 
+        options_for_column('client')
+      ) :
+      span_field(h(record.client.company_name))
   end
   
   def paid_on_form_column(record, input_name)
     (record.new_record?) ?
       input(:record, :paid_on, options_for_column('paid_on')) :
-      span_field(h(record.paid_on))
+      span_field(h(record.paid_on.strftime('%m/%d/%y %I:%M %p')))
   end
 
   def amount_form_column(record, input_name)
@@ -29,13 +34,26 @@ module Admin::PaymentsHelper
       span_field(h_money(record.amount)) 
   end
 
+  def payment_method_form_column(record, input_name)
+    (record.new_record?) ?
+      select_tag(
+        "record[payment_method][id]", 
+        options_for_select(
+          [["- select -", nil]]+PaymentMethod.find(:all, :order => 'name ASC').collect{|pm| [pm.name, pm.id] },
+          record.payment_method_id
+        ), 
+        options_for_column('payment_method')
+      ) :
+      span_field(h(record.payment_method.name))
+  end
+
   def payment_method_identifier_form_column(record, input_name)
     (record.new_record?) ?
       text_field_tag(
         input_name, 
         record.payment_method_identifier, 
         options_for_column('payment_method_identifier').merge( {:size => 30, :class=>'text-input' } )
-      ) :
+      )+span_field(t(:payment_method_identifier_description), :class => "description") :
       span_field(h(record.payment_method_identifier)) 
   end
 
@@ -97,7 +115,10 @@ module Admin::PaymentsHelper
                   :invoice_outstanding_details,
                   :inv_id => inv.id, 
                   :issued_on => h(inv.issued_on.strftime('%m/%d/%y')),
-                  :amount_outstanding => h_money(inv.amount_outstanding)
+                  :amount_outstanding => span_field(
+                    h_money(invoice_amount_outstanding_for(inv, record.id,inv_assignments[inv.id])),
+                    :id => ('%s_outstanding' % options_for_column(col_name)[:id])
+                  )
                 )
               ]
             }.join
@@ -124,6 +145,21 @@ module Admin::PaymentsHelper
   
   private
   
+  # This method is a little weird. But, its used in a couple places to determine what the amount oustanding
+  # is for an invoice, after the provided payment_id has been removied, and after the provided amount
+  # has been applied. Its not as efficient as I'd like. But, it works
+  def invoice_amount_outstanding_for(invoice, payment_id, amount = nil)
+    invoice.amount-(
+      invoice.payment_assignments.to_a.reject{|ip| 
+        payment_id == ip.payment_id
+      }.inject(Money.new(0)){|ret, ip| 
+        ret+ip.amount
+      }+(
+        (amount) ? amount : Money.new(0)
+      )
+    )
+  end
+  
   def span_field(content, options = {})
     content_tag(
       :span, 
@@ -132,4 +168,18 @@ module Admin::PaymentsHelper
     )    
   end
 
+  # We write this as an overide on the default behavior. Nothing needs to change in the case that this is a
+  # new record. But, if we're editing, a number of our input fields aren't on the page. For this
+  # case, we need to not query these for their value
+  def active_scaffold_observe_field(col_name, observation) 
+    unless @record.new_record?
+      # We won't be observing anything if its one of these columns
+      return %{} if /\A(?:client|amount)\Z/.match col_name
+      
+      # Its an amount column. For these, just remove the $F reference to the removed fields
+      ["client", "amount"].each{ |f| observation[:fields].delete f}
+    end
+    
+    super col_name, observation
+  end
 end
