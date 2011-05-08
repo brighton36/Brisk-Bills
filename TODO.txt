@@ -1,7 +1,4 @@
-* Do a mila on-site inspection when you get back in town
-
 Now for the final Controller Adjustments:
-	* Show a pop-up warning if someone tries to commit a payment w/o allocating the full amount...
 	* Get the actual create/update actions working 
 		* I'd say to start by just disabling any active_scaffold handling of :invoice_assignments
 		* Test the case of an error in validation ( is there a limit on the method_identifier? or just unselected no payment perhaps...)
@@ -17,7 +14,7 @@ Now for the final Controller Adjustments:
 
 --- Put a beta version on mario? ...
 
-* We shoud do the payment assignments on the invoices controller to
+* We shoud do the payment assignments on the invoices controller too
 	* Only on the show action
 	* Make the is_published a row_link
 	* But - only assignments should be editable on published invoices. Once they unpublish it - we can do more...

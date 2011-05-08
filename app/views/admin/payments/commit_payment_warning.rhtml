@@ -1,0 +1,8 @@
+<h1>This payment has not been fully allocated.</h1>
+
+<p>Are you sure you wish to commit this payment without having fully assigned its balance to an outstanding invoice(s)?</p>
+<p>
+  <%= button_to_function h("Yes, I'll assign it later"), "Modalbox.hide();$('%s').onsubmit();" % element_form_id(:action => action), :class => "MB_focusable" %>
+   or 
+  <%= link_to_function 'No, let me assign this in full', "Modalbox.hide();", :class => "MB_focusable", :title => 'No' %>
+</p>

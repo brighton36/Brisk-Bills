@@ -143,6 +143,32 @@ module Admin::PaymentsHelper
     "record_amount_unallocated_%s" % @record.id  
   end
   
+  # All this craziness exists to show a modal dialog asking the user to confirm any payment that isn't fully allocated.
+  def submit_tag(*args)
+    if (/\A(?:#{as_(:update)}|#{as_(:create)})\Z/.match args[0])
+      action = args[0] == as_(:update) ? :update : :create 
+      
+      button_to_function( 
+        args[0], 
+        "amt_unalloc = $$('#record_amount_unallocated_%s span');
+        if (amt_unalloc.length > 0 && amt_unalloc.first().innerHTML != '%s') {
+          show_modal_after_close(%s,%s);
+        } else {
+          $('%s').onsubmit();
+        }" % [
+          @record.id,
+          Money.new(0).format,
+          render(:file => 'admin/payments/commit_payment_warning.rhtml', :layout => false, :locals => {:action => action}).to_json,
+          {:title => 'Are you sure you wish to save?', :width => 600}.to_json,
+          element_form_id(:action => action)
+        ],
+        args[1]
+      )
+    else
+      super(*args)
+    end
+  end
+
   private
   
   # This method is a little weird. But, its used in a couple places to determine what the amount oustanding
