@@ -6,12 +6,20 @@ class Payment < ActiveRecord::Base
   belongs_to :payment_method
   
   has_many :invoices, :through => :assigned_payments
-  has_many :invoice_assignments, :class_name => 'InvoicePayment', :dependent => :delete_all
+  
+  # We have to make sure this doesnt validate since :amount_not_greater_than_payment_or_invoice_totals ,
+  # will trip things up if we're in the processing of manipulating invoice_assignments on payment that 
+  # already has some assignments
+  has_many :invoice_assignments, :class_name => 'InvoicePayment', :dependent => :delete_all, :validate =>false, :autosave => true
   
   validates_presence_of :client_id, :payment_method_id
   validates_numericality_of :amount, :allow_nil => false
   validates_numericality_of :amount, :greater_than_or_equal_to => 0
   validate :validate_invoice_payments_not_greater_than_amount
+
+  validate :validate_invoice_payments_not_greater_than_invoice_amount
+  validate :validate_invoice_payments_only_assigned_to_published_invoices
+  validate :validate_invoice_payments_not_negative
     
   money :amount, :currency => false
   
@@ -50,8 +58,44 @@ class Payment < ActiveRecord::Base
     )
   end
   
+  def validate_invoice_payments_not_greater_than_invoice_amount
+    invoice_assignments.each do |asgn|
+      errors.add(
+        :invoice_assignments, 
+        "has an invalid assignment whose amount (%s) is greater than invoice #%d's amount (%s)" % [
+          asgn.amount.to_s,
+          asgn.invoice.id,
+          asgn.invoice.amount.to_s
+        ]
+      ) if asgn.amount > asgn.invoice.amount
+    end
+  end
+  
+  def validate_invoice_payments_only_assigned_to_published_invoices
+    invoice_assignments.each do |asgn|
+      errors.add(
+        :invoice_assignments, 
+        "has an invalid assignment which is applied to an unpublished invoice #%d" % [
+          asgn.invoice.id
+        ]
+      ) unless asgn.invoice.is_published
+    end
+  end
+  
+  def validate_invoice_payments_not_negative
+    invoice_assignments.each do |asgn|
+      errors.add(
+        :invoice_assignments, 
+        "has an invalid assignment with a negative value applied to invoice #%d" % [
+          asgn.invoice.id
+        ]
+      ) if asgn.amount < 0
+    end
+  end
+  
+  # We don't want any actual fields changing on update. But, we do want the assignments to be changeable... 
   def validate_on_update
-    errors.add_to_base "Payments can't be updated after creation"
+    errors.add_to_base "Payments can't be updated after creation" if changed.length > 0
   end
   
   def name  

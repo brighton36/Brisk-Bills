@@ -99,13 +99,14 @@ module Admin::PaymentsHelper
           content_tag(:ul, :class => 'invoice_assignment_inputs') do
             show_invoices.collect{|inv|
               col_name = 'invoice_assignments_%d_amount' % inv.id
+              
+              assignment_amount = nil
+              assignment_amount = (inv_assignments.has_key? inv.id) ? inv_assignments[inv.id] : '0.00' if record.amount
 
               '<li>%s%s %s</li>' % [
                 text_field_tag( 
                     'record[invoice_assignments][%d][amount]' % inv.id, 
-                    (record.amount) ? 
-                      ((inv_assignments.has_key? inv.id) ? inv_assignments[inv.id] : '0.00' ) : 
-                      nil, 
+                    assignment_amount, 
                     :size  => 8, 
                     :class => 'text-input',
                     :id    => options_for_column(col_name)[:id]

@@ -1,11 +1,6 @@
 Now for the final Controller Adjustments:
-	* Get the actual create/update actions working 
-		* I'd say to start by just disabling any active_scaffold handling of :invoice_assignments
-		* Test the case of an error in validation ( is there a limit on the method_identifier? or just unselected no payment perhaps...)
-		* Don't allow someone to assign more than the payment amount via standard record errors
-		* Make sure that we cant submit a negative assignment value via standard record errors
-	* Test to make sure that we're properly deleting Invoice assignments when we remove them in set_invoice_assignments_from_params on edit-save 
-   	* Don't forget to notate the assignments on a show action
+	* Test to make sure that we're properly deleting Invoice assignments in PaymentsController::before_update_save when their value is 0.0
+   	* Don't forget to notate the assignments on a show action for both the invoice and the payment
 
 * We should add a rake task that checks for 'assignment consistency' , and makes sure that the assignments line-up as we'd expect for all invoices in the database... 
  	* We should think about what a negative invoice might do to payment tracking, and be sure to confirm this behavior in our checks

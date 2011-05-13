@@ -54,14 +54,36 @@ class Admin::PaymentsController < ApplicationController
     observe_active_scaffold_form_fields :fields => %w(client amount), :action => :on_assignment_observation
   end
 
+  # In here we update all the invoice assignments
   def before_update_save(payment)
-    # TODO! Use the actual values...
-    logger.error "Well, we're here - what we got?"+payment.invoice_assignments.inspect
-    
-# TODO: Remove. Stinky & Old: payment.invoice_assignments = payment.client.recommend_invoice_assignments_for payment.amount
-    
-    # TODO: New, build whats needed , or pull from whats already there
-    # InvoicePayment.new :invoice => inv, :amount => assignment
+    # Let's create a lookup map from the input params to make this easier:
+    input_assignments = {}
+    params[:record][:invoice_assignments].each_pair do |inv_id, fields|
+      input_assignments[inv_id.to_i] = Money.new(fields[:amount].tr('^\-0-9','').to_i)
+    end
+
+    # First we iterate through the existing relationships:
+    payment.invoice_assignments.each do |asgn|
+      # Did the assignment get changed by the input? If so, assign the value
+      asgn.amount = input_assignments[asgn.invoice_id] if (
+        input_assignments.has_key?(asgn.invoice_id) && 
+        input_assignments[asgn.invoice_id] != asgn.amount
+      )
+    end
+  
+    # And then we go through the open invoices to find if new assignments need to be created:
+    payment.client.unpaid_invoices.each do |inv|
+      # We need to add a new assignment if there's a non-zero value
+      payment.invoice_assignments.build(
+          :invoice_id => inv.id, 
+          :amount => input_assignments[inv.id]
+        ) if (
+        # We want to make sure we're not creating an assignment that already exists
+        !payment.invoice_assignments.any?{|asgn| asgn.invoice_id == inv.id} &&
+        input_assignments.has_key?(inv.id) &&
+        input_assignments[inv.id] != Money.new(0)
+      )
+    end
   end
 
   alias before_create_save before_update_save

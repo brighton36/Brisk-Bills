@@ -304,6 +304,15 @@ class InvoicePaymentTest < ActiveSupport::TestCase
         InvoicePayment.new( :invoice => invoice, :amount => 50.00 ) 
       ] )
     end
+    
+    # Test that negative assignments aren't accepted:
+    invoice = Factory.generate_invoice( client, 10.00, :is_published => false, :payment_assignments => [])
+
+    assert_raise(ActiveRecord::RecordInvalid) do
+      payment = Factory.generate_payment( client,  5.00 , :invoice_assignments => [
+        InvoicePayment.new( :invoice => invoice, :amount => -1.00 ) 
+      ] )
+    end
 
     # Test InvoicePayment create fails with unpublished unvoice
     invoice = Factory.generate_invoice( client, 60.00, :is_published => false, :payment_assignments => [])
