@@ -70,6 +70,12 @@ module Admin::PaymentsHelper
     }.join ', '
   end
   
+  def invoice_assignments_column(record)
+    record.invoice_assignments.collect{ |asgn|
+      '%s to (Invoice %d)' % [asgn.amount.format, asgn.invoice_id  ]
+    }.join ', '
+  end
+  
   def assignments_form_column(record, input_name = nil)
     content_tag(:div, :id => 'record_invoice_assignment_%s' % record.id ) do
       if record.client

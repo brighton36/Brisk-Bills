@@ -24,6 +24,18 @@ class Admin::PaymentsController < ApplicationController
       :created_at, 
       :updated_at
     ]
+    
+    config.show.columns = [
+      :paid_on, 
+      :client, 
+      :payment_method, 
+      :payment_method_identifier, 
+      :amount, 
+      :invoice_assignments,
+      :amount_unallocated, 
+      :created_at, 
+      :updated_at
+    ]
 
     config.columns[:client].form_ui = :select
     config.columns[:client].sort_by :sql => 'clients.company_name'
@@ -62,15 +74,29 @@ class Admin::PaymentsController < ApplicationController
       input_assignments[inv_id.to_i] = Money.new(fields[:amount].tr('^\-0-9','').to_i)
     end
 
+    assignment_deletes = []
     # First we iterate through the existing relationships:
     payment.invoice_assignments.each do |asgn|
-      # Did the assignment get changed by the input? If so, assign the value
-      asgn.amount = input_assignments[asgn.invoice_id] if (
+      # Did the assignment get changed by the input? If so...
+      if (
         input_assignments.has_key?(asgn.invoice_id) && 
         input_assignments[asgn.invoice_id] != asgn.amount
       )
+        # They set this asignment to zero - which means we remove the assignment:
+        if input_assignments[asgn.invoice_id] == Money.new(0)
+          # Mark this assignment for deletion below
+          assignment_deletes << asgn
+        else # assign the new value:
+          asgn.amount = input_assignments[asgn.invoice_id]
+        end
+      end
     end
   
+    # THis is a little more efficient than deleting in the loop above. Also,
+    # I think there's a bug whereby the iterator stops running as soon as you delete somethign in the 
+    # assignment collection. This causes subsequent assignments not to run..
+    payment.invoice_assignments.delete *assignment_deletes
+    
     # And then we go through the open invoices to find if new assignments need to be created:
     payment.client.unpaid_invoices.each do |inv|
       # We need to add a new assignment if there's a non-zero value

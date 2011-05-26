@@ -25,6 +25,24 @@ class Admin::InvoicesController < ApplicationController
       :created_at, 
       :updated_at
     ]
+    
+    config.show.columns = [
+      :id,
+      :issued_on,
+      :client,
+      :sub_total,
+      :taxes_total,
+      :amount,
+      :comments, 
+      :is_published,
+      :is_paid?,
+      :paid_on, 
+      :amount_paid,
+      :amount_outstanding,
+      :payment_assignments,
+      :created_at, 
+      :updated_at
+    ]
 
     config.columns[:is_paid?].sort_by :sql => '`invoices_with_totals`.is_paid'
 

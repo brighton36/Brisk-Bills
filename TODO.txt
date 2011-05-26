@@ -1,9 +1,7 @@
-Now for the final Controller Adjustments:
-	* Test to make sure that we're properly deleting Invoice assignments in PaymentsController::before_update_save when their value is 0.0
-   	* Don't forget to notate the assignments on a show action for both the invoice and the payment
-
 * We should add a rake task that checks for 'assignment consistency' , and makes sure that the assignments line-up as we'd expect for all invoices in the database... 
  	* We should think about what a negative invoice might do to payment tracking, and be sure to confirm this behavior in our checks
+ 	* We shoud check for '0' amount assignments. those shouldnt be there
+ 	* We check for 'orphaned' assignments which arent tied to a payment or invoice...
 
 * BUG: If I try to delete a newly created client in /clients I get a 500
 
@@ -64,7 +62,8 @@ Now for the final Controller Adjustments:
 * Publish !!!!!
 ---------------
 * Slimtimer-less time entry
-
+  * http://dhtmlx.com/docs/products/dhtmlxScheduler/index.shtml
+  
 * CC payments handling built-in- not a plugin
 
 * Revise the site-settings interfaces...

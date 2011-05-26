@@ -35,6 +35,12 @@ module Admin::InvoicesHelper
   def issued_on_column(record)
     h record.issued_on.strftime((params[:action] == 'show') ? '%m/%d/%y %I:%M %p' : '%m/%d/%y')
   end
+  
+  def payment_assignments_column(record)
+    record.payment_assignments.collect{ |asgn|
+      '%s from (Payment %d)' % [asgn.amount.format, asgn.payment_id  ]
+    }.join ', '
+  end
 
   # Shameless copy-paste:
   def activity_types_form_column(column, input_name)

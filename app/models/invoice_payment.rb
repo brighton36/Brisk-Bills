@@ -16,7 +16,7 @@ class InvoicePayment < ActiveRecord::Base
   end
   
   def label
-    '%s @ (Invoice %d, Payment %d)' % [amount.format, invoice.id,payment.id,  ]
+    '%s @ (Invoice %d, Payment %d)' % [amount.format, invoice.id,payment.id ]
   end
 
   # This is just to make the code a little easier to type/read. Its a create!, just without all the option verbosity.
