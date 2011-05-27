@@ -62,7 +62,10 @@ class Client < ActiveRecord::Base
   end
   
   def ensure_not_referenced_on_destroy
-    errors.add_to_base "Can't destroy a referenced employee" and return false unless authorized_for? {:destroy}
+    unless authorized_for?(:actions => :destroy)
+      errors.add_to_base "Can't destroy a referenced employee"
+      return false
+    end
   end
   
   def authorized_for?(options)

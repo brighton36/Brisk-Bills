@@ -1,5 +1,3 @@
-* We should add a rake task that checks for 'assignment consistency' , and makes sure that the assignments line-up as we'd expect for all invoices in the database... 
-
 * BUG: If I try to delete a newly created client in /clients I get a 500
 
 --- Put a beta version on mario? ... Do this then:
