@@ -76,6 +76,12 @@ module Admin::ActivityTypeControllerHelper
         record.activity.is_published = true if params[:action] == 'create'
       end
       
+      # override_form_field_partial in the helper gets buggered out b/c our controller name doesn't match
+      # the model name. This fixes that:
+      def self.active_scaffold_controller_for(klass)
+        self
+      end
+      
     end
     
   end

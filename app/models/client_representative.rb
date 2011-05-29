@@ -10,21 +10,13 @@ class ClientRepresentative < ActiveRecord::Base
   )
   
   def name
-    ret = String.new
-    
-    ret += self.first_name if !self.first_name.nil? and self.first_name.length > 0
-    
-    ret += (ret.length > 0) ? " #{self.last_name}" : self.last_name if !self.last_name.nil? and self.last_name.length > 0
-    
-    ret
+    [
+      first_name, last_name
+    ].find_all{|x| x.try(:length).try(:>,0)}.join(' ')
   end
 
-  # This fixes (I guess its a bug?) in _add_existing_form.html when ClientReps are being shown
-  # as a sublist in Clients, and the user chooses to "Add Existing". Without this - the order
-  # Is totally effed.  
-  def self.find(*args)
-    (args == [:all]) ? super(:all, :order => 'first_name ASC, last_name ASC') : super(*args)
+  # This is used by the Nested Add_existing control label
+  def self.human_name
+    'Representative'
   end
-
-
 end

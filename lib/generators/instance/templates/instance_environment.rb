@@ -44,7 +44,7 @@ BriskBills::Initializer.run do |config|
   # Make sure the secret is at least 30 characters and all random, 
   # no regular words or you'll be exposed to dictionary attacks.
   config.action_controller.session = {
-    :session_key => '_brisk-bills_session',
+    :key => '_brisk-bills_session',
     :secret      => '<%= ([nil]*54).collect{character_pool[rand(character_pool.length)]}.join%>'
   }
   

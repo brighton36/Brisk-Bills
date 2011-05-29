@@ -62,7 +62,7 @@ class Admin::PaymentsController < ApplicationController
       :amount_unallocated, 
       :assignments
     ]
-    
+
     observe_active_scaffold_form_fields :fields => %w(client amount), :action => :on_assignment_observation
   end
 

@@ -3,16 +3,20 @@ module ActiveScaffold::Config
     include ActiveScaffold::Configurable
     extend ActiveScaffold::Configurable
 
+    def initialize(core_config)
+      @core = core_config
+    end
+
     def self.inherited(subclass)
       class << subclass
-        # the crud type of the action. possible values are :create, :read, :update, :destroy, and nil.
+        # the crud type of the action. possible values are :create, :read, :update, :delete, and nil.
         # this is not a setting for the developer. it's self-description for the actions.
         def crud_type; @crud_type; end
 
         protected
 
         def crud_type=(val)
-          raise ArgumentError, "unknown CRUD type #{val}" unless [:create, :read, :update, :destroy].include?(val.to_sym)
+          raise ArgumentError, "unknown CRUD type #{val}" unless [:create, :read, :update, :delete].include?(val.to_sym)
           @crud_type = val.to_sym
         end
       end
@@ -20,6 +24,10 @@ module ActiveScaffold::Config
     # delegate
     def crud_type; self.class.crud_type end
 
+    def label(model = nil)
+      as_(@label, :model => model || @core.label(:count => 1))
+    end
+    
     # the user property gets set to the instantiation of the local UserSettings class during the automatic instantiation of this class.
     attr_accessor :user
 
@@ -32,6 +40,23 @@ module ActiveScaffold::Config
         # the configuration object for this action
         @conf = conf
       end
+    end
+    
+    def formats
+      @formats ||= []
+    end
+    
+    def formats=(val)
+      @formats=val
+    end
+    
+    private
+    
+    def columns=(val)
+      @columns = ActiveScaffold::DataStructures::ActionColumns.new(*val)
+      @columns.action = self
+      @columns.set_columns(@core.columns) if @columns.respond_to?(:set_columns)
+      @columns
     end
   end
 end

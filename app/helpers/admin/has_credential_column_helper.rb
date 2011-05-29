@@ -12,27 +12,27 @@ module Admin::HasCredentialColumnHelper
   "});"
   
   def form_remote_tag(*args)
-    post_script = ''
-
     if @record and !@record.new_record? and @record.password_hash
       args[0][:before] = "if (password_has_changed[%d] == false) { $('%s').value = ''; }" % [ 
         @record.id, 
         password_input_id 
       ]
 
-      post_script = 
+      concat(
         ('<script>'+
           'if (typeof(password_has_changed) == "undefined"){password_has_changed = [];old_password_values = [];};'+
           'password_has_changed[%d] = false;'+
         '</script>')  % @record.id
+      )
     end
 
-    super(*args)+post_script
+    super(*args)
   end
 
-  def password_form_column(record, input_name)
+  def password_form_column(record, options)
+
     password_field_tag(
-      input_name, 
+      options[:name], 
       ( record.password_hash ) ? 'secretsecret' : '', 
       :id => password_input_id,
       :size => 20
@@ -41,9 +41,9 @@ module Admin::HasCredentialColumnHelper
     )
   end
 
-  def login_enabled_form_column(record, input_name)
+  def login_enabled_form_column(record, options)
     select_tag(
-      input_name, 
+      options[:name], 
       options_for_select( 
         [ ["Yes", 'true'], ["No", 'false'] ], 
         (record.login_enabled.nil?) ? 'false' : record.login_enabled.to_s

@@ -21,7 +21,7 @@ module Admin::ActivitiesHelper
     
     activity_partial = "#{record.activity_type}_column"
     
-    if FileTest.exists? "#{activity_partial_path}/_#{activity_partial}.rhtml"
+    if FileTest.exists? "#{activity_partial_path}/_#{activity_partial}.html.erb"
       render :partial => activity_partial, :locals => { :record => record }
     else
       '-'
@@ -54,18 +54,18 @@ module Admin::ActivitiesHelper
   end
   
   def override_form_field(column)
-    subtype_override_method = "#{@record.activity_type}_#{column.name}_form_column"
+    subtype_override_method = "activity_#{@record.activity_type}_#{column.name}_form_column"
     
-    respond_to?(subtype_override_method) ? subtype_override_method : "#{column.name}_form_column"
+    respond_to?(subtype_override_method) ? subtype_override_method : "activity_#{column.name}_form_column"
   end
 
   # Generic helpers:
   
-  def cost_form_column(record, input_name)
+  def activity_cost_form_column(record, input_name)
     text_field_tag input_name, money_for_input(@record.cost), options_for_column('cost').merge({:size => 10 })
   end
   
-  def client_id_form_column(record, input_name)
+  def activity_client_id_form_column(record, input_name)
     select_tag(
       input_name, 
       options_for_select(
@@ -82,13 +82,13 @@ module Admin::ActivitiesHelper
     )
   end
   
-  def label_form_column(record, input_name)
+  def activity_label_form_column(record, input_name)
     label_value = (@record.respond_to?(@record.activity_type)) ? @record.send("#{@record.activity_type}").label : nil
     
     text_field_tag input_name, label_value, options_for_column('label').merge({:size => 30 })
   end
   
-  def comments_form_column(record, input_name)
+  def activity_comments_form_column(record, input_name)
     comments_value = (@record.respond_to?(@record.activity_type)) ? @record.send("#{@record.activity_type}").comments : nil
     
     text_area_tag input_name, comments_value, options_for_column('comments').merge({:cols => 72, :rows => 20})

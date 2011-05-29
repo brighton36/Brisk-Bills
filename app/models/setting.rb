@@ -33,7 +33,9 @@ class Setting < ActiveRecord::Base
   end
   
   def authorized_for?(options)
-    (options[:action] == :destroy) ? false : true
+    return true unless options.try(:[],:action)
+    
+    (options[:action].to_sym != :delete)
   end
   
 end

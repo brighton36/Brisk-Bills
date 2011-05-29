@@ -1,6 +1,6 @@
 module Admin::ActivitiesHelper
     
-  def proposal_proposed_on_form_column(record, input_name)
+  def proposed_on_form_column(record, input_name)
     # Super-ghetto hack
     @proposal = record.proposal
 

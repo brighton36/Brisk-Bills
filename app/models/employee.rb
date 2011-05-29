@@ -15,13 +15,9 @@ class Employee < ActiveRecord::Base
   validates_numericality_of :phone_extension, :allow_nil => true
 
   def name
-    ret = String.new
-    
-    ret += first_name if !first_name.nil? and first_name.length > 0
-    
-    ret += (ret.length > 0) ? " #{last_name}" : last_name if !last_name.nil? and last_name.length > 0
-    
-    ret
+    [
+      first_name, last_name
+    ].find_all{|x| x.try(:length).try(:>,0)}.join(' ')
   end
 
   def short_name
@@ -33,16 +29,18 @@ class Employee < ActiveRecord::Base
   end
   
   def ensure_not_referenced_on_destroy
-    ( errors.add_to_base "Can't destroy a referenced employee" and return false ) unless authorized_for? :action => :destroy
+    ( errors.add_to_base "Can't destroy a referenced employee" and return false ) unless authorized_for? :action => :delete
   end
 
   def authorized_for?(options)
-    case options[:action]
-      when :destroy
+    return true unless options.try(:[],:action)
+    
+    case options[:action].to_sym
+      when :delete
         ( Activity::Labor.count( :all, :conditions => ['employee_id = ?', id] ) > 0 ) ? false : true
       else
         true
-    end
+    end 
   end
 
   # There were some issues in rails 2.3.2 that caused associations (slimtimer/credential/etc) to not save without this hack

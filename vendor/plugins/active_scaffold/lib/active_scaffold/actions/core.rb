@@ -5,11 +5,34 @@ module ActiveScaffold::Actions
         after_filter :clear_flashes
       end
     end
+    def render_field
+      @record = if params[:in_place_editing]
+        active_scaffold_config.model.find params[:id]
+      else
+        active_scaffold_config.model.new
+      end
+      column = active_scaffold_config.columns[params[:column]]
+      if params[:in_place_editing]
+        render :inline => "<%= active_scaffold_input_for(active_scaffold_config.columns[params[:update_column].to_sym]) %>"
+      elsif !column.nil?
+        if column.send_form_on_update_column
+          @record = update_record_from_params(@record, active_scaffold_config.update.columns, params[:record])
+        else
+          value = column_value_from_param_value(@record, column, params[:value])
+          @record.send "#{column.name}=", value
+        end
+        @update_columns = Array(params[:update_column])
+        after_render_field(@record, column)
+      end
+    end
 
     protected
+    
+    # override this method if you want to do something after render_field
+    def after_render_field(record, column); end
 
-    def authorized_for?(*args)
-      active_scaffold_config.model.authorized_for?(*args)
+    def authorized_for?(options = {})
+      active_scaffold_config.model.authorized_for?(options)
     end
 
     def clear_flashes
@@ -20,6 +43,13 @@ module ActiveScaffold::Actions
       end
     end
 
+    def marked_records
+      active_scaffold_session_storage[:marked_records] ||= Set.new
+    end
+    
+    def default_formats
+      [:html, :js, :json, :xml, :yaml]
+    end
     # Returns true if the client accepts one of the MIME types passed to it
     # ex: accepts? :html, :xml
     def accepts?(*types)
@@ -37,7 +67,11 @@ module ActiveScaffold::Actions
     end
 
     def response_status
-      successful? ? 200 : 500
+      if successful?
+        action_name == 'create' ? 201 : 200
+      else
+        422
+      end
     end
 
     # API response object that will be converted to XML/YAML/JSON using to_xxx
@@ -61,14 +95,7 @@ module ActiveScaffold::Actions
 
     # Redirect to the main page (override if the ActiveScaffold is used as a component on another controllers page) for Javascript degradation
     def return_to_main
-      unless params[:parent_controller].nil?
-        params[:controller] = params[:parent_controller]
-        params[:eid] = nil
-        params[:parent_model] = nil
-        params[:parent_column] = nil
-        params[:parent_id] = nil
-      end
-      redirect_to params_for(:action => "index")
+      redirect_to main_path_to_return
     end
 
     # Override this method on your controller to define conditions to be used when querying a recordset (e.g. for List). The return of this method should be any format compatible with the :conditions clause of ActiveRecord::Base's find.
@@ -84,11 +111,15 @@ module ActiveScaffold::Actions
       {}
     end
   
-
+    #Overide this method on your controller to provide model with named scopes
+    def beginning_of_chain
+      active_scaffold_config.model
+    end
+        
     # Builds search conditions by search params for column names. This allows urls like "contacts/list?company_id=5".
     def conditions_from_params
       conditions = nil
-      params.reject {|key, value| [:controller, :action, :id].include?(key.to_sym)}.each do |key, value|
+      params.reject {|key, value| [:controller, :action, :id, :page, :sort, :sort_direction].include?(key.to_sym)}.each do |key, value|
         next unless active_scaffold_config.model.column_names.include?(key)
         if value.is_a?(Array)
           conditions = merge_conditions(conditions, ["#{active_scaffold_config.model.table_name}.#{key.to_s} in (?)", value])
@@ -97,6 +128,25 @@ module ActiveScaffold::Actions
         end
       end
       conditions
+    end
+    private
+    def respond_to_action(action)
+      respond_to do |type|
+        send("#{action}_formats").each do |format|
+          type.send(format){ send("#{action}_respond_to_#{format}") }
+        end
+      end
+    end
+
+    def response_code_for_rescue(exception)
+      case exception
+        when ActiveScaffold::RecordNotAllowed
+          "403 Record Not Allowed"
+        when ActiveScaffold::ActionNotAllowed
+          "403 Action Not Allowed"
+        else
+          super
+      end
     end
   end
 end

@@ -13,7 +13,7 @@ module ActiveScaffold
         elsif column.list_ui and override_show_column_ui?(column.list_ui)
           send(override_show_column_ui(column.list_ui), column, record)
         else
-          if override_show_column_ui?(column.column.type)
+          if column.column and override_show_column_ui?(column.column.type)
             send(override_show_column_ui(column.column.type), column, record)
           else
             get_column_value(record, column)
@@ -22,16 +22,23 @@ module ActiveScaffold
       end
 
       def active_scaffold_show_text(column, record)
-        simple_format(get_column_value(record, column))
+        simple_format(clean_column_value(record.send(column.name)))
+      end
+
+      def show_column_override_name(column, old = false)
+        "#{clean_class_name(column.active_record_class.name) + '_' unless old}#{clean_column_name(column.name)}_show_column"
       end
 
       def show_column_override(column)
-        "#{column.name.to_s.gsub('?', '')}_show_column" # parse out any question marks (see issue 227)
+        method = show_column_override_name(column)
+        return method if respond_to?(method)
+        old_method = show_column_override_name(column, true)
+        if respond_to?(old_method)
+          ActiveSupport::Deprecation.warn("You are using an old naming schema for overrides, you should name the helper #{method} instead of #{old_method}")
+          old_method
+        end
       end
-
-      def show_column_override?(column)
-        respond_to?(show_column_override(column))
-      end
+      alias_method :show_column_override?, :show_column_override
 
       def override_show_column_ui?(list_ui)
         respond_to?(override_show_column_ui(list_ui))

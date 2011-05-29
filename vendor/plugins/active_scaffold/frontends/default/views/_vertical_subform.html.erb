@@ -1,0 +1,7 @@
+<div id="<%= sub_form_list_id(:association => column.name) %>">
+  <% associated.each_index do |index| %>
+  <% @record = associated[index] -%>
+  <%= render :partial => 'vertical_subform_record', :locals => {:scope => column_scope(column), :parent_record => parent_record, :column => column, :locked => @record == locked} %>
+  <% end -%>
+</div>
+<%= render :partial => 'form_association_footer', :locals => {:parent_record => parent_record, :column => column, :associated => associated} -%>

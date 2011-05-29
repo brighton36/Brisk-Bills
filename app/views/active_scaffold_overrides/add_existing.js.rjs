@@ -1,0 +1,25 @@
+# NOTE: We overide this templayte b/c it seems as if there's a bug in active scaffold
+# that causes nested forms to always stay open after submit. We didn't want that, so
+# this version is only slightly different than the dist
+page.insert_html :top, active_scaffold_tbody_id, :partial => 'list_record', :locals => {:record => @record}
+page.replace active_scaffold_calculations_id, :partial => 'list_calculations' if active_scaffold_config.list.columns.any? {|c| c.calculation?}
+page << "ActiveScaffold.stripe($('#{active_scaffold_tbody_id}'))"
+page << "ActiveScaffold.hide_empty_message('#{active_scaffold_tbody_id}','#{empty_message_id}');"
+page << "ActiveScaffold.increment_record_count('#{active_scaffold_id}');"
+logger.error "HMM : #{element_form_id(:action => :new_existing)}"
+# Modified
+form_stays_open = nil
+if (form_stays_open)
+# /Modified
+  # why not just re-render the form? that wouldn't utilize a possible do_new override which sets default values.
+  page << "$('#{element_form_id}').reset()"
+  page.replace_html element_messages_id(:action => :add_existing), :partial => 'form_messages'
+  # have to delay the focus, because there's no "firstElement" in prototype until at least one element is not disabled
+  page.delay 0.1 do
+    page << "Form.focusFirstElement('#{element_form_id}');"
+  end
+else
+  # Modified
+  page << "$$('##{element_form_id(:action => :add_existing)} a.cancel').first().link.close();"
+  # /Modified
+end

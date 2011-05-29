@@ -5,7 +5,7 @@ class Payment < ActiveRecord::Base
   belongs_to :client
   belongs_to :payment_method
   
-  has_many :invoices, :through => :assigned_payments
+  has_many :invoices, :through => :invoice_assignments
   
   # We have to make sure this doesnt validate since :amount_not_greater_than_payment_or_invoice_totals ,
   # will trip things up if we're in the processing of manipulating invoice_assignments on payment that 
@@ -99,7 +99,7 @@ class Payment < ActiveRecord::Base
   end
   
   def name  
-    '%.2f Payment from %s'  % [ amount, client.company_name ]
+    '%s Payment from %s'  % [ amount.format, client.company_name ]
   end
 
   def self.find_with_totals( how_many = :all, options = {} )

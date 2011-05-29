@@ -26,7 +26,7 @@ class AuthenticationController < ApplicationController
         if @active_credential
           redirect_to @active_credential.default_post_login_url_to
         else     
-          render :action => 'login.rhtml'
+          render :action => :login
         end
       end
       format.js do

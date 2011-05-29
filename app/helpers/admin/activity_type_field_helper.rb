@@ -2,9 +2,9 @@ module Admin::ActivityTypeFieldHelper
   
   include Admin::IsActiveColumnHelper
 
-  def client_form_column(record, input_name) 
+  def client_form_column(record, options) 
     select_tag(
-      input_name, 
+      options[:name], 
       options_for_select(
         (Client.find(
           :all, 
@@ -17,7 +17,7 @@ module Admin::ActivityTypeFieldHelper
     )
   end
   
-  def occurred_on_form_column(record, input_name)
+  def occurred_on_form_column(record, options)
     datetime_select "record", "occurred_on"
   end
   
@@ -29,17 +29,17 @@ module Admin::ActivityTypeFieldHelper
     h_money (record.tax) ? record.tax : Money.new(0)
   end
 
-  def cost_form_column(record,input_name)
-    text_field_tag input_name, (@record.cost.nil?) ? nil : ("%.2f" % @record.cost), :size => 10, :id => "record_cost_#{record.id}"
+  def cost_form_column(record,options)
+    text_field_tag options[:name], (@record.cost.nil?) ? nil : ("%.2f" % @record.cost), :size => 10, :id => "record_cost_#{record.id}"
   end
   
-  def tax_form_column(record,input_name)
-    text_field_tag input_name, (@record.tax.nil?) ? nil : ("%.2f" % @record.tax), :size => 10, :id => "record_tax_#{record.id}"
+  def tax_form_column(record,options)
+    text_field_tag options[:name], (@record.tax.nil?) ? nil : ("%.2f" % @record.tax), :size => 10, :id => "record_tax_#{record.id}"
   end
   
   # Not all the activities have this, but many do:
-  def comments_form_column(record,input_name)
-    text_area_tag input_name, record.comments, :cols => 80, :rows => 22, :id => "record_comments_#{record.id}"
+  def comments_form_column(record,options)
+    text_area_tag options[:name], record.comments, :cols => 80, :rows => 22, :id => "record_comments_#{record.id}"
   end
 
 end

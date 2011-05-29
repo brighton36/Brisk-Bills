@@ -1,6 +1,6 @@
 module Admin::ActivitiesHelper
 
-  def labor_employee_id_form_column(record, input_name)
+  def activity_employee_id_form_column(record, input_name)
     select_tag(
       input_name, 
       options_for_select(
@@ -17,11 +17,11 @@ module Admin::ActivitiesHelper
     )
   end
   
-  def labor_duration_form_column(record, input_name)
+  def activity_duration_form_column(record, input_name)
     text_field_tag input_name, @record.labor.clock_duration, options_for_column('duration').merge({:size => 10})
   end
   
-  def labor_comments_form_column(record, input_name)
+  def activity_comments_form_column(record, input_name)
     text_area_tag input_name, @record.labor.comments, options_for_column('comments').merge({:cols => 72, :rows => 20})
   end
   

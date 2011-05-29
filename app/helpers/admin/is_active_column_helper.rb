@@ -1,7 +1,7 @@
 module Admin::IsActiveColumnHelper
 
   # This is for the Client and Employees controller itself:
-  def is_active_form_column(record, input_name)
+  def is_active_form_column(record, options)
     input_id = 'record_is_active'
 
     confirm_prompt = 
@@ -14,7 +14,7 @@ module Admin::IsActiveColumnHelper
     modalbox_params = { :title => 'Confirm De-activation', :width => 300}
 
     select_tag(
-      input_name, 
+      options[:name], 
       options_for_select( [ ["Yes", 'true'], ["No", 'false'] ], record.is_active.to_s ),
       :id => input_id
     )+

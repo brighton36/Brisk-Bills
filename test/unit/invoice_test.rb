@@ -88,7 +88,7 @@ class InvoiceTest < ActiveSupport::TestCase
   def test_invoice_create_defaults
     inv = Invoice.create
 
-    assert_equal Time.utc(*Time.now.to_a).last_month.end_of_month, inv.issued_on
+    assert_equal Time.utc(*Time.now.to_a).prev_month.end_of_month, inv.issued_on
     assert_equal false, inv.is_published
   end
 

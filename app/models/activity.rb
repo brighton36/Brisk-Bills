@@ -81,8 +81,10 @@ class Activity < ActiveRecord::Base
   end
   
   def authorized_for?(options)
+    return true unless options.try(:[],:action)
+    
     case options[:action].to_s
-      when /^(update|destroy)$/
+      when /^(update|delete)$/
         (is_published?) ? false : true
       else
         true

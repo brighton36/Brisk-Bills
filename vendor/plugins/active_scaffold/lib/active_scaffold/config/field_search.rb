@@ -3,9 +3,8 @@ module ActiveScaffold::Config
     self.crud_type = :read
 
     def initialize(core_config)
-      @core = core_config
-
-      @full_text_search = self.class.full_text_search?
+      super
+      @text_search = self.class.text_search
 
       # start with the ActionLink defined globally
       @link = self.class.link.clone
@@ -16,13 +15,16 @@ module ActiveScaffold::Config
     # --------------------------
     # the ActionLink for this action
     cattr_reader :link
-    @@link = ActiveScaffold::DataStructures::ActionLink.new('show_search', :label => :search, :type => :table, :security_method => :search_authorized?)
+    @@link = ActiveScaffold::DataStructures::ActionLink.new('show_search', :label => :search, :type => :collection, :security_method => :search_authorized?)
 
-    cattr_writer :full_text_search
-    def self.full_text_search?
-      @@full_text_search
-    end
-    @@full_text_search = true
+    # A flag for how the search should do full-text searching in the database:
+    # * :full: LIKE %?%
+    # * :start: LIKE ?%
+    # * :end: LIKE %?
+    # * false: LIKE ?
+    # Default is :full
+    cattr_accessor :text_search
+    @@text_search = :full
 
     # instance-level configuration
     # ----------------------------
@@ -37,15 +39,15 @@ module ActiveScaffold::Config
       @columns
     end
 
-    def columns=(val)
-      @columns = ActiveScaffold::DataStructures::ActionColumns.new(*val)
-      @columns.action = self
-    end
+    public :columns=
 
-    attr_writer :full_text_search
-    def full_text_search?
-      @full_text_search
-    end
+    # A flag for how the search should do full-text searching in the database:
+    # * :full: LIKE %?%
+    # * :start: LIKE ?%
+    # * :end: LIKE %?
+    # * false: LIKE ?
+    # Default is :full
+    attr_accessor :text_search
 
     # the ActionLink for this action
     attr_accessor :link

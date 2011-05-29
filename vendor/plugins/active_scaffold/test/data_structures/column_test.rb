@@ -1,9 +1,11 @@
 require File.join(File.dirname(__FILE__), '../test_helper.rb')
-# require 'test/model_stub'
 
 class ColumnTest < Test::Unit::TestCase
   def setup
     @column = ActiveScaffold::DataStructures::Column.new(:a, ModelStub)
+    @association_col = ActiveScaffold::DataStructures::Column.new(:b, ModelStub)
+    @association_col.stubs(:polymorphic_association?).returns(false)
+    @association_col.instance_variable_set(:@association, true)
   end
 
   def test_column
@@ -42,7 +44,7 @@ class ColumnTest < Test::Unit::TestCase
   end
 
   def test_field
-    assert_equal 'model_stubs.a', @column.send(:field)
+    assert_equal '"model_stubs"."a"', @column.send(:field)
   end
 
   def test_table
@@ -81,6 +83,28 @@ class ColumnTest < Test::Unit::TestCase
     assert @column != 0
   end
 
+  def test_ui
+    assert_nil @column.form_ui
+    assert_nil @column.list_ui
+    assert_nil @column.search_ui
+    assert_equal :select, @association_col.search_ui
+
+    @column.form_ui = :calendar
+    assert_equal :calendar, @column.form_ui
+    assert_equal :calendar, @column.list_ui
+    assert_equal :calendar, @column.search_ui
+
+    @association_col.form_ui = :record_select
+    assert_equal :record_select, @association_col.form_ui
+    assert_equal :record_select, @association_col.search_ui
+
+    @column.search_ui = :record_select
+    @column.list_ui = :checkbox
+    assert_equal :calendar, @column.form_ui
+    assert_equal :checkbox, @column.list_ui
+    assert_equal :record_select, @column.search_ui
+  end
+
   def test_searchable
     @column.search_sql = nil
     assert !@column.searchable?
@@ -97,7 +121,7 @@ class ColumnTest < Test::Unit::TestCase
 
   def test_custom_search
     @column.search_sql = true
-    assert_equal 'model_stubs.a', @column.search_sql
+    assert_equal '"model_stubs"."a"', @column.search_sql
     @column.search_sql = 'foobar'
     assert_equal 'foobar', @column.search_sql
     assert @column.searchable?
@@ -105,7 +129,7 @@ class ColumnTest < Test::Unit::TestCase
 
   def test_custom_sort
     @column.sort = true
-    hash = {:sql => 'model_stubs.a'}
+    hash = {:sql => '"model_stubs"."a"'}
     assert_equal hash, @column.sort
     @column.sort_by :sql => 'foobar'
     hash = {:sql => 'foobar'}

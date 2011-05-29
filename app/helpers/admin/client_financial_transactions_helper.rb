@@ -1,7 +1,7 @@
 module Admin::ClientFinancialTransactionsHelper
   include ExtensibleObjectHelper
   
-  def amount_column(record)
+  def client_financial_transaction_amount_column(record)
     h_money record.amount, false
   end
   

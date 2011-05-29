@@ -27,12 +27,13 @@ class Admin::ClientAccountingController < ApplicationController
     config.create.columns = [:company_name, :address1, :address2, :city, :state, :zip, :phone_number, :fax_number ]
     config.update.columns = [:company_name, :address1, :address2, :city, :state, :zip, :phone_number, :fax_number, :is_active]
 
-    config.nested.add_link "Invoices", [:invoices]
-    config.nested.add_link "Payments", [:payments]
-    config.nested.add_link "Labor Rates", [:employee_client_labor_rates]
-    config.nested.add_link "Transactions", [:client_financial_transactions]
-    
-    config.full_list_refresh_on = [:update, :destroy]
+    config.nested.add_link "Invoices", :invoices
+    config.nested.add_link "Payments", :payments
+    config.nested.add_link "Labor Rates", :employee_client_labor_rates
+    config.nested.add_link "Transactions", :client_financial_transactions
+
+# TODO
+#    config.full_list_refresh_on = [:update, :destroy]
 
   end
   

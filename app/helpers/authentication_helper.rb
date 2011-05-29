@@ -39,15 +39,12 @@ module AuthenticationHelper
   def welcome_form_box(name, &block)
     logo_w=120
 
-    concat(
-      '%s<div id="%s_welcome" class="welcome_box clearfix"><h1>%s</h1>%s' % [ 
-        image_tag('brisk-bills-logo.gif', :size => '%dx%d' % [logo_w, 300.to_f/316*logo_w], :alt => "Brisk Bills"),
-        name.underscore, 
-        h(name), 
-        image_tag('login-form-spinner.gif', :size => '32x32', :style => 'visibility: hidden', :id => 'loading_indicator') 
-      ],
-      block.binding
-    )
+    concat('%s<div id="%s_welcome" class="welcome_box clearfix"><h1>%s</h1>%s' % [ 
+      image_tag('brisk-bills-logo.gif', :size => '%dx%d' % [logo_w, 300.to_f/316*logo_w], :alt => "Brisk Bills"),
+      name.underscore, 
+      h(name), 
+      image_tag('login-form-spinner.gif', :size => '32x32', :style => 'visibility: hidden', :id => 'loading_indicator') 
+    ])
     form_remote_tag(
       {
       :url => url_for(:action => params[:action]), 
@@ -55,7 +52,7 @@ module AuthenticationHelper
       },
       &block
     )
-    concat '</div>', block.binding
+    concat('</div>')
   end
 
 end

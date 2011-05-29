@@ -1,10 +1,11 @@
 module ActiveScaffold::Config
-  class Create < Form
+  class Create < ActiveScaffold::Config::Form
     self.crud_type = :create
-    def initialize(*args)
+    def initialize(core_config)
       super
+      @label = :create_model
       self.persistent = self.class.persistent
-      self.edit_after_create = self.class.edit_after_create
+      self.action_after_create = self.class.action_after_create
     end
 
     # global level configuration
@@ -16,28 +17,20 @@ module ActiveScaffold::Config
     def self.link=(val)
       @@link = val
     end
-    @@link = ActiveScaffold::DataStructures::ActionLink.new('new', :label => :create_new, :type => :table, :security_method => :create_authorized?)
+    @@link = ActiveScaffold::DataStructures::ActionLink.new('new', :label => :create_new, :type => :collection, :security_method => :create_authorized?)
 
     # whether the form stays open after a create or not
     cattr_accessor :persistent
     @@persistent = false
 
     # whether update form is opened after a create or not
-    cattr_accessor :edit_after_create
-    @@edit_after_create = false
-
-    # instance-level configuration
-    # ----------------------------
-    # the label= method already exists in the Form base class
-    def label
-      @label ? as_(@label) : as_(:create_model, :model => @core.label(:count => 1))
-    end
+    cattr_accessor :action_after_create
+    @@action_after_create = nil
 
     # whether the form stays open after a create or not
     attr_accessor :persistent
 
     # whether the form stays open after a create or not
-    attr_accessor :edit_after_create
-    
+    attr_accessor :action_after_create
   end
 end

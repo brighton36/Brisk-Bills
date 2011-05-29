@@ -62,15 +62,17 @@ class Client < ActiveRecord::Base
   end
   
   def ensure_not_referenced_on_destroy
-    unless authorized_for?(:actions => :destroy)
+    unless authorized_for?(:action => :delete)
       errors.add_to_base "Can't destroy a referenced employee"
       return false
     end
   end
   
   def authorized_for?(options)
-    case options[:action]
-      when :destroy
+    return true unless options.try(:[],:action)
+    
+    case options[:action].to_sym
+      when :delete
         [Invoice, Payment, Activity].each{ |k| return false if k.count(:all, :conditions => ['client_id = ?', id] ) > 0 }
 
         true

@@ -1,0 +1,70 @@
+<%
+# Keeps things a little DRYer
+remember_flash = flash[:notice] ? flash_notice( :info, flash[:notice] ) : 'To get started, enter your email address and password, and click &#39;Login&#39;'
+-%>
+<script type="text/javascript">
+	remember_flash = <%=remember_flash.to_json%>;
+  forgot_flash = '<h3>Did you forget your password?</h3>Just enter your email below , and we&#39;ll email you recovery instructions.';
+	
+	function forgot_password() {
+		new Effect.BlindUp('flash-notice', {duration: 0.20 });
+		new Effect.BlindUp('password',     {duration:0.20});
+		new Effect.BlindUp('login_submit',{
+			duration: 0.20,
+			afterFinish: function(){
+				$('flash-notice').innerHTML = forgot_flash;
+				
+		      new Effect.BlindDown('flash-notice', {duration:0.20});
+		      new Effect.BlindDown('forgot_submit',{duration:0.20});	
+			}
+		});
+	}
+	
+  function remember() {
+		if ($('flash-notice').getStyle('display') != 'none') {
+	    new Effect.BlindUp('flash-notice', {duration: 0.20 });
+    }
+
+		new Effect.BlindUp('forgot_submit',{
+			duration: 0.20,
+			afterFinish: function(){
+				$('flash-notice').innerHTML = remember_flash;
+
+		    new Effect.BlindDown('flash-notice',{duration:0.20});
+		    new Effect.BlindDown('password',    {duration:0.20});
+		    new Effect.BlindDown('login_submit',{duration:0.20});	
+			}
+		});
+  }
+
+  function submit_fix(submit_button) {
+    // This fixes a weirdo annoying bug in form_to_remote that causes the first submit button to serialize each time.
+    $('commit').value = submit_button
+  }
+
+  Event.observe( window, 'load', function() {$('email_address').focus();} );
+</script>
+<% welcome_form_box('Sign-in') do %>
+  <%= hidden_field 'commit', '', :id => "commit" %>
+	<fieldset>
+		<div id="flash-notice"><%=remember_flash%></div>
+		
+		<label>E-mail address :</label>
+		<%= text_field_tag 'email_address', nil, :id => 'email_address' %>
+		
+		<div id="password">
+			<label>Password :</label>
+			<%= password_field_tag 'password', nil, :id => 'password_input' %>
+		</div>
+	</fieldset>
+
+	<div id="login_submit">
+		<%= submit_tag 'Login', :class => 'submit', :name => '_commit', :onclick => "submit_fix('login')" %>
+		<span class="submit_note">Oops - <%= link_to_function "I forgot!", "forgot_password()" %></span>
+	</div>
+
+	<div id="forgot_submit" style="display: none;">
+		<%= submit_tag 'E-mail my password!', :class => 'submit', :id => 'email_my_password', :name => '_commit', :onclick => "submit_fix('email')" %>
+		<span class="submit_note">No wait - <%= link_to_function "I remember now!", "remember()" %></span>
+	</div>
+<% end -%>

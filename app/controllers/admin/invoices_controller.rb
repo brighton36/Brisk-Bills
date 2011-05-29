@@ -63,7 +63,9 @@ class Admin::InvoicesController < ApplicationController
     config.list.columns =[:id, :issued_on, :client,  :amount, :is_published, :is_paid?]
     config.list.sorting = [{:issued_on => :desc}]
     
-    config.create.columns = config.update.columns = [:issued_on, :is_published, :client, :activity_types, :comments]
+    config.create.columns = config.update.columns = [
+      :issued_on, :is_published, :client, :activity_types, :comments
+    ]
 
     config.action_links.add ActiveScaffold::DataStructures::ActionLink.new(
       'download', 
@@ -73,14 +75,16 @@ class Admin::InvoicesController < ApplicationController
       :page   => true
     )
 
-    config.nested.add_link "Activities", [:activities]
-    
-    config.full_list_refresh_on = [:update, :create]
+    config.nested.add_link "Activities", :activities
+# TODO     
+#    config.full_list_refresh_on = [:update, :create]
 
   end
   
+  # override_form_field_partial in the helper gets buggered out b/c our controller name doesn't match
+  # the model name. This fixes that:
   def self.active_scaffold_controller_for(klass)
-    (klass == Activity) ? Admin::ActivitiesWithPricesController : super
+    (klass == Activity) ? Admin::ActivitiesWithPricesController : self
   end
 
   # We ovverride the defaut behavior here only so that we can use this method as a hook to detyermine the invoice.activity_type_ids

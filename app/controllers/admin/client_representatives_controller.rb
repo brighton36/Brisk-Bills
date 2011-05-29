@@ -15,6 +15,10 @@ class Admin::ClientRepresentativesController < ApplicationController
 
     config.columns[:title].label = 'Job Title'
 
+    # If someone tries a 'delete' when we're nested inside the clients controller,
+    # This ensures the habtm relationship is deleted, and not the record 
+    config.nested.shallow_delete = true
+
     config.list.columns = [:clients, :last_name, :first_name, :email_address]
     
     config.create.columns = config.update.columns = [:first_name, :last_name, :email_address, :password, :login_enabled, :title, :cell_phone, :clients, :notes]
@@ -22,9 +26,30 @@ class Admin::ClientRepresentativesController < ApplicationController
     config.list.sorting = [{:clients => :asc},{:last_name => :asc},{:first_name => :asc}]
   end
 
-  # This fixes a weirdo activescaffold(?) bug in lib/nested.rb that causes a redirect loop when going from nested to list, in production mode...
-  def verify_action(options)
-    super(options) unless options[:only] == :add_existing
+  # We override this method b/c at some point in the new active_scaffold code, there was a bug
+  # that stopped this from being smart enough to recognize the :uniq on the client_representatives 
+  # association. in he new_existing action
+  def merge_conditions(*conditions)    
+    if (
+      params[:action].to_sym == :new_existing && 
+      params.has_key?(:parent_model) && 
+      params.has_key?(:eid)
+    )
+      parent_klass = params[:parent_model].constantize
+
+      # I'm not sure if table_name is the right method to use exactly - but it works here... 
+      parent_id = session["as:#{params[:eid]}"][:constraints][parent_klass.table_name.to_sym].to_i if parent_klass
+
+      parent_record = parent_klass.find parent_id if parent_id
+
+      existing_association_ids = parent_record.send('%s_ids' % params[:parent_column].singularize) if parent_record
+      
+      (existing_association_ids) ? 
+        ['`client_representatives`.id NOT IN (?)', existing_association_ids] :
+        nil    
+    else
+      super(*conditions)
+    end
   end
 
   handle_extensions

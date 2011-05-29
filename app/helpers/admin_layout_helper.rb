@@ -74,17 +74,13 @@ module AdminLayoutHelper
     url_for :controller => for_controller, :only_path => true
   end
 
-  def index_with_admin_helper
-    redirect_to :action => :list
-  end
-
   def self.append_features(base)
     super
     
     base.class_eval do
       layout 'admin'
       
-      alias :index :index_with_admin_helper
+      
     end
   end
 

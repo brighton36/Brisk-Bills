@@ -1,6 +1,6 @@
 module Admin::LaborsHelper
   
-  def slimtimer_task_form_column(record, input_name)
+  def activity_labor_slimtimer_task_form_column(record, options)
     begin
       slimtimer_task_name = @record.slimtimer_time_entry.slimtimer_task.name
     rescue

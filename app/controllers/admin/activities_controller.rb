@@ -32,8 +32,8 @@ class Admin::ActivitiesController < ApplicationController
     config.list.columns = [:activity, :occurred_on]
     
     config.create.columns = config.update.columns =  [:occurred_on]
-    
-    config.full_list_refresh_on = [:update, :create, :destroy]
+# TODO    
+#    config.full_list_refresh_on = [:update, :create, :destroy]
     
     # This allows us to use the for_activity_type parameter to selectively constriain fields to the appropriate record types.
     config.columns.instance_eval do    

@@ -1,14 +1,20 @@
 module ActiveScaffold::Config
   class Subform < Base
     def initialize(core_config)
-      @core = core_config
+      super
+      @layout = self.class.layout # default layout
     end
 
     # global level configuration
     # --------------------------
 
+    cattr_accessor :layout
+    @@layout = :horizontal
+
     # instance-level configuration
     # ----------------------------
+
+    attr_accessor :layout
 
     # provides access to the list of columns specifically meant for the Sub-Form to use
     def columns
@@ -24,10 +30,6 @@ module ActiveScaffold::Config
       @columns
     end
 
-    def columns=(val)
-      @columns = ActiveScaffold::DataStructures::ActionColumns.new(*val)
-      @columns.action = self
-      return @columns
-    end
+    public :columns=
   end
 end

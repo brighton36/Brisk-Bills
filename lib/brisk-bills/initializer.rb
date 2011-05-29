@@ -1,6 +1,6 @@
 require 'rubygems'
-gem 'rails', '= 2.3.2'
-require 'initializer' # This is the rails-2.3.2/lib/initializer
+gem 'rails', '= 2.3.8'
+require 'initializer' # This is the rails-2.3.8/lib/initializer
 
 module BriskBills
 

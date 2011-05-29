@@ -1,43 +1,62 @@
-* BUG: If I try to delete a newly created client in /clients I get a 500
+* 2.3.8 upgrade ?
+  * Remove the rhtml's and rjs's and use js.rjs and html.erb
+  * Go through the plugins - enable everything, and remove the plugs line
+  * Test the activity assignments on invoice create
+    * Test activity move
+  * Test the nested activities on the invoices controller
 
---- Put a beta version on mario? ... Do this then:
-    # NOTE: One way to 'fix' any problems with your invoice assignments is to: 
-    #   InvoicePayment.find(:all).each{|ip| ip.destroy}
-    #   Payment.find(:all).each{|pmt| if pmt.amount > Money.new(0) then pmt.invoice_assignments = pmt.client.recommend_invoice_assignments_for(pmt.amount); pmt.save! end }
-    
+* Ok - you left off finishing up the activities controller
 
-* We shoud do the payment assignments on the invoices controller too
-	* Make the is_published a row_link
-	* But - only assignments should be editable on published invoices. Once they unpublish it - we can do more...
-		* The js might get tricky here
-		* Nah - we can probably use the model.is_editable? to show/hide the edit button on published invoices. perfect.
-	
+-=-=  
 * Double check that we're removing payment assignments on invoice unpublish..
-* I think there's a bug saving invoice comments on unpublished invoices? ... (maybe its just when you're choosing no?)
- 	
-* reocurring payments module with rake task
-	* DDC / GI / Ashbritt / Manny Kadre bills
 
 * Assign version numbers to the invoice based on the number of times an invoice is published...
-	* I don't know if we should/need-to adjust the invoice pdfs out here just yet ....
-	* Might as well put this in migration 29 while we're publishing anyways
+  * I don't know if we should/need-to adjust the invoice pdfs out here just yet ....
+  * Might as well put this in migration 29 while we're publishing anyways
 
-* (Install the rails-debugger on your laptop)
+* Invoices
+  * Make the is_published a row_link
+    * Use JS to (YES/NO) ask them to confirm if they want to send an invoice by mail - cancel cancels the action
+    * Use JS to confirm an unpublish
+  * Only allow edits on an unpublished invoice - use the is_authorized to accomplish this
 
-* Things might be a little awkward with out activity assignment if people are going back and editing old stuff... we should really have an activity selector...
+* Move_to_invoice function should allow us to Move_to '(Unassigned)', and ideally that would be a radio group
+
+* Payment:::is_allocated should probably be added to a view and then list controller...
+  * Code is there - but no view supports it...
 
 * We should add an unpublished Open Invoices controller ...
 
-* I'd like to see a payment identifier listed in the payments list ... (check no/cc#)
+* Is there a bug saving invoice comments on unpublished invoices? ... (maybe its just when you're choosing no?)
 
-* Payment:::is_allocated should probably be added to a view and then list controller...
-	* Code is there - but no view supports it...
+* I'd like to see a payment identifier listed in the payments list ... (check no/cc#)
 
 * We should put tax before cost in the activities with prices controller...
 
 * WHen Assigning employees to labr_rates - the form stays open between updates and shouldnt...
 
-* Move_to_invoice function should allow us to Move_to '(Unassigned)', and ideally that would be a radio group
+
+
+--- Put a beta version on mario? ... Do this then:
+    # NOTE: One way to 'fix' any problems with your invoice assignments is to: 
+    #   InvoicePayment.find(:all).each{|ip| ip.destroy}
+    #   Payment.find(:all).each{|pmt| if pmt.amount > Money.new(0) then pmt.invoice_assignments = pmt.client.recommend_invoice_assignments_for(pmt.amount); pmt.save! end }
+
+* Translate the time into the local zone for the user, probably each user/client should have a zone associtation in their account.
+  *  Its already stored in UTC everywhere...
+  * We need to factor this into invoices too, I think
+  
+--- 
+* Slimtimer-less time entry
+  * http://dhtmlx.com/docs/products/dhtmlxScheduler/index.shtml
+
+* Use polymorphic relationship for sub activities
+  * I really don't like the way we're uing dont_validate_type_associations. ..
+
+* reocurring payments module with rake task
+	* DDC / GI / Ashbritt / Manny Kadre bills
+
+* Things might be a little awkward with out activity assignment if people are going back and editing old stuff... we should really have an activity selector...
 
 * Start using 0.8-pre on mario...
 
@@ -45,13 +64,7 @@
 ---------------
 * all delete confirms should go through the modal box
 
-* Probably - we should prompt on invoice update, when appropriate, whether to email the client. 
-	* Probably too, publish should be a row-action and not a form control
 * Probably - when prompted to delete an invoice, we should give the option to also remove the activities (or preserve them and leave them unsassigned)
-
-* Translate the time into the local zone for the user, probably each user/client should have a zone associtation in their account.
-	*  Its already stored in UTC everywhere...
-	* We need to factor this into invoices too, I think
 
 * Public interface
 
@@ -59,8 +72,6 @@
 
 * Publish !!!!!
 ---------------
-* Slimtimer-less time entry
-  * http://dhtmlx.com/docs/products/dhtmlxScheduler/index.shtml
   
 * CC payments handling built-in- not a plugin
 
@@ -84,19 +95,9 @@ LONGER-TERM Features: (Needs re-prioritization...)
 
 * Drop the VIEW hacks and de-normalize the payments/invoices tables. Just 'cache' the irksome values in here
 
-* Better searches by using the search sql fields...
-
-* See what we decide to do long-term with our model_view hack, maybe we can run tests on both models, as well as their view_models. Just one by one... I think thats smart...
-
 Feature: Make the Search actually work the way we'd expect. Perhaps even make something mroe useful still that would let us filter records...
 
 BUG: We should probably write a plugin that better displays delete errors in the flash[:error] , invoices is a good place for that
-	* BTW - why does it show delete as an option here when we clearly can't delete some of these
-	* Also- it'd be nice to show a pretty record error in the invoices update, if you try to update the activities on a published invoice
-	* Create two invoices - both unpublished, try to delete the oldest one
-
-* Use polymorphic relationship for sub activities
-	* I really don't like the way we're uing dont_validate_type_associations. ..
 
 * The ability to create an activity from the activities & invoices/activities list would be sweet
 	* With a little pop-up that asks for the activity type?
@@ -110,14 +111,7 @@ BUG: We should probably write a plugin that better displays delete errors in the
 	
 * Better unit tests for Activity::* model. (too , make sure negative values work on whatever..)
 
-Editable Payment amounts?
-	* Probably this is a bad idea for a feature.
-	However, if you change your mind, remember that part of the problem when editing payments, is that our reccomended_assignments 
-	function only recommends for unpaid invoices. If you have existing assignments on the form, when you change the payment amount, you're
-	going to end up with a 0.00 assignment to the invoices which were pre-existing assignments in the payment.
-	* Keep in min tha  our view value caching can play havoc with some of these invoice assignments for pre-existing records if you change the amount
-		* I think we need do an is_dirty? before the read attribute ...
-		
+
 Plugins for 
    * Reimbursable scanning
 	* phone calls
@@ -125,9 +119,7 @@ Plugins for
 
 * An employee_rate_changed_last changed plugin would be super-useful at some point...
 
-Nice Features:
-	* Todo list.. maybe just a block? Call it an outstanding issues/projects
-	* Client Notes? Probably just a google docs link
+
 -------------------
 dd if=/dev/urandom bs=200 count=1 | tr -cd 'A-Za-z0-9!@#$%^&*()_+'; echo
 

@@ -11,7 +11,7 @@ class Invoice < ActiveRecord::Base
 
   belongs_to :client
   has_many :activities, :dependent => :nullify
-  has_many :payments, :through => :assigned_payments
+  has_many :payments, :through => :payment_assignments
   has_many :payment_assignments, :class_name => 'InvoicePayment', :dependent => :delete_all
   
   has_and_belongs_to_many(
@@ -31,7 +31,7 @@ class Invoice < ActiveRecord::Base
 
   def initialize(*args)
     super(*args)
-    end_of_last_month = Time.utc(*Time.now.to_a).last_month.end_of_month
+    end_of_last_month = Time.utc(*Time.now.to_a).prev_month.end_of_month
     self.issued_on = end_of_last_month unless self.issued_on
   end
   
@@ -78,8 +78,10 @@ class Invoice < ActiveRecord::Base
   end
 
   def authorized_for?(options)
-    case options[:action].to_s
-      when /^(destroy)$/
+    return true unless options.try(:[],:action)
+    
+    case options[:action].to_sym
+      when :destroy
         !is_published
       else
         true
