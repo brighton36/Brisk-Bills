@@ -8,7 +8,13 @@ class Admin::ActivitiesWithPricesController < Admin::ActivitiesController
     config.columns << [:cost, :tax]
     config.list.columns = [:activity, :tax, :cost, :occurred_on]
         
-    config.action_links.add :move_to_invoice, :type => :record, :label => 'Move...', :crud_type => :update, :action => 'move_to_invoice'
+    config.action_links.add(
+      :move_to_invoice, 
+      :type => :member, 
+      :label => 'Move...', 
+      :crud_type => :update, 
+      :action => 'move_to_invoice'
+    )
     
     config.columns[:cost].sort_by :sql => 'cost_in_cents'
     config.columns[:tax].sort_by :sql => 'tax_in_cents'

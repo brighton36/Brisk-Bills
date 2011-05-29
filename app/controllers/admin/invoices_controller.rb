@@ -67,10 +67,12 @@ class Admin::InvoicesController < ApplicationController
       :issued_on, :is_published, :client, :activity_types, :comments
     ]
 
-    config.action_links.add ActiveScaffold::DataStructures::ActionLink.new(
+    config.create.link
+
+    config.action_links.add(
       'download', 
       :label  => 'Download', 
-      :type   => :record,
+      :type   => :member,
       :inline => false,
       :page   => true
     )

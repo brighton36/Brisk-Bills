@@ -1,5 +1,6 @@
 * 2.3.8 upgrade ?
-  * Test activity 'move' on the invoices_with totals. Actually - why isn't it listed?
+  * On the Activities _with prices controller ...
+    * use this , instead of your shit-ordering: https://github.com/activescaffold/active_scaffold/wiki/Action-Links-Order
   * Go through the plugins - enable everything, and remove the plugs line  
 
 * Put a beta version on mario. ... Don't forget to: 
