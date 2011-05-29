@@ -1,12 +1,11 @@
 * 2.3.8 upgrade ?
-  * Remove the rhtml's and rjs's and use js.rjs and html.erb
-  * Go through the plugins - enable everything, and remove the plugs line
-  * Test the activity assignments on invoice create
-    * Test activity move
-  * Test the nested activities on the invoices controller
+  * Test activity 'move' on the invoices_with totals. Actually - why isn't it listed?
+  * Go through the plugins - enable everything, and remove the plugs line  
 
-* Ok - you left off finishing up the activities controller
-
+* Put a beta version on mario. ... Don't forget to: 
+# NOTE: One way to 'fix' any problems with your invoice assignments is to: 
+    #   InvoicePayment.find(:all).each{|ip| ip.destroy}
+    #   Payment.find(:all).each{|pmt| if pmt.amount > Money.new(0) then pmt.invoice_assignments = pmt.client.recommend_invoice_assignments_for(pmt.amount); pmt.save! end }
 -=-=  
 * Double check that we're removing payment assignments on invoice unpublish..
 
@@ -25,7 +24,7 @@
 * Payment:::is_allocated should probably be added to a view and then list controller...
   * Code is there - but no view supports it...
 
-* We should add an unpublished Open Invoices controller ...
+* We should add an Draft Invoices controller and rename Invoices to 'All' Invoices...
 
 * Is there a bug saving invoice comments on unpublished invoices? ... (maybe its just when you're choosing no?)
 
@@ -33,25 +32,20 @@
 
 * We should put tax before cost in the activities with prices controller...
 
-* WHen Assigning employees to labr_rates - the form stays open between updates and shouldnt...
 
-
-
---- Put a beta version on mario? ... Do this then:
-    # NOTE: One way to 'fix' any problems with your invoice assignments is to: 
-    #   InvoicePayment.find(:all).each{|ip| ip.destroy}
-    #   Payment.find(:all).each{|pmt| if pmt.amount > Money.new(0) then pmt.invoice_assignments = pmt.client.recommend_invoice_assignments_for(pmt.amount); pmt.save! end }
+--- Put a beta version on mario? ... 
 
 * Translate the time into the local zone for the user, probably each user/client should have a zone associtation in their account.
   *  Its already stored in UTC everywhere...
   * We need to factor this into invoices too, I think
-  
---- 
-* Slimtimer-less time entry
-  * http://dhtmlx.com/docs/products/dhtmlxScheduler/index.shtml
 
 * Use polymorphic relationship for sub activities
   * I really don't like the way we're uing dont_validate_type_associations. ..
+
+* Rails 3.x?
+--- 
+* Slimtimer-less time entry
+  * http://dhtmlx.com/docs/products/dhtmlxScheduler/index.shtml
 
 * reocurring payments module with rake task
 	* DDC / GI / Ashbritt / Manny Kadre bills

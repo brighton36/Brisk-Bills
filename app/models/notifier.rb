@@ -76,8 +76,8 @@ class Notifier < ActionMailer::Base
   def generate_view_parts(view_name, tmpl)
     part( :content_type => "multipart/alternative" ) do |p|
       [
-        { :content_type => "text/plain", :body => render_message("#{view_name.to_s}.plain.rhtml", tmpl) },
-        { :content_type => "text/html",  :body => render_message("#{view_name.to_s}.html.rhtml",  tmpl.merge({:part_container => p})) }
+        { :content_type => "text/plain", :body => render_message("#{view_name.to_s}.plain.erb", tmpl) },
+        { :content_type => "text/html",  :body => render_message("#{view_name.to_s}.html.erb",  tmpl.merge({:part_container => p})) }
       ].each { |parms| p.part parms.merge( { :charset => "UTF-8", :transfer_encoding => "7bit"} ) }
     end
   end

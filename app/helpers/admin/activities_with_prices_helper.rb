@@ -1,7 +1,7 @@
 module Admin::ActivitiesWithPricesHelper
 
-  def render_action_link(link, url_options)
-    return super(link, url_options) unless link.action == 'move_to_invoice'
+  def render_action_link(link, url_options, record)
+    return super(link, url_options, record) unless link.action == 'move_to_invoice'
 
     url_for_dialog = url_for( 
       :controller => url_options[:controller],

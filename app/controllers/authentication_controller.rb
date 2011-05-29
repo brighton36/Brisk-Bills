@@ -72,7 +72,7 @@ class AuthenticationController < ApplicationController
         rescue
           @flash_error = $!
         ensure
-          render :action => "#{@button_press}.rjs"
+          render :action => @button_press
         end
       end
     end
@@ -108,7 +108,7 @@ class AuthenticationController < ApplicationController
         rescue
           @flash_error = $!
         ensure
-          render :action => "reset_password_via_token.rjs"
+          render :action => :reset_password_via_token
         end
       end
     end

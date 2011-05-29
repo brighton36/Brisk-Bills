@@ -22,7 +22,7 @@ module Admin::ActivitiesHelper
   end
   
   def activity_comments_form_column(record, input_name)
-    text_area_tag input_name, @record.labor.comments, options_for_column('comments').merge({:cols => 72, :rows => 20})
+    text_area_tag input_name, @record.sub_activity.comments, options_for_column('comments').merge({:cols => 72, :rows => 20})
   end
   
 end

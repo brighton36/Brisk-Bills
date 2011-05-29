@@ -39,7 +39,7 @@ class Admin::ActivitiesController < ApplicationController
     config.columns.instance_eval do    
 
       # Column selective inclusion, based on activity_type:
-      alias :add_without_activities :add
+      alias :add_without_activities :add unless self.respond_to? :add_without_activities
       
       def extend_activity_column(col)     
         def col.for_activity_type?(type); (for_activities.length == 0 or for_activities.include? type) ? true : false; end

@@ -109,7 +109,7 @@ class Invoice < ActiveRecord::Base
   alias :grand_total :amount
   
   def name  
-    '"%s" Invoice on %s'  % [ (client) ? client.company_name : '(Unknown Client)', issued_on.strftime("%m/%d/%Y %I:%M %p") ]
+    '%s Invoice on %s'  % [ (client) ? client.company_name : '(Unknown Client)', issued_on.strftime("%m/%d/%Y %I:%M %p") ]
   end
   
   def long_name

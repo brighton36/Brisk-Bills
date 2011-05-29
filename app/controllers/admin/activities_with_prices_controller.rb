@@ -6,7 +6,7 @@ class Admin::ActivitiesWithPricesController < Admin::ActivitiesController
     config.label = "Invoice Activity"
     
     config.columns << [:cost, :tax]
-    config.list.columns = [:activity, :cost, :tax, :occurred_on]
+    config.list.columns = [:activity, :tax, :cost, :occurred_on]
         
     config.action_links.add :move_to_invoice, :type => :record, :label => 'Move...', :crud_type => :update, :action => 'move_to_invoice'
     
@@ -56,9 +56,9 @@ class Admin::ActivitiesWithPricesController < Admin::ActivitiesController
         @errors_during_move << $!
       end
       
-      render :action => 'move_to_invoice.rjs'
+      render :action => 'move_to_invoice.js.rjs'
     else
-      render :action => 'move_to_invoice.rhtml', :layout => false
+      render :action => 'move_to_invoice.html.erb', :layout => false
     end
   end
 

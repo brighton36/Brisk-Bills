@@ -1,6 +1,10 @@
 module Admin::ActivitiesHelper
   include ::Admin::ActivityTaxFieldHelper
   include ExtensibleObjectHelper
+  
+  alias :activity_apply_tax_form_column :apply_tax_form_column
+  alias :activity_tax_form_column :tax_form_column
+  
 
   def active_scaffold_observe_field(col_name, observation)
     # This is slightly hackish - but it should work
@@ -40,11 +44,11 @@ module Admin::ActivitiesHelper
     "#{column.name}-column"
   end
 
-  def cost_column(record)
+  def activity_cost_column(record)
     h_money record.cost
   end
 
-  def tax_column(record)
+  def activity_tax_column(record)
     h_money record.tax
   end
     
@@ -61,13 +65,13 @@ module Admin::ActivitiesHelper
 
   # Generic helpers:
   
-  def activity_cost_form_column(record, input_name)
-    text_field_tag input_name, money_for_input(@record.cost), options_for_column('cost').merge({:size => 10 })
+  def activity_cost_form_column(record, options)
+    text_field_tag options[:name], money_for_input(@record.cost), options_for_column('cost').merge({:size => 10 })
   end
   
-  def activity_client_id_form_column(record, input_name)
+  def activity_client_id_form_column(record, options)
     select_tag(
-      input_name, 
+      options[:name], 
       options_for_select(
         # NOTE: We don't do a find_active here, but see the conditions...
         [ ['(Unknown)', nil] ]+Client.find(
@@ -82,16 +86,16 @@ module Admin::ActivitiesHelper
     )
   end
   
-  def activity_label_form_column(record, input_name)
+  def activity_label_form_column(record, options)
     label_value = (@record.respond_to?(@record.activity_type)) ? @record.send("#{@record.activity_type}").label : nil
     
-    text_field_tag input_name, label_value, options_for_column('label').merge({:size => 30 })
+    text_field_tag options[:name], label_value, options_for_column('label').merge({:size => 30 })
   end
   
-  def activity_comments_form_column(record, input_name)
+  def activity_comments_form_column(record, options)
     comments_value = (@record.respond_to?(@record.activity_type)) ? @record.send("#{@record.activity_type}").comments : nil
     
-    text_area_tag input_name, comments_value, options_for_column('comments').merge({:cols => 72, :rows => 20})
+    text_area_tag options[:name], comments_value, options_for_column('comments').merge({:cols => 72, :rows => 20})
   end
   
   def submit_tag(*args)

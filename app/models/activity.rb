@@ -84,7 +84,7 @@ class Activity < ActiveRecord::Base
     return true unless options.try(:[],:action)
     
     case options[:action].to_s
-      when /^(update|delete)$/
+      when /^(edit|delete)$/
         (is_published?) ? false : true
       else
         true
