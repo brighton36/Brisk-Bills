@@ -15,14 +15,15 @@ class Admin::ActivitiesWithPricesController < Admin::ActivitiesController
       :crud_type => :update, 
       :action => 'move_to_invoice'
     )
-    
+
     config.columns[:cost].sort_by :sql => 'cost_in_cents'
-    config.columns[:tax].sort_by :sql => 'tax_in_cents'
-    
-    # This adjusts the order of the link so that move appears to the left, fugly:
-    config.action_links.instance_eval do
-      @set = @set.sort_by{ |l| ( l.action == "move_to_invoice" ) ? -1 : 1 }
-    end
+    config.columns[:tax].sort_by  :sql => 'tax_in_cents'
+  end
+  
+  # This adjusts the order of the link so that move appears to the left, fugly:
+  def action_links_order
+    links = active_scaffold_config.action_links
+    links.sort_by{ |l| ( l.action == "move_to_invoice" ) ? -1 : 1 }
   end
   
   # We need to be sure the view is looking in the right place, this little hack should do it:

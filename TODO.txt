@@ -1,9 +1,6 @@
-* 2.3.8 upgrade ?
-  * On the Activities _with prices controller ...
-    * use this , instead of your shit-ordering: https://github.com/activescaffold/active_scaffold/wiki/Action-Links-Order
-  * Go through the plugins - enable everything, and remove the plugs line  
+* Rails the gem version - and test in gem mode on your workstation... 
 
-* Put a beta version on mario. ... Don't forget to: 
+* Then Put a beta version on mario. ... Don't forget to: 
 # NOTE: One way to 'fix' any problems with your invoice assignments is to: 
     #   InvoicePayment.find(:all).each{|ip| ip.destroy}
     #   Payment.find(:all).each{|pmt| if pmt.amount > Money.new(0) then pmt.invoice_assignments = pmt.client.recommend_invoice_assignments_for(pmt.amount); pmt.save! end }
@@ -33,6 +30,7 @@
 
 * We should put tax before cost in the activities with prices controller...
 
+- Release gem as 'final'
 
 --- Put a beta version on mario? ... 
 

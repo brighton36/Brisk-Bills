@@ -19,9 +19,8 @@ class Admin::EmployeesController < ApplicationController
     config.nested.add_link "Labor Rates", :employee_client_labor_rates
     
     config.create.columns = [:first_name, :last_name, :email_address, :password, :phone_extension, :login_enabled]
-    config.update.columns = [:first_name, :last_name, :email_address, :password, :phone_extension, :is_active, :login_enabled]
-# TODO    
-#    config.full_list_refresh_on = [:update, :destroy]
+    config.update.columns = [:first_name, :last_name, :email_address, :password, :phone_extension, :is_active, :login_enabled]    
+    config.full_list_refresh_on = [:update, :destroy]
   end
   
   def conditions_for_collection

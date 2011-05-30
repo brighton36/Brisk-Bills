@@ -20,19 +20,6 @@ BriskBills::Initializer.run do |config|
   # Only load the plugins named here, in the order given (default is alphabetical).
   # :all can be used as a placeholder for all plugins not explicitly named
   # config.plugins = [ :exception_notification, :ssl_requirement, :all ]
-  config.plugins = [
-    :active_scaffold,
-    :active_scaffold_as_gem,
-    :active_scaffold_form_observation,
-#    :active_scaffold_full_refresh,
-    :active_scaffold_move_column_under,
-    :acts_as_money,
-    :association_hacks,
-    'InlineAttachment-0.3.0-modified',
-    :railspdf,
-    :render_component
-  ]
-
 
   # Use the database for sessions instead of the file system
   # (create the session table with 'rake db:sessions:create')

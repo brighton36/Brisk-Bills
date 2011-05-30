@@ -77,9 +77,8 @@ class Admin::InvoicesController < ApplicationController
       :page   => true
     )
 
-    config.nested.add_link "Activities", :activities
-# TODO     
-#    config.full_list_refresh_on = [:update, :create]
+    config.nested.add_link "Activities", :activities     
+    config.full_list_refresh_on = [:update, :create]
 
   end
   

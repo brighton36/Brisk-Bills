@@ -32,9 +32,7 @@ class Admin::ClientAccountingController < ApplicationController
     config.nested.add_link "Labor Rates", :employee_client_labor_rates
     config.nested.add_link "Transactions", :client_financial_transactions
 
-# TODO
-#    config.full_list_refresh_on = [:update, :destroy]
-
+    config.full_list_refresh_on = [:update, :destroy]
   end
   
   def self.active_scaffold_controller_for(klass)

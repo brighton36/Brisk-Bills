@@ -18,8 +18,8 @@ class Admin::ClientsController < ApplicationController
     config.update.columns = [:company_name, :address1, :address2, :city, :state, :zip, :phone_number, :fax_number, :is_active]
 
     config.nested.add_link "Representatives", :client_representatives
-# TODO    
-#    config.full_list_refresh_on = [:update, :destroy]
+    
+    config.full_list_refresh_on = [:update, :destroy]
   end
     
   def conditions_for_collection
