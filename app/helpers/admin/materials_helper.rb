@@ -12,5 +12,5 @@ module Admin::MaterialsHelper
   alias :activity_material_tax_form_column :tax_form_column
   alias :activity_material_comments_form_column :comments_form_column 
   
-  alias :activity_material_apply_tax_form_column :tax_form_column
+  alias :activity_material_apply_tax_form_column :apply_tax_form_column
 end

@@ -1,0 +1,60 @@
+<% if record.is_published # This means we want to confirm an un-publish -%>
+  <h1>Are you sure you wish to un-publish this invoice?</h1>
+  <% if record.payment_assignments.length > 0 -%>
+    <p>Please be aware that by un-publishing this invoice:</p>
+    <p><strong><%=h record.name%></strong></p>
+    <p>You will be removing the following payment assignments:<p>
+    <ul>
+    <%= record.payment_assignments.collect{|ip|
+      '<li>%s from (Payment %d)</li>' % [ip.amount.format, ip.payment_id  ] 
+    }.join %>
+    </ul>
+    <p>These payments can be re-assigned if/when you decide to re-publish this invoice.</p>
+  <% else -%>
+    <p><%=h record.name%></p>
+    <p>This invoice currently has no payments applied to its balance, and can be safely un-published without affecting the payment register.</p>
+  <% end -%>
+  <p>
+  <%= button_to_remote(
+    'Un-Publish...',
+    {:url => submit_to, :before => 'Modalbox.hide();'},
+    :class => "MB_focusable"
+  ) %>
+   or 
+  <%= link_to_function(
+    'Cancel & Close', 
+    "Modalbox.hide();", 
+    :title => 'Cancel & Close'
+  ) %>
+  </p>
+<% else  # This means we want to confirm a publish  -%>
+  <h1>Would you like to email this invoice to the client?</h1>
+  <p>Shall we email this invoice:</p>
+  <p><strong><%=h record.name%></strong></p>
+  <p>to the following recipients:</p>
+  <% if record.client.client_representatives.length > 0 -%>
+  <ul>
+    <%= record.client.client_representatives.find(:all, :include => [:credential]).collect{|cr| 
+    '<li>%s &lt;%s&gt;</li>' % [cr.name, cr.email_address  ] 
+    }.join %>
+  </ul>
+  <p>with the invoice included as a pdf attachment?</p>
+  <% else -%>
+    <p>(No client representatives were found)</p>
+  <% end -%>
+  <%= button_to_remote(
+    'Yes - send this out',
+    {:url => submit_to.merge({:email_invoice => 1}), :before => 'Modalbox.hide();'},
+    :class => "MB_focusable"
+  ) %>
+  <%= button_to_remote(
+    'Nope - just publish it',
+    {:url => submit_to.merge({:email_invoice => 0}), :before => 'Modalbox.hide();'}
+  ) %>
+   or 
+  <%= link_to_function(
+    'Cancel & Close', 
+    "Modalbox.hide();", 
+    :title => 'Cancel & Close'
+  ) %>
+<% end -%>

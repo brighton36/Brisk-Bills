@@ -81,7 +81,9 @@ class Invoice < ActiveRecord::Base
     return true unless options.try(:[],:action)
     
     case options[:action].to_sym
-      when :destroy
+      when :delete
+        !is_published
+      when :edit
         !is_published
       else
         true

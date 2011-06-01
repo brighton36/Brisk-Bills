@@ -39,8 +39,44 @@ module Admin::InvoicesHelper
       '%s from (Payment %d)' % [asgn.amount.format, asgn.payment_id  ]
     }.join ', '
   end
+  
+  # This let's us hook into the action_link names, so we can dynamically generate a label 
+  # for the publish/unpublish row action
+  def render_action_link(link, url_options, record = nil, html_options = {})
+    # We don't want to modify the config itself, so we dup it before we start 
+    # on changes
+    our_options = url_options.dup 
+    
+    if link.action == 'toggle_published'
+      # Unfortunately, the only way I could get this was by way of copy-pasta from 
+      # our super:
+      url_options = url_options.clone
+      url_options[:action] = link.action
+      url_options[:controller] = link.controller if link.controller
+      url_options.delete(:search) if link.controller and link.controller.to_s != params[:controller]
+      url_options.merge! link.parameters if link.parameters
+      # /copy-pasta
 
-  # Shameless copy-paste:
+      our_options[:link] = (record.is_published) ? 'Un-Publish' : 'Publish'
+      
+      html_options[:onclick] = "Modalbox.show(%s,%s); return false;" % [
+        render(
+          :partial => 'confirm_publish_modal', 
+          :locals => {:record => record, :submit_to => url_options}
+        ).to_json,
+        {
+        :title => '%s confirmation' % [
+          (record.is_published) ? 'Un-publish' : 'Publish'
+        ], 
+        :width => 700
+        }.to_json
+      ]
+    end
+    
+    super(link, our_options, record, html_options)
+  end
+
+  # Shameless activescaffold copy-pasta:
   def invoices_with_total_activity_types_form_column(column, options)
     available_types = ActivityType.find(:all)
     

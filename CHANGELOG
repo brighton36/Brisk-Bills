@@ -1,7 +1,10 @@
 == Change Log
 
 === Release 0.8.0
-
+- Upgraded codebase to rails 2.3.8
+- *Greatly* Improved options in the payment to invoice mapping.
+- GUI Bugfixes! 
+- Revised the invoice approval and sending interfaces
 
 === Release 0.7.0 (May 03, 2010)
 - Much improved invoice to payment mapping control.

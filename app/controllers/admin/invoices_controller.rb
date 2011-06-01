@@ -26,26 +26,9 @@ class Admin::InvoicesController < ApplicationController
       :updated_at
     ]
     
-    config.show.columns = [
-      :id,
-      :issued_on,
-      :client,
-      :sub_total,
-      :taxes_total,
-      :amount,
-      :comments, 
-      :is_published,
-      :is_paid?,
-      :paid_on, 
-      :amount_paid,
-      :amount_outstanding,
-      :payment_assignments,
-      :created_at, 
-      :updated_at
-    ]
-
     config.columns[:is_paid?].sort_by :sql => '`invoices_with_totals`.is_paid'
 
+    config.columns[:id].includes = [:payment_assignments]
     config.columns[:id].label = 'Num'
     config.columns[:is_published].label = 'Pub?'
     config.columns[:is_paid?].label = 'Paid?'
@@ -64,10 +47,19 @@ class Admin::InvoicesController < ApplicationController
     config.list.sorting = [{:issued_on => :desc}]
     
     config.create.columns = config.update.columns = [
-      :issued_on, :is_published, :client, :activity_types, :comments
+      :issued_on, :client, :activity_types, :comments
     ]
 
     config.create.link
+
+    config.action_links.add(
+      'toggle_published', 
+      :label  => 'Publish', 
+      :type   => :member,
+      :inline => true,
+      :page   => false,
+      :position => false 
+    )
 
     config.action_links.add(
       'download', 
@@ -98,7 +90,8 @@ class Admin::InvoicesController < ApplicationController
 
   def before_update_save(invoice)
     super
-       
+    
+    # Here we handle activity assignments:
     invoice.activities = invoice.recommended_activities if (
       invoice.new_record? or (
         !invoice.is_published and
@@ -107,57 +100,75 @@ class Admin::InvoicesController < ApplicationController
         (invoice.issued_on_changed? || (@activity_type_ids_before != invoice.activity_type_ids))
       )
     )
-
-    invoice.payment_assignments.clear if !invoice.is_published and invoice.is_published_changed?
-
-    # We're going to need this in the after_update_save... Note it now.
-    @invoice_changes = invoice.changes.keys.collect(&:to_sym)
-    @invoice_new_record = invoice.new_record?
   end
 
   alias before_create_save before_update_save
-
-  def after_update_save(invoice)
-    super
-
-    if successful? and invoice.is_published and (@invoice_new_record || @invoice_changes.include?(:is_published))
-      # Unfortunately we have to assign payments using the quick_create and not by concat'ing on the
-      # invoice AssociationProxy. THis is due to a bug in my InvoicesWithTotal wrapper that I think is related
-      # to the association proxy not resettting its owenr id on an id change (as is the case of a create)
-      invoice.client.recommend_payment_assignments_for(invoice.amount).each do |ip|
-         InvoicePayment.quick_create! invoice.id, ip.payment_id, ip.amount
-      end
-
-      define_invoice invoice
-      
-      attachments = [
-        {
-        :content_type => "application/pdf", 
-        :body         => render_to_string(:action => 'download', :layout => false),
-        :disposition  => "attachment",
-        :filename     => @rails_pdf_name
-        }
-      ]
-      
-      mail = Notifier.deliver_invoice_available @invoice, @client, @footer_text, attachments
-      
-      dest_addresses = []
-      dest_addresses += mail.to_addrs if mail.to_addrs
-      dest_addresses += mail.cc_addrs if mail.cc_addrs
-      
-      dest_addresses.collect!{|t_a| '%s <%s>' % [t_a.name, t_a.address] }
-      
-      flash[:warning]  = "Invoice e-mailed to : %s" % dest_addresses.join(',')
-    end
-  end
-    
-  alias after_create_save after_update_save
 
   def download
     define_invoice Invoice.find(params[:id].to_i, :include => [:client])
     
     rescue 
       render :file => RAILS_ROOT+'/public/500.html', :status => 500
+  end
+  
+  def toggle_published
+    invoice = find_if_allowed(params[:id], :toggle_published)
+    
+    invoice.is_published = !invoice.is_published
+    invoice.payment_assignments.clear unless invoice.is_published
+    invoice.save!
+
+    if invoice.is_published
+      # Unfortunately we have to assign payments using the quick_create and not by concat'ing on the
+      # invoice AssociationProxy. This is due to a bug in my InvoicesWithTotal wrapper that I think is related
+      # to the association proxy not resettting its owenr id on an id change (as is the case of a create)
+      invoice.client.recommend_payment_assignments_for(invoice.amount).each do |ip|
+         InvoicePayment.quick_create! invoice.id, ip.payment_id, ip.amount
+      end
+  
+      # Send the notifier
+      if params[:email_invoice].to_i == 1
+        define_invoice invoice
+        
+        attachments = [
+          {
+          :content_type => "application/pdf", 
+          :body         => render_to_string(:action => 'download', :layout => false),
+          :disposition  => "attachment",
+          :filename     => @rails_pdf_name
+          }
+        ]
+        
+        mail = Notifier.deliver_invoice_available invoice, @client, @footer_text, attachments
+        
+        dest_addresses = []
+        dest_addresses += mail.to_addrs if mail.to_addrs
+        dest_addresses += mail.cc_addrs if mail.cc_addrs
+        
+        dest_addresses.collect!{|t_a| '%s <%s>' % [t_a.name, t_a.address] }
+        
+        flash[:warning]  = "Invoice e-mailed to : %s" % dest_addresses.join(',')
+      end
+    end
+
+    # Now we just re-render the row...
+    respond_to do |format|
+      format.html do
+        render :text => 'Success'
+      end
+      format.js do
+        render(:update) do |page| 
+          page.replace(
+            element_row_id(:action => :list, :id => invoice.id), 
+            :partial => 'list_record', 
+            :locals => {:record => invoice}
+          )
+          
+          # Update the flash as well, if needed:
+          page.replace_html active_scaffold_messages_id, :partial => 'messages'
+        end
+      end
+    end
   end
 
   private
