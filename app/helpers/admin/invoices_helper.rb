@@ -15,7 +15,7 @@ module Admin::InvoicesHelper
   end
   
   def invoices_with_total_is_paid_column(record)
-    record.is_paid? ? 'Yes' : 'No'
+    record.is_published ? (record.is_paid? ? 'Yes' : 'No') : '-'
   end
 
   def invoices_with_total_sub_total_column(record)
@@ -39,7 +39,36 @@ module Admin::InvoicesHelper
       '%s from (Payment %d)' % [asgn.amount.format, asgn.payment_id  ]
     }.join ', '
   end
-  
+ 
+  def toggle_published_indicator
+    loading_indicator_tag :action => :toggle_published, :id => @record.id
+  end
+   
+  def toggle_published_submit( label, is_focused, url_options = {} )
+    loading_indicator_id = loading_indicator_id(:action => :toggle_published, :id => @record.id)
+
+    button_to_remote( 
+      label,
+      { 
+        :url => {
+          :action        => :toggle_published, 
+          :id            => @record.id, 
+          :is_confirmed  => 1
+        }.merge(url_options),
+        :loaded  => [
+          'Modalbox.hide()',
+          "$(%s).style.visibility = 'visible'"  % loading_indicator_id.to_json
+        ].join(';'),
+        :before  => [
+          "$(%s).style.visibility = 'visible'" % loading_indicator_id.to_json,
+          "$$('#MB_content input[type=button]').each(function(i){i.disable();} )",
+          "$('cancel_box').style.display = 'none'"
+        ].join(";"),
+      },
+      (is_focused) ? {:class => "MB_focusable"} : {}
+    ) 
+  end
+
   # This let's us hook into the action_link names, so we can dynamically generate a label 
   # for the publish/unpublish row action
   def render_action_link(link, url_options, record = nil, html_options = {})
@@ -48,26 +77,12 @@ module Admin::InvoicesHelper
     our_options = url_options.dup 
     
     if link.action == 'toggle_published'
-      # Unfortunately, the only way I could get this was by way of copy-pasta from 
-      # our super:
-      url_options = url_options.clone
-      url_options[:action] = link.action
-      url_options[:controller] = link.controller if link.controller
-      url_options.delete(:search) if link.controller and link.controller.to_s != params[:controller]
-      url_options.merge! link.parameters if link.parameters
-      # /copy-pasta
-
       our_options[:link] = (record.is_published) ? 'Un-Publish' : 'Publish'
       
       html_options[:onclick] = "Modalbox.show(%s,%s); return false;" % [
-        render(
-          :partial => 'confirm_publish_modal', 
-          :locals => {:record => record, :submit_to => url_options}
-        ).to_json,
+        url_for(:action => :toggle_published, :id => record.id).to_json,
         {
-        :title => '%s confirmation' % [
-          (record.is_published) ? 'Un-publish' : 'Publish'
-        ], 
+        :title => '%s confirmation' %  [(record.is_published) ? 'Un-publish' : 'Publish'], 
         :width => 700
         }.to_json
       ]

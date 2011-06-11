@@ -8,10 +8,13 @@ class Admin::ClientRepresentativesController < ApplicationController
     config.columns = [:clients, :first_name, :last_name, :title, :cell_phone, :password, :login_enabled, :accepts_tos_version, :email_address, :notes, :created_at, :updated_at]
     
     config.columns[:clients].form_ui = :select
-    columns[:clients].sort_by :sql => 'clients.company_name'
+    config.columns[:clients].sort_by :sql => 'clients.company_name'
+    config.columns[:clients].search_sql = 'clients.company_name'
 
     config.columns[:email_address].includes = [:credential]
     config.columns[:email_address].sort_by :sql => "credentials.email_address"
+    config.columns[:email_address].search_sql = 'credentials.email_address'
+    
 
     config.columns[:title].label = 'Job Title'
 
@@ -19,7 +22,7 @@ class Admin::ClientRepresentativesController < ApplicationController
     # This ensures the habtm relationship is deleted, and not the record 
     config.nested.shallow_delete = true
 
-    config.list.columns = [:clients, :last_name, :first_name, :email_address]
+    config.search.columns = config.list.columns = [:clients, :last_name, :first_name, :email_address]
     
     config.create.columns = config.update.columns = [:first_name, :last_name, :email_address, :password, :login_enabled, :title, :cell_phone, :clients, :notes]
     

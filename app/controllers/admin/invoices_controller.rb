@@ -5,8 +5,23 @@ class Admin::InvoicesController < ApplicationController
   include ::InvoicePdfHelper
   
   add_layout_conditions :except => 'download'
+  
+  # TODO: Put in a plugin-helper
+  def self.invoices_scaffold_config(&block)
+    @invoices_scaffold_config ||= []
+    @invoices_scaffold_config << block.to_proc  
+  end
+  
+  def self.invoices_scaffold_init
+    # I dont love this mechanism of scaffold_init - but I think its going to work quite well...
+    configs = @invoices_scaffold_config
 
-  active_scaffold :invoices_with_total do |config|
+    active_scaffold(:invoices_with_total){|c| configs.each{|ac| ac.call c if ac.respond_to? :call} }
+  end
+  # /TODO: Put in a plugin-helper
+  
+
+  invoices_scaffold_config do |config|
     config.label = "Invoices"
 
     config.show.columns = config.columns = [
@@ -30,6 +45,7 @@ class Admin::InvoicesController < ApplicationController
 
     config.columns[:id].includes = [:payment_assignments]
     config.columns[:id].label = 'Num'
+    
     config.columns[:is_published].label = 'Pub?'
     config.columns[:is_paid?].label = 'Paid?'
     config.columns[:activity_types].label = 'Include Activities'
@@ -80,7 +96,7 @@ class Admin::InvoicesController < ApplicationController
     (klass == Activity) ? Admin::ActivitiesWithPricesController : self
   end
 
-  # We ovverride the defaut behavior here only so that we can use this method as a hook to detyermine the invoice.activity_type_ids
+  # We overide the defaut behavior here only so that we can use this method as a hook to detyermine the invoice.activity_type_ids
   # Before they've been updated by the form. We reference @activity_type_ids_before in before_update_save to determine whether we
   # need to update the activity associations for this invoice.
   def update_record_from_params(*args)
@@ -112,62 +128,60 @@ class Admin::InvoicesController < ApplicationController
   end
   
   def toggle_published
-    invoice = find_if_allowed(params[:id], :toggle_published)
+    if params[:is_confirmed] == '1'
+      invoice = find_if_allowed(params[:id], :toggle_published)
+      
+      invoice.is_published = !invoice.is_published
+      invoice.payment_assignments.clear unless invoice.is_published
+      invoice.save!
+
+      if invoice.is_published
+        # Unfortunately we have to assign payments using the quick_create and not by concat'ing on the
+        # invoice AssociationProxy. This is due to a bug in my InvoicesWithTotal wrapper that I think is related
+        # to the association proxy not resettting its owenr id on an id change (as is the case of a create)
+        invoice.client.recommend_payment_assignments_for(invoice.amount).each do |ip|
+           InvoicePayment.quick_create! invoice.id, ip.payment_id, ip.amount
+        end
     
-    invoice.is_published = !invoice.is_published
-    invoice.payment_assignments.clear unless invoice.is_published
-    invoice.save!
-
-    if invoice.is_published
-      # Unfortunately we have to assign payments using the quick_create and not by concat'ing on the
-      # invoice AssociationProxy. This is due to a bug in my InvoicesWithTotal wrapper that I think is related
-      # to the association proxy not resettting its owenr id on an id change (as is the case of a create)
-      invoice.client.recommend_payment_assignments_for(invoice.amount).each do |ip|
-         InvoicePayment.quick_create! invoice.id, ip.payment_id, ip.amount
-      end
-  
-      # Send the notifier
-      if params[:email_invoice].to_i == 1
-        define_invoice invoice
-        
-        attachments = [
-          {
-          :content_type => "application/pdf", 
-          :body         => render_to_string(:action => 'download', :layout => false),
-          :disposition  => "attachment",
-          :filename     => @rails_pdf_name
-          }
-        ]
-        
-        mail = Notifier.deliver_invoice_available invoice, @client, @footer_text, attachments
-        
-        dest_addresses = []
-        dest_addresses += mail.to_addrs if mail.to_addrs
-        dest_addresses += mail.cc_addrs if mail.cc_addrs
-        
-        dest_addresses.collect!{|t_a| '%s <%s>' % [t_a.name, t_a.address] }
-        
-        flash[:warning]  = "Invoice e-mailed to : %s" % dest_addresses.join(',')
-      end
-    end
-
-    # Now we just re-render the row...
-    respond_to do |format|
-      format.html do
-        render :text => 'Success'
-      end
-      format.js do
-        render(:update) do |page| 
-          page.replace(
-            element_row_id(:action => :list, :id => invoice.id), 
-            :partial => 'list_record', 
-            :locals => {:record => invoice}
-          )
+        # Send the notifier
+        if params[:email_invoice].to_i == 1
+          define_invoice invoice
           
-          # Update the flash as well, if needed:
-          page.replace_html active_scaffold_messages_id, :partial => 'messages'
+          attachments = [
+            {
+            :content_type => "application/pdf", 
+            :body         => render_to_string(:action => 'download', :layout => false),
+            :disposition  => "attachment",
+            :filename     => @rails_pdf_name
+            }
+          ]
+          
+          mail = Notifier.deliver_invoice_available invoice, @client, @footer_text, attachments
+          
+          dest_addresses = []
+          dest_addresses += mail.to_addrs if mail.to_addrs
+          dest_addresses += mail.cc_addrs if mail.cc_addrs
+          
+          dest_addresses.collect!{|t_a| '%s <%s>' % [t_a.name, t_a.address] }
+          
+          flash[:warning]  = "Invoice e-mailed to : %s" % dest_addresses.join(',')
         end
       end
+
+      render(:update) do |page| 
+        page.replace(
+          element_row_id(:action => :list, :id => invoice.id), 
+          :partial => 'list_record', 
+          :locals => {:record => invoice}
+        )
+        
+        # Update the flash as well, if needed:
+        page.replace_html active_scaffold_messages_id, :partial => 'messages'
+      end
+    else
+      @record = Invoice.find params[:id].to_i, :include => [:payment_assignments]
+
+      render :action => :confirm_publish_modal, :layout => false
     end
   end
 
@@ -232,4 +246,6 @@ class Admin::InvoicesController < ApplicationController
   end
 
   handle_extensions
+  
+  invoices_scaffold_init
 end

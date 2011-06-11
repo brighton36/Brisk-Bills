@@ -1,6 +1,10 @@
 module Admin::PaymentsHelper
   include Admin::IsActiveColumnHelper
   
+  def payment_is_allocated_column(record)
+    record.is_allocated? ? 'Yes' : 'No'
+  end
+  
   def payment_amount_column(record)
     h_money record.amount
   end

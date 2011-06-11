@@ -5,6 +5,7 @@
 - *Greatly* Improved options in the payment to invoice mapping.
 - GUI Bugfixes! 
 - Revised the invoice approval and sending interfaces
+- Added new columns to list views
 
 === Release 0.7.0 (May 03, 2010)
 - Much improved invoice to payment mapping control.

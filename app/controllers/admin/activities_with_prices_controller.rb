@@ -20,18 +20,20 @@ class Admin::ActivitiesWithPricesController < Admin::ActivitiesController
     config.columns[:tax].sort_by  :sql => 'tax_in_cents'
   end
   
-  # This adjusts the order of the link so that move appears to the left, fugly:
+  # This adjusts the order of the link so that move appears to the left:
   def action_links_order
     links = active_scaffold_config.action_links
     links.sort_by{ |l| ( l.action == "move_to_invoice" ) ? -1 : 1 }
   end
   
+  # TODO: Put in a plugin-helper?
   # We need to be sure the view is looking in the right place, this little hack should do it:
   def self.active_scaffold_paths
     super_view_path = BRISKBILLS_ROOT+'/app/views/admin/activities'
     @active_scaffold_overrides << super_view_path unless @active_scaffold_overrides.include? super_view_path
     super
   end
+  # /TODO
 
   # This is a little hackish - but it fixes would-be problems with the observation code
   @active_scaffold_observations = superclass.active_scaffold_observations

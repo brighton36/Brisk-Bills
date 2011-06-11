@@ -54,7 +54,8 @@ module AdminLayoutHelper
       end
 
       admin.item 'Accounts Ledger', controller_url("Admin/Client_Accounting") do |accounting|
-        accounting.item 'Invoices', controller_url("Admin/Invoices")
+        accounting.item 'All Invoices', controller_url("Admin/Invoices")
+        accounting.item 'Draft Invoices', controller_url("Admin/draft_invoices")
         accounting.item 'Payments', controller_url("Admin/Payments")
       end
 

@@ -2,6 +2,7 @@ class Admin::ActivitiesController < ApplicationController
   include AdminLayoutHelper
   include ExtensibleObjectHelper
  
+  # TODO: Put in a helper?
   def self.activities_scaffold_config(&block)
     @activities_scaffold_configs ||= []
     @activities_scaffold_configs << block.to_proc  
@@ -13,6 +14,7 @@ class Admin::ActivitiesController < ApplicationController
 
     active_scaffold(:activity){|c| configs.each{|ac| ac.call c if ac.respond_to? :call} }
   end
+  # /TODO: Put in a helper?
   
   activities_scaffold_config do |config|
     config.label = "Activity Quick-Review"

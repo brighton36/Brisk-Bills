@@ -12,6 +12,7 @@ class Admin::PaymentsController < ApplicationController
     config.label = "Payments"
 
     config.columns = [
+      :id,
       :paid_on, 
       :client, 
       :payment_method, 
@@ -22,10 +23,12 @@ class Admin::PaymentsController < ApplicationController
       :assignments,
       :amount_unallocated, 
       :created_at, 
-      :updated_at
+      :updated_at,
+      :is_allocated?
     ]
     
     config.show.columns = [
+      :id,
       :paid_on, 
       :client, 
       :payment_method, 
@@ -33,24 +36,31 @@ class Admin::PaymentsController < ApplicationController
       :amount, 
       :invoice_assignments,
       :amount_unallocated, 
+      :is_allocated?,
       :created_at, 
       :updated_at
     ]
 
+    config.columns[:id].label = 'Num'
+
     config.columns[:client].form_ui = :select
     config.columns[:client].sort_by :sql => 'clients.company_name'
     
+    config.columns[:is_allocated?].label = "Alloc?"
+    config.columns[:is_allocated?].includes = [:invoice_assignments]
+    
+    config.columns[:payment_method_identifier].label = "Identifier"
+    
+    config.columns[:payment_method].label = 'Method'
     config.columns[:payment_method].form_ui = :select
     config.columns[:payment_method].sort_by :sql => 'payment_methods.name'
     
-    config.columns[:payment_method_identifier].label = 'Method Identifier'
-
     config.columns[:amount_unallocated].label = 'Unallocated'
     config.columns[:assignments].label = 'Applies To'
     
     config.columns[:amount].sort_by :sql => 'amount_in_cents'
     
-    config.list.columns =[:client, :payment_method, :amount, :paid_on]
+    config.list.columns =[:id, :client, :payment_method,:payment_method_identifier, :amount,:is_allocated?, :paid_on]
     config.list.sorting = [{:paid_on => :desc}]
 
     config.create.columns = config.update.columns = [
