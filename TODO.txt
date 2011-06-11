@@ -1,9 +1,7 @@
 
 Bugs Found on 06/2/11:
-  * Next page acting weirdo bug ...
   * If you take an unpublished invoice, view its activities, and then publish it, and then try to close activities.... no close
   * I tried to add an axisting rep to paradise press in production - and no reps were listed!
-
 
 Invoices:
 * We should add an Draft Invoices controller and rename Invoices to 'All' Invoices...

@@ -17,5 +17,5 @@ test:
   <<: *defaults
 
 production:
-  database: briskbills_development
+  database: briskbills_production
   <<: *defaults

@@ -4,7 +4,6 @@ module Admin::ActivitiesHelper
   
   alias :activity_apply_tax_form_column :apply_tax_form_column
   alias :activity_tax_form_column :tax_form_column
-  
 
   def active_scaffold_observe_field(col_name, observation)
     # This is slightly hackish - but it should work
