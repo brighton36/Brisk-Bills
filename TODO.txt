@@ -1,12 +1,9 @@
 
-Bugs Found on 06/2/11:
-  * If you take an unpublished invoice, view its activities, and then publish it, and then try to close activities.... no close
-  * I tried to add an axisting rep to paradise press in production - and no reps were listed!
-
 Invoices:
 * We should add an Draft Invoices controller and rename Invoices to 'All' Invoices...
-  * I would really like a Create last mionths_invoices type feature in the controller itself as a table-action
-  * 'Publish' should force the row to disappear
+  * All we need to do now is the submit. make sure we dim the buttons and run the spinner while generating
+  * And make sure we do a full list_refresh
+  * Why does the Create New not destroy the batch div? It should ...
 
 * Assign version numbers to the invoice based on the number of times an invoice is published...
   * I don't know if we should/need-to adjust the invoice pdfs out here just yet ....
@@ -33,7 +30,8 @@ activities_with_prices:
 
 * Plugin interface...
   * We should DRY the interfaces for inheritance on the activities and invoices controllers (See  "TODO: Put in a plugin-helper?")
-  
+ 
+* Ideally we have that DraftInvoices/ "Batch Create" link to the left of Create..
 
 * Slimtimer-less time entry
   * http://dhtmlx.com/docs/products/dhtmlxScheduler/index.shtml

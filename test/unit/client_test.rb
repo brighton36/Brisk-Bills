@@ -317,4 +317,35 @@ class ClientTest < ActiveSupport::TestCase
     assert_equal true, invoices[2].is_paid?(true)
     assert_equal [payments[0].id], invoices[2].payment_assignments(true).collect(&:payment_id)
   end
+
+  def test_find_invoiceable_clients_at
+
+    # Because we're using fixtures - we have some pre-existing clients and activities here . 
+    # I really don't want 'em for this test though:
+    Client.find(:all).each{|c| c.destroy}
+    Activity.find(:all).each{|a| a.destroy}
+
+    # OK - time to get started:
+    
+    Factory.generate_payment Factory.create_client(:company_name => "All Paid Up, Inc."), Money.new(10000)
+
+    
+    clientA = Factory.create_client :company_name => "Client A"
+    clientB = Factory.create_client :company_name => "Client B"
+    clientC = Factory.create_client :company_name => "Client C"
+    clientD = Factory.create_client :company_name => "Client D"
+
+    Factory.create_labor( {}, {:client => clientA, :occurred_on => (DateTime.now << 1)} )
+    Factory.create_labor( {}, {:client => clientA, :occurred_on => (DateTime.now << 2)} )
+    Factory.create_labor( {}, {:client => clientA, :occurred_on => (DateTime.now >> 1)} )
+    Factory.create_labor( {}, {:client => clientB, :occurred_on => (DateTime.now << 1)} )
+    Factory.create_labor( {}, {:client => clientC, :occurred_on => (DateTime.now >> 1)} )
+    Factory.create_labor( {}, {:client => clientD, :occurred_on => (DateTime.now << 1), :is_published => false} )
+    Factory.create_labor( {}, {:client_id => nil, :occurred_on => (DateTime.now << 1)} )
+
+    invoiceable_clients = Client.find_invoiceable_clients_at(DateTime.now)
+
+    assert_equal 2, invoiceable_clients.length
+    assert_equal [clientA.id, clientB.id], invoiceable_clients.collect(&:id)
+  end
 end

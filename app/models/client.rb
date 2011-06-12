@@ -185,4 +185,24 @@ class Client < ActiveRecord::Base
     )
   end
 
+  # This is mostly used by the batch create feature. Here, we return an array of clients, which have approved,
+  # unassigned activity which occurred before the specified_date
+  def self.find_invoiceable_clients_at(occurred_at)
+    find(
+      :all,
+      :select     => 'DISTINCT `clients`.*',
+      :joins      => 'LEFT JOIN `activities` ON `clients`.id = `activities`.client_id',
+      :conditions => [
+        [
+          '`activities`.occurred_on <= ?',
+          '`activities`.is_published = ?',
+          '`activities`.invoice_id IS NULL'
+        ].join(" AND "),
+        occurred_at, 
+        true
+      ],
+      :order => ["`clients`.company_name ASC","`clients`.id ASC"].join(",")
+    )
+  end
+
 end

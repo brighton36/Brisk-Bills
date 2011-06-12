@@ -1,0 +1,73 @@
+<div class="active-scaffold">
+  <div class="batch_create-view <%= "#{params[:controller]}-view" %> view">
+    <%= form_remote_tag(
+      :url      => url_for(:action => :batch_create),
+      :after    => [
+        "$('#{loading_indicator_id(:action => :batch_create, :id => params[:id])}').style.visibility = 'visible'",
+        "Form.disable('#{element_form_id(:action => :batch_create)}')"
+      ].join(';'),
+      :complete => [
+        "$('#{loading_indicator_id(:action => :batch_create, :id => params[:id])}').style.visibility = 'hidden'",
+        "Form.enable('#{element_form_id(:action => :batch_create)}')"
+      ].join(';'),
+      :failure  => "ActiveScaffold.report_500_response('#{active_scaffold_id}')",
+      :html => {
+        :href     => url_for(:action => :batch_create),
+        :onsubmit => onsubmit,
+        :id       => element_form_id(:action => :batch_create),
+        :class    => 'create'
+      }
+    ) %>
+    <h4>Batch Create</h4>
+    <div id="<%= element_messages_id(:action => :create) %>" class="messages-container"></div>
+
+    <ol class="form">
+    <li>
+    <p>Batch Create will automatically create unpublished invoices for the below specified clients. Invoices
+    will be populated with all the approved, unassigned activity in their queue, which occured on or before the specified date.</p>
+    </li>
+    <li class="form-element required">
+      <dl>
+        <dt><label>Invoice Date</label></dt>
+        <dd>
+        <% invoice_date_at_fields = [:year, :month, :day, :hour, :minute, :second] %>
+          <%=select_datetime(
+            @invoice_date_at, 
+            :prefix             => 'batch_invoice_date_at', 
+            :datetime_separator => ' — ', 
+            :time_separator     => ' : ',
+            :include_seconds    => true
+          ) %>
+          <%= invoice_date_at_fields.collect{|field_id| 
+            observe_field(
+              'batch_invoice_date_at_%s' % field_id, 
+              :url => url_for(:action => :batch_create), 
+              :with => invoice_date_at_fields.collect{|f|
+                "'batch_invoice_date_at[%s]='+$F('batch_invoice_date_at_%s')" % ([f]*2)
+              }.compact.join("+'&'+"),
+              :update => 'batch_invoice_clients_list'
+            )
+          }.join %>
+        </dd>
+      </dl>
+    </li>
+    <li class="form-element required">
+      <dl>
+        <dt><label>Clients</label></dt>
+        <dd><%= batch_create_clients_form_column @invoice_date_at %></dd>
+      </dl>
+    </li>
+    </ol>
+
+    <p class="form-footer">
+    <%= submit_tag "Batch Create", :class => "submit" %>
+    <%= link_to as_(:cancel), main_path_to_return, :class => 'cancel' %>
+    <%= loading_indicator_tag(:action => :create, :id => params[:id]) %>
+    </p>
+
+    </form>
+    <script type="text/javascript">
+    Form.focusFirstElement('<%= element_form_id(:action => :batch_create) -%>');
+    </script>
+  </div>
+</div>

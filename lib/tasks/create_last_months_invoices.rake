@@ -4,20 +4,7 @@ namespace :brisk_bills do
   task :create_last_months_invoices => :environment do
     end_of_last_month = Time.utc(*Time.now.to_a).last_month.end_of_month
  
-    invoiceable_client_ids = Activity.find(
-      :all, 
-      :select => 'DISTINCT client_id', 
-      :conditions => [
-        [
-        'is_published = ?',
-        'invoice_id IS NULL',
-        'client_id IS NOT NULL', 
-        'occurred_on <= ?'
-        ].join(' AND '),
-        true,
-        end_of_last_month
-      ]
-    ).collect{|a| a.client.id}
+    invoiceable_client_ids = Client.find_invoiceable_clients_at(end_of_last_month)
     
     if invoiceable_client_ids.length > 0
       all_activity_types = ActivityType.find(:all)
