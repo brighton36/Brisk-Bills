@@ -169,6 +169,9 @@ class Admin::InvoicesController < ApplicationController
       end
 
       render(:update) do |page| 
+        # Close the "Nested" Div, if it's open:
+        page << 'if($(%s)){Element.remove(%s);};' % ([element_row_id(:action => :nested, :id => invoice.id).to_json]*2)
+
         page.replace(
           element_row_id(:action => :list, :id => invoice.id), 
           :partial => 'list_record', 

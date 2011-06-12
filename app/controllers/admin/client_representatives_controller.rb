@@ -33,6 +33,7 @@ class Admin::ClientRepresentativesController < ApplicationController
   # that stopped this from being smart enough to recognize the :uniq on the client_representatives 
   # association. in he new_existing action
   def merge_conditions(*conditions)    
+
     if (
       params[:action].to_sym == :new_existing && 
       params.has_key?(:parent_model) && 

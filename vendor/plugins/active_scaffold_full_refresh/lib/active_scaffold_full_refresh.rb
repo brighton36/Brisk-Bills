@@ -1,3 +1,32 @@
+module ActiveScaffoldFullRefreshControllerHelpers
+  
+  # This was introduced to fix bugs that cropped up on the newer versions of active_scaffold
+  # specifically, the _list_pagination_links.html.erb doesn't specify the action to the page
+  # links, which then default to :update or :create, and paging fails. This fixes that.
+  # Really, a less-hackish fix would be to replace the erb file itself. But that wouldn't 
+  # be as easily distributable as a plugin
+  def params_for_with_refresh(options = {})
+
+    options[:action] = :list if (
+      options.length == 0 && 
+      active_scaffold_config.full_list_refresh_on.try(:include?, params[:action].to_sym)
+    )
+
+    params_for_without_refresh options
+  end
+
+   def self.append_features(base)
+    super
+    base.class_eval do 
+      unless method_defined? :active_scaffold_params_for_without_refresh
+        alias params_for_without_refresh params_for
+        alias params_for params_for_with_refresh
+      end
+      
+    end
+  end
+end
+
 module ActiveScaffoldFullRefresh
   def action_with_full_refresh
     refresh_on = (active_scaffold_config.full_list_refresh_on or [])

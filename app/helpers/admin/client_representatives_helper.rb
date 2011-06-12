@@ -6,7 +6,7 @@ module Admin::ClientRepresentativesHelper
 
   def client_representative_clients_form_column(record, options)
     list_i = nil
-    
+
     # Keeps our queries down by 'caching' it here:
     client_ids = record.client_ids
     

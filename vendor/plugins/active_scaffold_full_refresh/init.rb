@@ -6,3 +6,4 @@ ActiveScaffold::Actions::Create.send :include, ActiveScaffoldFullRefresh
 ActiveScaffold::Actions::Update.send :include, ActiveScaffoldFullRefresh
 ActiveScaffold::Actions::Delete.send :include, ActiveScaffoldFullRefresh
 
+ActiveScaffold::Helpers::ControllerHelpers.send :include, ActiveScaffoldFullRefreshControllerHelpers
