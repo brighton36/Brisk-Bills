@@ -26,24 +26,27 @@ class Admin::DraftInvoicesController < Admin::InvoicesController
     ret
   end
   # /TODO: Put in a plugin-helper
-   
-  def batch_create
-    if params[:batch_invoice_date_at]
-      # This is kind of annoying ...
-      @invoice_date_at = Time.utc(
-        params[:batch_invoice_date_at][:year].to_i, 
-        params[:batch_invoice_date_at][:month].to_i, 
-        params[:batch_invoice_date_at][:day].to_i,
-        params[:batch_invoice_date_at][:hour].to_i,
-        params[:batch_invoice_date_at][:minute].to_i,
-        params[:batch_invoice_date_at][:second].to_i
-      )
+  
+  def batch_create_on_date_change
+    # This is kind of an annoying way to make a date ...
+    @invoice_date_at = Time.utc(
+      params[:batch_invoice_date_at][:year].to_i, 
+      params[:batch_invoice_date_at][:month].to_i, 
+      params[:batch_invoice_date_at][:day].to_i,
+      params[:batch_invoice_date_at][:hour].to_i,
+      params[:batch_invoice_date_at][:minute].to_i,
+      params[:batch_invoice_date_at][:second].to_i
+    ) if params[:batch_invoice_date_at]
 
-      # I didn't really feel the need to create a partial just for this one line:
-      render :inline => '<%= batch_create_clients_form_column(@invoice_date_at) %>'
+    # I didn't really feel the need to create a partial just for this one line:
+    render :inline => '<%= batch_create_clients_form_column(@invoice_date_at) %>' if @invoice_date_at
+  end
+
+  def batch_create
+    if params.has_key? :batch_client
+     render(:update){|page| page << "alert('yoyoyoy');"} 
     else
       @invoice_date_at = Time.utc(*Time.now.to_a).prev_month.end_of_month
-
       render :action => :batch_create, :layout => false
     end
   end

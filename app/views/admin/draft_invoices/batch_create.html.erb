@@ -41,7 +41,7 @@
           <%= invoice_date_at_fields.collect{|field_id| 
             observe_field(
               'batch_invoice_date_at_%s' % field_id, 
-              :url => url_for(:action => :batch_create), 
+              :url => url_for(:action => :batch_create_on_date_change), 
               :with => invoice_date_at_fields.collect{|f|
                 "'batch_invoice_date_at[%s]='+$F('batch_invoice_date_at_%s')" % ([f]*2)
               }.compact.join("+'&'+"),

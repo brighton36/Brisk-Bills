@@ -157,7 +157,7 @@
 }
 
 .active-scaffold-header div.actions a.batch_create {
-  background-image: url(../../../images/page-new.gif);
+  background-image: url(../../images/page-new.gif);
 
   padding-left: 19px;
   background-position: 1px 50%;

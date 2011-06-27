@@ -80,7 +80,7 @@ class Admin::PaymentsController < ApplicationController
   def before_update_save(payment)
     # Let's create a lookup map from the input params to make this easier:
     input_assignments = {}
-    params[:record][:invoice_assignments].each_pair do |inv_id, fields|
+    params[:record][:invoice_assignments].try(:each_pair) do |inv_id, fields|
       input_assignments[inv_id.to_i] = Money.new(fields[:amount].tr('^\-0-9','').to_i)
     end
 
