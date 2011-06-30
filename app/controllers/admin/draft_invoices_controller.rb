@@ -29,13 +29,8 @@ class Admin::DraftInvoicesController < Admin::InvoicesController
   
   def batch_create_on_date_change
     # This is kind of an annoying way to make a date ...
-    @invoice_date_at = Time.utc(
-      params[:batch_invoice_date_at][:year].to_i, 
-      params[:batch_invoice_date_at][:month].to_i, 
-      params[:batch_invoice_date_at][:day].to_i,
-      params[:batch_invoice_date_at][:hour].to_i,
-      params[:batch_invoice_date_at][:minute].to_i,
-      params[:batch_invoice_date_at][:second].to_i
+    @invoice_date_at = utc_date_from_param(
+      params[:batch_invoice_date_at]
     ) if params[:batch_invoice_date_at]
 
     # I didn't really feel the need to create a partial just for this one line:
@@ -44,11 +39,49 @@ class Admin::DraftInvoicesController < Admin::InvoicesController
 
   def batch_create
     if params.has_key? :batch_client
-     render(:update){|page| page << "alert('yoyoyoy');"} 
+      invoiceable_client_ids = params[:batch_client].keys.collect(&:to_i)
+
+      if invoiceable_client_ids.length > 0
+        all_activity_types = ActivityType.find(:all)
+
+        invoice_date = utc_date_from_param params[:batch_invoice_date_at]
+        
+        @new_invoices = Client.find(
+          :all, 
+          :conditions => ['id IN (?)', invoiceable_client_ids]
+        ).each do |client|  
+          Invoice.create!(
+            :client => client, 
+            :activity_types => all_activity_types,
+            :activities => Invoice.recommended_activities_for( 
+              client.id, 
+              invoice_date, 
+              all_activity_types 
+            )
+          )
+        end
+
+        do_list
+      end
+
+      render :action => 'batch_create.js'
     else
       @invoice_date_at = Time.utc(*Time.now.to_a).prev_month.end_of_month
-      render :action => :batch_create, :layout => false
+      render :action => 'batch_create.html', :layout => false
     end
+  end
+
+  private 
+  
+  def utc_date_from_param(date_hash)
+    Time.utc(
+      date_hash[:year].to_i, 
+      date_hash[:month].to_i, 
+      date_hash[:day].to_i,
+      date_hash[:hour].to_i,
+      date_hash[:minute].to_i,
+      date_hash[:second].to_i
+    )
   end
 
   handle_extensions

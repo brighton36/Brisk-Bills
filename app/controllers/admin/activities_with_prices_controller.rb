@@ -55,7 +55,10 @@ class Admin::ActivitiesWithPricesController < Admin::ActivitiesController
 
     if params.has_key? :move_to_invoice_id
       begin
-        invoice_dest = Invoice.find(params[:move_to_invoice_id].to_i)
+        invoice_dest = (params[:move_to_invoice_id].empty?) ? 
+          nil :
+          Invoice.find(params[:move_to_invoice_id].to_i)
+
         activity.move_to_invoice invoice_dest
 
         do_list
@@ -65,9 +68,9 @@ class Admin::ActivitiesWithPricesController < Admin::ActivitiesController
         @errors_during_move << $!
       end
       
-      render :action => 'move_to_invoice.js.rjs'
+      render :action => 'move_to_invoice.js'
     else
-      render :action => 'move_to_invoice.html.erb', :layout => false
+      render :action => 'move_to_invoice.html', :layout => false
     end
   end
 
