@@ -2,7 +2,7 @@ class Admin::ClientAccountingController < ApplicationController
   include AdminLayoutHelper
   include ExtensibleObjectHelper
 
-  active_scaffold :client_accounting do |config|
+  active_scaffold :client do |config|
     config.label = "Accounts Ledger"
     
     config.create.link = nil
@@ -43,6 +43,10 @@ class Admin::ClientAccountingController < ApplicationController
   def conditions_for_collection
     ['is_active = ?', true]
   end
-  
+
+  def custom_finder_options
+    {:from => 'clients_with_balances AS clients'}
+  end
+
   handle_extensions
 end

@@ -16,7 +16,7 @@ class Admin::InvoicesController < ApplicationController
     # I dont love this mechanism of scaffold_init - but I think its going to work quite well...
     configs = @invoices_scaffold_config
 
-    active_scaffold(:invoices_with_total){|c| configs.each{|ac| ac.call c if ac.respond_to? :call} }
+    active_scaffold(:invoice){|c| configs.each{|ac| ac.call c if ac.respond_to? :call} }
   end
   # /TODO: Put in a plugin-helper
   
@@ -41,7 +41,7 @@ class Admin::InvoicesController < ApplicationController
       :updated_at
     ]
     
-    config.columns[:is_paid?].sort_by :sql => '`invoices_with_totals`.is_paid'
+    config.columns[:is_paid?].sort_by :sql => '`invoices`.is_paid'
 
     config.columns[:id].includes = [:payment_assignments]
     config.columns[:id].label = 'Num'
@@ -189,7 +189,12 @@ class Admin::InvoicesController < ApplicationController
   end
 
   private
+ 
   
+  def custom_finder_options
+    {:from => 'invoices_with_totals AS invoices'}
+  end
+
   BAD_INDIFFERENTIZE_VARS =  /^\@(#{%w(
     request_origin _request active_scaffold_observations variables_added before_filter_chain_aborted
     rendering_runtime query action_name _flash performed_render url _headers _cookies db_rt_after_render
