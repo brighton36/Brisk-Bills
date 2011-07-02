@@ -1,0 +1,5 @@
+form = element_form_id(:action => :batch_create)
+cancel_selector = "##{form} a.cancel".to_json
+
+page << "$$(#{cancel_selector}).first().link.close();"
+page.replace_html active_scaffold_content_id, :partial => 'list', :layout => false if @new_invoices

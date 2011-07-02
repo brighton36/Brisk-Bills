@@ -3,11 +3,11 @@
     <%= form_remote_tag(
       :url      => url_for(:action => :batch_create),
       :after    => [
-        "$('#{loading_indicator_id(:action => :batch_create, :id => params[:id])}').style.visibility = 'visible'",
+        "$('#{loading_indicator_id(:action => :batch_create)}').style.visibility = 'visible'",
         "Form.disable('#{element_form_id(:action => :batch_create)}')"
       ].join(';'),
       :complete => [
-        "$('#{loading_indicator_id(:action => :batch_create, :id => params[:id])}').style.visibility = 'hidden'",
+        "$('#{loading_indicator_id(:action => :batch_create)}').style.visibility = 'hidden'",
         "Form.enable('#{element_form_id(:action => :batch_create)}')"
       ].join(';'),
       :failure  => "ActiveScaffold.report_500_response('#{active_scaffold_id}')",
@@ -62,7 +62,7 @@
     <p class="form-footer">
     <%= submit_tag "Batch Create", :class => "submit" %>
     <%= link_to as_(:cancel), main_path_to_return, :class => 'cancel' %>
-    <%= loading_indicator_tag(:action => :create, :id => params[:id]) %>
+    <%= loading_indicator_tag(:action => :batch_create) %>
     </p>
 
     </form>

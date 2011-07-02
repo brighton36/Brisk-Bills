@@ -1,16 +1,8 @@
-
-Invoices:
-* We should add an Draft Invoices controller and rename Invoices to 'All' Invoices...
-  * All we need to do now is the submit. make sure we dim the buttons and run the spinner while generating
-  * Why does the Create New not destroy the batch div? It should ...
-
-* BUG: Add Existing Client Reps is borked. We're only showing from the existing company - not all the available (see the LDI)
-
-* Assign version numbers to the invoice based on the number of times an invoice is published...
-  * I don't know if we should/need-to adjust the invoice pdfs out here just yet ....
-
 activities_with_prices:
   * Move_to_invoice function should allow us to Move_to '(Unassigned)', and ideally that would be a radio group
+  * Get the move to nil unit test working
+
+TODO: I think the dates on the Batch create aren't getting created right... test to make sure they equal the input
 
 * We may want to go through the controllers and modify the searches a bit:
   config.columns[:clients].search_sql
@@ -33,6 +25,9 @@ activities_with_prices:
   * We should DRY the interfaces for inheritance on the activities and invoices controllers (See  "TODO: Put in a plugin-helper?")
  
 * Ideally we have that DraftInvoices/ "Batch Create" link to the left of Create..
+
+* Assign version numbers to the invoice based on the number of times an invoice is published...
+  * I don't know if we should/need-to adjust the invoice pdfs out here just yet ....
 
 * Slimtimer-less time entry
   * http://dhtmlx.com/docs/products/dhtmlxScheduler/index.shtml

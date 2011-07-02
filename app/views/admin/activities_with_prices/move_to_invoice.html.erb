@@ -28,14 +28,14 @@
       <%= select_tag(
          'move_to_invoice_id', 
          options_for_select(
-           @dest_invoices.collect{|inv| [inv.long_name, inv.id]},
+           [['(None)', nil]]+@dest_invoices.collect{|inv| [inv.long_name, inv.id]},
            params[:move_to_invoice_id].to_i
          )
       ) %>
    <% else -%>
       <p class="warning-message">We're sorry, but no un-published invoices were available in the database for this move.</p>
    <% end -%>
-   <p>This activity's client and invoice association will be matched with the selected destination.</p>
+   <p>This activity's client and invoice association will be matched with the selected destination. If "(None)" is selected, this actvity will be removed from its current invoice, and placed back in the unassigned activity queue.</p>
    <p>
       <%= submit_tag 'Move...', :class => "MB_focusable" %>
        or 

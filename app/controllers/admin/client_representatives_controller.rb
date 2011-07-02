@@ -48,7 +48,7 @@ class Admin::ClientRepresentativesController < ApplicationController
 
       existing_association_ids = parent_record.send('%s_ids' % params[:parent_column].singularize) if parent_record
       
-      (existing_association_ids) ? 
+      (existing_association_ids.try(:length) > 0) ? 
         ['`client_representatives`.id NOT IN (?)', existing_association_ids] :
         nil    
     else

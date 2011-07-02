@@ -95,11 +95,15 @@ class Activity < ActiveRecord::Base
     dest_invoice = (dest.class == Integer) ? Invoice.find(dest) : dest
 
     raise StandardError, "Can't move an already-published activity." if is_published?
-    raise StandardError, "Can't move an activity to an already published invoice." if dest_invoice.is_published?
+    raise StandardError, "Can't move an activity to an already published invoice." if dest_invoice.try(:is_published?)
 
-    self.invoice_id = dest_invoice.id
-    self.client_id = dest_invoice.client_id
-    
+    self.invoice_id = (dest_invoice.nil?) ? 0 : dest_invoice.id
+    self.client_id = dest_invoice.client_id unless dest_invoice.nil?
+   
+if self.invoice_id == 0
+  puts "A:"+self.changed_attributes.inspect
+  puts "D:"+self.dirty?.inspect
+end
 
     @dont_validate_type_associations = true
     save!

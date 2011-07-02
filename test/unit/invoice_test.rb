@@ -461,7 +461,56 @@ class InvoiceTest < ActiveSupport::TestCase
     assert_raise(StandardError) { material.activity.move_to_invoice invoice_src }
     
   end
-  
+
+  def test_activity_unassign
+    client_src = Factory.create_client
+
+    create_act_args = {:occurred_on => (DateTime.now << 1), :client => client_src}
+    
+    labor = Factory.create_labor( {}, create_act_args.merge({:cost => 1.99}) )
+    material = Factory.create_material( {}, create_act_args.merge({:cost => 100.0, :tax => 2.0}))
+    proposal = Factory.create_proposal( {}, create_act_args)
+    adjustment = Factory.create_adjustment( {}, create_act_args.merge({:tax => 26.00}))
+
+    subactivities = [labor, material, proposal, adjustment]
+    
+    present_date = DateTime.now
+    
+    invoice_src = Invoice.create!(
+      :client => client_src, 
+      :issued_on => present_date,
+      :activity_types => @activity_types,
+      :activities => Invoice.recommended_activities_for(client_src, present_date, @activity_types)
+    )
+
+    assert_equal 1650.00, invoice_src.amount
+    assert_equal 48.01,   invoice_src.taxes_total
+
+    assert_nothing_raised do 
+      material.activity.move_to_invoice nil
+    end
+
+
+    invoice_src.activities(true)
+
+    material = Activity::Material.find(material.id)
+    
+    puts "Material:"+material.activity.inspect
+
+puts "invoice:"
+invoice_src.activities(true).each{|a| 
+  puts "a(%d) : %s %s" % [a.id, a.cost.to_s, a.tax.to_s]
+}
+
+    assert_equal 1548.0, invoice_src.amount(true)
+    assert_equal 46.01,   invoice_src.taxes_total
+
+    assert_equal nil, material.activity.invoice_id
+    assert_equal client_src.id, material.activity.client_id
+
+  end
+
+
   private
   
   def set_published(inv, published_state)
