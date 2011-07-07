@@ -490,24 +490,15 @@ class InvoiceTest < ActiveSupport::TestCase
       material.activity.move_to_invoice nil
     end
 
-
     invoice_src.activities(true)
 
     material = Activity::Material.find(material.id)
     
-    puts "Material:"+material.activity.inspect
-
-puts "invoice:"
-invoice_src.activities(true).each{|a| 
-  puts "a(%d) : %s %s" % [a.id, a.cost.to_s, a.tax.to_s]
-}
-
-    assert_equal 1548.0, invoice_src.amount(true)
-    assert_equal 46.01,   invoice_src.taxes_total
-
     assert_equal nil, material.activity.invoice_id
     assert_equal client_src.id, material.activity.client_id
 
+    assert_equal 1548.0, invoice_src.amount(true)
+    assert_equal 46.01,   invoice_src.taxes_total
   end
 
 

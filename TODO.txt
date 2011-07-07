@@ -1,8 +1,5 @@
 activities_with_prices:
   * Move_to_invoice function should allow us to Move_to '(Unassigned)', and ideally that would be a radio group
-  * Get the move to nil unit test working
-
-TODO: I think the dates on the Batch create aren't getting created right... test to make sure they equal the input
 
 * We may want to go through the controllers and modify the searches a bit:
   config.columns[:clients].search_sql
@@ -12,17 +9,19 @@ TODO: I think the dates on the Batch create aren't getting created right... test
 
 --- Put a beta version on mario? ... 
 
+* Use polymorphic relationship for sub activities
+  * I really don't like the way we're uing dont_validate_type_associations. ..
+  * See if we can get rid of the association_hacks while we're at it ...
+
 * Translate the time into the local zone for the user, probably each user/client should have a zone associtation in their account.
   *  Its already stored in UTC everywhere...
   * We need to factor this into invoices too, I think
-
-* Use polymorphic relationship for sub activities
-  * I really don't like the way we're uing dont_validate_type_associations. ..
 
 * Rails 3.x?
 
 * Plugin interface...
   * We should DRY the interfaces for inheritance on the activities and invoices controllers (See  "TODO: Put in a plugin-helper?")
+  * I think the mountable apps is our good solution. Alongside a generator
  
 * Ideally we have that DraftInvoices/ "Batch Create" link to the left of Create..
 
@@ -85,9 +84,6 @@ BUG: We should probably write a plugin that better displays delete errors in the
 	* This gets a little complicated though - we have to decide if we're going to generate these warnings based on the date of the invoice, or the current situation
 	
 * The invoice issued_on date I think is rounding off to the end of the day on assignment. It should really be time sensitive.
-	
-* Better unit tests for Activity::* model. (too , make sure negative values work on whatever..)
-
 
 Plugins for 
    * Reimbursable scanning

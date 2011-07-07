@@ -32,6 +32,7 @@ class Admin::DraftInvoicesController < Admin::InvoicesController
     @invoice_date_at = utc_date_from_param(
       params[:batch_invoice_date_at]
     ) if params[:batch_invoice_date_at]
+logger.error "Well?" + @invoice_date_at.inspect
 
     # I didn't really feel the need to create a partial just for this one line:
     render :inline => '<%= batch_create_clients_form_column(@invoice_date_at) %>' if @invoice_date_at
@@ -53,6 +54,7 @@ class Admin::DraftInvoicesController < Admin::InvoicesController
           Invoice.create!(
             :client => client, 
             :activity_types => all_activity_types,
+            :issued_on => invoice_date,
             :activities => Invoice.recommended_activities_for( 
               client.id, 
               invoice_date, 

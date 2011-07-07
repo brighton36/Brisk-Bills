@@ -97,18 +97,22 @@ class Activity < ActiveRecord::Base
     raise StandardError, "Can't move an already-published activity." if is_published?
     raise StandardError, "Can't move an activity to an already published invoice." if dest_invoice.try(:is_published?)
 
-    self.invoice_id = (dest_invoice.nil?) ? 0 : dest_invoice.id
-    self.client_id = dest_invoice.client_id unless dest_invoice.nil?
-   
-if self.invoice_id == 0
-  puts "A:"+self.changed_attributes.inspect
-  puts "D:"+self.dirty?.inspect
-end
+    if dest_invoice.nil?
+      self.invoice_id =  nil
+
+      # OMG - this took me forever to figure out. It *seems* there's some bug in rails 2.3.8 that's 
+      # causing this not to update from the above statement, when we're setting the association to nil
+      # Weirder still - this only happens when transactions are enabled. (Such as when we're in test:units!)
+      @changed_attributes["invoice_id"] = nil
+    else
+      self.invoice_id = (dest_invoice.nil?) ? nil : dest_invoice.id
+      self.client_id = dest_invoice.client_id
+    end
 
     @dont_validate_type_associations = true
     save!
     @dont_validate_type_associations = false
   end
-  
+ 
   handle_extensions
 end
