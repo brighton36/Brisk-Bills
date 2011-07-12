@@ -1,9 +1,5 @@
 if @errors_during_move.length > 0
-  page.call(
-    'show_modal_after_close',
-    render(:file => 'admin/activities_with_prices/move_to_invoice.rhtml', :layout => false), 
-    {:title => 'Move Activity to Invoice ...', :width => 700}
-  )
+  page.alert @errors_during_move.to_s
 else
   page.replace_html active_scaffold_content_id, :partial => 'list'
 end

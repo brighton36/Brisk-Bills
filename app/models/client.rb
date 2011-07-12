@@ -23,7 +23,7 @@ class Client < ActiveRecord::Base
   def uninvoiced_activities_balance( force_reload = false )
     Money.new(
       (attribute_present? :uninvoiced_activities_balance_in_cents and !force_reload) ?
-        Money.new(read_attribute(:uninvoiced_activities_balance_in_cents).to_i) :
+        read_attribute(:uninvoiced_activities_balance_in_cents).to_i :
         Activity.sum( Invoice::ACTIVITY_TOTAL_SQL, :conditions => ['client_id = ? AND is_published = ? AND invoice_id IS NULL',id, true] ).to_i
     )
   end

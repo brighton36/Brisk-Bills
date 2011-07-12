@@ -1,9 +1,4 @@
 activities_with_prices:
-  * Move_to_invoice function should allow us to Move_to '(Unassigned)', and ideally that would be a radio group
-
-* We may want to go through the controllers and modify the searches a bit:
-  config.columns[:clients].search_sql
-  config.search.columns = config.list.columns 
 
 - Release gem as 'final'
 
@@ -35,6 +30,11 @@ activities_with_prices:
 	* DDC / GI / Ashbritt / Manny Kadre bills
 
 * Start using 0.9 on mario...
+
+* We may want to go through the controllers and modify the searches a bit:
+  config.columns[:clients].search_sql
+  config.search.columns = config.list.columns 
+
 
 * Publish !!!!!
 ---------------

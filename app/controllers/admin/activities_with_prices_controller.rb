@@ -59,11 +59,13 @@ class Admin::ActivitiesWithPricesController < Admin::ActivitiesController
           nil :
           Invoice.find(params[:move_to_invoice_id].to_i)
 
-        activity.move_to_invoice invoice_dest
+        activity.move_to_invoice! invoice_dest
 
         do_list
         
-        flash[:warning]  = '%s successfully moved to "%s"' % [activity.label,invoice_dest.long_name]
+        flash[:warning]  = (invoice_dest) ? 
+          ('%s successfully moved to "%s"' % [activity.label,invoice_dest.long_name]) :
+          ('The %s was removed from this invoice.' % activity.label)
       rescue
         @errors_during_move << $!
       end

@@ -91,7 +91,7 @@ class Activity < ActiveRecord::Base
     end
   end
   
-  def move_to_invoice(dest)        
+  def move_to_invoice!(dest)        
     dest_invoice = (dest.class == Integer) ? Invoice.find(dest) : dest
 
     raise StandardError, "Can't move an already-published activity." if is_published?

@@ -421,7 +421,7 @@ class InvoiceTest < ActiveSupport::TestCase
 
     assert_nothing_raised do 
       subactivities.each do |activity_type|
-        activity_type.activity.move_to_invoice invoice_dest
+        activity_type.activity.move_to_invoice! invoice_dest
       end
     end
 
@@ -437,7 +437,7 @@ class InvoiceTest < ActiveSupport::TestCase
     end
   
     assert_nothing_raised do 
-      labor.activity.move_to_invoice invoice_src
+      labor.activity.move_to_invoice! invoice_src
     end
 
     assert_equal invoice_src.id, labor.activity.invoice_id
@@ -454,11 +454,11 @@ class InvoiceTest < ActiveSupport::TestCase
 
     # Assert fail!
     labor.activity.reload
-    assert_raise(StandardError) { labor.activity.move_to_invoice invoice_dest }
+    assert_raise(StandardError) { labor.activity.move_to_invoice! invoice_dest }
     
     # Assert fail!
     material.activity.reload
-    assert_raise(StandardError) { material.activity.move_to_invoice invoice_src }
+    assert_raise(StandardError) { material.activity.move_to_invoice! invoice_src }
     
   end
 
@@ -487,7 +487,7 @@ class InvoiceTest < ActiveSupport::TestCase
     assert_equal 48.01,   invoice_src.taxes_total
 
     assert_nothing_raised do 
-      material.activity.move_to_invoice nil
+      material.activity.move_to_invoice! nil
     end
 
     invoice_src.activities(true)
