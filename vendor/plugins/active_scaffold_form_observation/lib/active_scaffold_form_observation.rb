@@ -1,4 +1,3 @@
-require 'extensions/module'
 
 class DummyActiveScaffoldColumn
   # This exists merely for ActiveScaffold::Helpers::FormColumns::options_for_column

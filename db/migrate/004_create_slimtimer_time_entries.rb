@@ -1,6 +1,6 @@
 class CreateSlimtimerTimeEntries < ActiveRecord::Migration
   def self.up
-    create_table :slimtimer_time_entries, :options => 'TYPE=InnoDB' do |t|
+    create_table :slimtimer_time_entries do |t|
       
       t.column :employee_slimtimer_id, :integer
       t.column :slimtimer_task_id,     :integer

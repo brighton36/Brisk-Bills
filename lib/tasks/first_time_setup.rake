@@ -38,7 +38,7 @@ namespace :brisk_bills do
           "CREATE DATABASE `%s`;" % envconf[:database],
           "USE `%s`;" % envconf[:database],
           "GRANT ALL PRIVILEGES ON `%s`.* TO `%s`@`%s` IDENTIFIED BY '%s';" % [envconf[:database], envconf[:username],envconf[:host],envconf[:password]]
-        ].join ("\n  ")
+        ].join("\n  ")
       ) if db_version.nil?
       
       # Let's run migrations?

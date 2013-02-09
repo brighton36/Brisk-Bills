@@ -1,6 +1,6 @@
 class CreateActivityAdjustments < ActiveRecord::Migration
   def self.up
-    create_table :activity_adjustments, :options => 'TYPE=InnoDB' do |t|
+    create_table :activity_adjustments do |t|
       
       t.integer :activity_id
       t.string    :label

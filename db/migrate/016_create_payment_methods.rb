@@ -1,6 +1,6 @@
 class CreatePaymentMethods < ActiveRecord::Migration
   def self.up
-    create_table :payment_methods, :options => 'TYPE=InnoDB' do |t|
+    create_table :payment_methods do |t|
       t.string    :name
       
       t.timestamps

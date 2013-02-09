@@ -1,5 +1,5 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require File.dirname(__FILE__) + '/../test_unit_factory_helper.rb'
+require 'test_helper'
+require 'test_unit_factory_helper'
 
 class PaymentTest < ActiveSupport::TestCase
 

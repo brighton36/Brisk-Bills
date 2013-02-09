@@ -1,6 +1,6 @@
 class CreateActivityProposals < ActiveRecord::Migration
   def self.up
-    create_table :activity_proposals, :options => 'TYPE=InnoDB' do |t|
+    create_table :activity_proposals do |t|
       
       t.integer   :activity_id
       

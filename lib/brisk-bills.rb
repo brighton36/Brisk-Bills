@@ -4,7 +4,7 @@ unless defined? BriskBills::Version
   module BriskBills::Version
     Major = '0'
     Minor = '8'
-    Tiny  = '0'
+    Tiny  = '1'
 
     class << self
       def to_s

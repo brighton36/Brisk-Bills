@@ -1,13 +1,13 @@
 class CreateActivityTypes < ActiveRecord::Migration
   def self.up
-    create_table( :activity_types, :options => 'TYPE=InnoDB') do |t|
+    create_table( :activity_types) do |t|
       t.string  :label
       
       t.timestamps
     end
     
     # Create invoice_activity_types for habtm
-    create_table( :invoices_activity_types, :options => 'TYPE=InnoDB', :id => false ) do |t|
+    create_table( :invoices_activity_types, :id => false ) do |t|
       t.integer :invoice_id, :activity_type_id
     end
     

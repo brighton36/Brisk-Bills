@@ -1,6 +1,6 @@
 class CreateEmployeeClientLaborRates < ActiveRecord::Migration
   def self.up
-    create_table :employee_client_labor_rates, :options => 'TYPE=InnoDB' do |t|
+    create_table :employee_client_labor_rates do |t|
       # Note : The only reason we really have an id here is b/c it makes things easier with ActiveScaffold
       t.integer   :employee_id
       t.integer   :client_id

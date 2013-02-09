@@ -1,6 +1,6 @@
 class CreateActivityLabors < ActiveRecord::Migration
   def self.up
-    create_table :activity_labors, :options => 'TYPE=InnoDB' do |t|
+    create_table :activity_labors do |t|
       
       t.integer :employee_id, :activity_id
       t.text    :comments

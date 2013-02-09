@@ -1,5 +1,5 @@
 defaults: &defaults
-  adapter:  mysql
+  adapter:  mysql2
   socket:  <%=
    ['/opt/local/var/run/mysql5/mysqld.sock',
     '/opt/local/var/run/mysqld/mysqld.sock',

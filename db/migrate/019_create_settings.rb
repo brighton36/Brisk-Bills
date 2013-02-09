@@ -1,6 +1,6 @@
 class CreateSettings < ActiveRecord::Migration
   def self.up
-    create_table( :settings, :options => 'TYPE=InnoDB') do |t|
+    create_table( :settings) do |t|
       t.string :keyname, :label
       t.text :keyval, :description
 

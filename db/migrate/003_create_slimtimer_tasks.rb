@@ -1,6 +1,6 @@
 class CreateSlimtimerTasks < ActiveRecord::Migration
   def self.up
-    create_table :slimtimer_tasks, :options => 'TYPE=InnoDB' do |t|
+    create_table :slimtimer_tasks do |t|
       # Owner id:
       t.column :owner_employee_slimtimer_id, :integer
       

@@ -1,6 +1,6 @@
 class CreateInvoices < ActiveRecord::Migration
   def self.up
-    create_table :invoices, :options => 'TYPE=InnoDB' do |t|
+    create_table :invoices do |t|
       t.integer   :client_id
       t.text      :comments
       t.timestamp :issued_on

@@ -12,7 +12,7 @@ class CreateCredentialsMigrateRepresentatives < ActiveRecord::Migration
     # Phase 1: Since we're here - habtm the client_representatives
     say_with_time "Migrating Client Representatives" do 
       # Create the Representatives to clients habtm relationship
-      create_table( :client_representatives_clients, :options => 'TYPE=InnoDB', :id => false ) do |t|
+      create_table( :client_representatives_clients, :id => false ) do |t|
         t.integer :client_id, :client_representative_id
       end
       
@@ -52,7 +52,7 @@ class CreateCredentialsMigrateRepresentatives < ActiveRecord::Migration
     say_with_time "Migrating Credentials" do 
       
       # First we create the credentials table:
-      create_table( :credentials, :options => 'TYPE=InnoDB') do |t|
+      create_table( :credentials) do |t|
         t.string :email_address, :password_hash
                 
         t.integer :failed_login_count, :null => false, :default => 0

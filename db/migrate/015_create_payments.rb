@@ -1,6 +1,6 @@
 class CreatePayments < ActiveRecord::Migration
   def self.up
-    create_table :payments, :options => 'TYPE=InnoDB' do |t|
+    create_table :payments do |t|
       t.integer   :client_id
       t.integer   :payment_method_id
       t.text      :payment_method_identifier  # Check No./Card Name/last four

@@ -7,9 +7,9 @@ class String
     
     options.each_char do |c| 
       mods |= case c
-        when 'i': Regexp::IGNORECASE
-        when 'x': Regexp::EXTENDED
-        when 'm': Regexp::MULTILINE
+        when 'i' then Regexp::IGNORECASE
+        when 'x' then Regexp::EXTENDED
+        when 'm' then Regexp::MULTILINE
       end
     end unless options.nil? or options.empty?
         

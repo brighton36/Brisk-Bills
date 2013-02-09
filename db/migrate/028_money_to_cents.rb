@@ -107,8 +107,8 @@ class MoneyToCents < ActiveRecord::Migration
 
   def self.up
     CONVERT_FIELDS.each_pair do |klass, cols|
-      cols.to_a.each do |col|
-        klass.update_all('%s = %s * 100' % (col.to_s.to_a * 2) )
+      [cols].flatten.each do |col|
+        klass.update_all('%s = %s * 100' % ([col.to_s] * 2) )
         change_column klass.table_name, col, :integer
         rename_column klass.table_name, col, ('%s_in_cents' % col.to_s ).to_sym 
       end

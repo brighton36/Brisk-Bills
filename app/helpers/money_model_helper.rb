@@ -5,7 +5,6 @@ module MoneyModelHelper
     super
     
     base.class_eval do
-      super
       
       # This prevents a NoMethodError: undefined method `amount_before_type_cast' error when validations kick-in
       def method_missing(symbol, *params)

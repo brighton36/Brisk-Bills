@@ -1,6 +1,6 @@
 class CreateEmployeeSlimtimers < ActiveRecord::Migration
   def self.up
-    create_table :employee_slimtimers, :options => 'TYPE=InnoDB' do |t|
+    create_table :employee_slimtimers do |t|
        t.column :employee_id,   :integer, :null => false
        t.column :api_key,       :string
        t.column :username,      :string

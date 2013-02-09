@@ -1,6 +1,6 @@
 class CreateActivityMaterials < ActiveRecord::Migration
   def self.up
-    create_table :activity_materials, :options => 'TYPE=InnoDB' do |t|
+    create_table :activity_materials do |t|
       
       t.integer :activity_id
       t.string  :label

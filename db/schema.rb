@@ -72,17 +72,19 @@ ActiveRecord::Schema.define(:version => 29) do
     t.datetime "created_at"
   end
 
-  create_table "client_finance_transactions", :force => true do |t|
+  create_table "client_finance_transactions", :id => false, :force => true do |t|
+    t.string   "id",              :limit => 18,                                      :default => "", :null => false
     t.integer  "client_id"
     t.datetime "date"
-    t.binary   "description",     :limit => 16777215
+    t.text     "description",     :limit => 16777215
     t.integer  "amount_in_cents", :limit => 34,       :precision => 34, :scale => 0
   end
 
-  create_table "client_finance_transactions_union", :force => true do |t|
+  create_table "client_finance_transactions_union", :id => false, :force => true do |t|
+    t.string   "id",              :limit => 18,                                      :default => "", :null => false
     t.integer  "client_id"
     t.datetime "date"
-    t.binary   "description",     :limit => 16777215
+    t.text     "description",     :limit => 16777215
     t.integer  "amount_in_cents", :limit => 34,       :precision => 34, :scale => 0
   end
 
@@ -120,7 +122,8 @@ ActiveRecord::Schema.define(:version => 29) do
     t.boolean  "is_active",    :default => true, :null => false
   end
 
-  create_table "clients_with_balances", :force => true do |t|
+  create_table "clients_with_balances", :id => false, :force => true do |t|
+    t.integer  "id",                                                                                  :default => 0,    :null => false
     t.string   "company_name"
     t.string   "address1"
     t.string   "address2"
@@ -220,7 +223,8 @@ ActiveRecord::Schema.define(:version => 29) do
     t.integer "amount_paid_in_cents", :limit => 32, :precision => 32, :scale => 0
   end
 
-  create_table "invoices_with_totals", :force => true do |t|
+  create_table "invoices_with_totals", :id => false, :force => true do |t|
+    t.integer  "id",                                                                :default => 0,     :null => false
     t.integer  "client_id"
     t.text     "comments"
     t.datetime "issued_on"
@@ -250,10 +254,6 @@ ActiveRecord::Schema.define(:version => 29) do
 
   add_index "payments", ["client_id"], :name => "index_payments_on_client_id"
   add_index "payments", ["payment_method_id"], :name => "index_payments_on_payment_method_id"
-
-  create_table "schema_info", :id => false, :force => true do |t|
-    t.integer "version"
-  end
 
   create_table "sessions", :force => true do |t|
     t.string   "session_id", :null => false

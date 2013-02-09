@@ -1,6 +1,6 @@
 class CreateActivities < ActiveRecord::Migration
   def self.up
-    create_table :activities, :options => 'TYPE=InnoDB' do |t|
+    create_table :activities do |t|
       t.integer   :client_id, :invoice_id
       t.boolean   :is_published, :default => 0, :null => false
       t.string    :activity_type
