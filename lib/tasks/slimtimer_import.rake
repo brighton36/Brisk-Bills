@@ -29,7 +29,7 @@ namespace :brisk_bills do
     def model_to_update?( map, st_record, klass )
       st_record_id = st_record.id
 
-      if map.has_key?(st_record_id) and st_record.updated_at.to_a != map[st_record_id].st_updated_at.to_a
+      if map.has_key?(st_record_id) and st_record.updated_at != map[st_record_id].st_updated_at
         # UPDATE this record:
         return map[st_record_id]
       elsif !map.has_key? st_record_id
@@ -65,6 +65,8 @@ namespace :brisk_bills do
         st = SlimTimer.new employee.slimtimer.username, employee.slimtimer.password, employee.slimtimer.api_key, 300
         
         ### Tasks: 
+        # At some point this stopped working due to Slimtimer only showing you a limited
+        # number of tasks as a result of this call:
         st.list_tasks('yes').each do |t|
           begin
             # <Record(Result)
@@ -107,7 +109,7 @@ namespace :brisk_bills do
         end
         
         ## Time Entries:
-    
+
         # Let's create an entry update map
         briskbills_time_entries = {}
         employee.slimtimer.time_entries.find(
@@ -117,7 +119,8 @@ namespace :brisk_bills do
       
         # We'll end up using this to tell when something's been deleted:    
         st_time_entry_ids = []
-    
+   
+        missing_task_ids = []
         st.list_timeentries(sync_from,time_now).each do |e|
           begin
             #  <Record(Result) 
@@ -151,6 +154,8 @@ namespace :brisk_bills do
             end
     
             unless update_time_entry.nil?
+              missing_task_ids << e.task.id if !tasks_map.has_key?(e.task.id) and !missing_task_ids.include?(e.task.id)
+
               update_time_entry[:slimtimer_task_id] = e.task.id
               update_time_entry[:employee_slimtimer_id] = employee.slimtimer.id
               update_time_entry[:comments] = e.comments
@@ -186,7 +191,28 @@ namespace :brisk_bills do
             puts "Error in 'deleted_time_entry_ids': #{$!}"
           end
         end
-    
+   
+        # And now create any tasks that were found to be missing:
+        missing_task_ids.each do |task_id|
+          t = st.show_task task_id
+
+          update_task = SlimtimerTask.new
+          update_task[:id] = t.id
+          update_task[:name] = t.name
+          update_task[:st_updated_at] = t.updated_at
+          update_task[:st_created_at] = t.created_at
+          update_task[:owner_employee_slimtimer_id] = t.owners[0]['user_id']
+
+          puts '%s - %s Task: "%s"' % [ 
+            employee.name,
+            (update_task.new_record?)?'Creating':'Updating', 
+            update_task.label
+          ]
+              
+          update_task.save!
+              
+          raise StandardError, "Error #{(update_task.new_record?)?'Creat':'Updat'}ing task: #{update_task.errors.full_messages.inspect}" unless update_task.errors.empty?
+        end
       
 #      rescue
 #        puts "Error in 'Employee.find': #{$!}"
