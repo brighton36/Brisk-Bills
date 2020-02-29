@@ -2,7 +2,7 @@ source :rubygems
 
 gem 'i18n', '0.4.2'
 gem 'rails', '2.3.17'
-gem 'rake', '0.8.7'
+gem 'rake', '13.0.1'
 gem 'pdf-writer', :git => 'git://github.com/metaskills/pdf-writer.git', :require => ['pdf/writer', 'pdf/simpletable']
 gem 'slimtimer4r', '0.2.4'
 gem 'money', '2.2.0'
