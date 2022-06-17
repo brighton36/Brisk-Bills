@@ -1,6 +1,6 @@
 source :rubygems
 
-gem 'i18n', '0.4.2'
+gem 'i18n', '1.10.0'
 gem 'rails', '2.3.17'
 gem 'rake', '13.0.1'
 gem 'pdf-writer', :git => 'git://github.com/metaskills/pdf-writer.git', :require => ['pdf/writer', 'pdf/simpletable']
